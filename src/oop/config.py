@@ -41,9 +41,9 @@ def load_config(path: str | None) -> ExperimentConfig:
     if path is None:
         return ExperimentConfig()
     input_path = Path(path)
-    payload: dict[str, Any] = json.loads(input_path.read_text(encoding="utf-8"))
-    runtime = RuntimeConfig(**payload.get("runtime", {}))
-    optimization = OptimizationConfig(**payload.get("optimization", {}))
+    raw_config: dict[str, Any] = json.loads(input_path.read_text(encoding="utf-8"))
+    runtime = RuntimeConfig(**raw_config.get("runtime", {}))
+    optimization = OptimizationConfig(**raw_config.get("optimization", {}))
     config = ExperimentConfig(runtime=runtime, optimization=optimization)
     validate_config(config)
     return config

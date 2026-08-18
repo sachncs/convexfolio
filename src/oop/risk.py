@@ -6,7 +6,9 @@ from scipy.stats import norm
 from oop.types import FloatArray
 
 
-def validate_shapes(u: FloatArray, q_matrix: FloatArray, x: FloatArray) -> None:
+def validate_shapes(
+    u: FloatArray, q_matrix: FloatArray, x: FloatArray
+) -> None:
     """Defensive checks on key tensor shapes."""
     if u.ndim != 1 or x.ndim != 1:
         raise ValueError("u and x must be 1D vectors")
@@ -37,23 +39,46 @@ def kappa3(
     tau_tensor: FloatArray,
 ) -> float:
     """Eq. (S2.Ex24-S2.Ex26) third central moment approximation."""
-    x_p = float(x.T @ p_vec)
-    x_rx = float(x.T @ r_matrix @ x)
-    core = float(x.T @ (d_matrix.T + b_matrix).T @ sigma_matrix @ (d_matrix + b_matrix.T) @ x)
-    tensor_term = float(np.einsum("ijk,i,j,k->", tau_tensor, x, x, x))
+    linear_pricing_term = float(x.T @ p_vec)
+    quadratic_pricing_term = float(x.T @ r_matrix @ x)
+    volatility_contribution_term = float(
+        x.T @ (d_matrix.T + b_matrix).T @ sigma_matrix @ (d_matrix + b_matrix.T) @ x
+    )
+    fourth_order_term = float(np.einsum("ijk,i,j,k->", tau_tensor, x, x, x))
 
-    term1 = 2.0 * nu**3 / ((nu - 2.0) ** 3 * (nu - 4.0) * (nu - 6.0)) * x_p**3
-    term2 = 3.0 * nu**3 / ((nu - 2.0) ** 2 * (nu - 4.0) * (nu - 6.0)) * x_p * x_rx
-    term3 = 3.0 * nu**2 / ((nu - 2.0) ** 2 * (nu - 4.0)) * x_p * core
-    return float(term1 + term2 + term3 + tensor_term)
+    term1 = (
+        2.0
+        * nu**3
+        / ((nu - 2.0) ** 3 * (nu - 4.0) * (nu - 6.0))
+        * linear_pricing_term**3
+    )
+    term2 = (
+        3.0
+        * nu**3
+        / ((nu - 2.0) ** 2 * (nu - 4.0) * (nu - 6.0))
+        * linear_pricing_term
+        * quadratic_pricing_term
+    )
+    term3 = (
+        3.0
+        * nu**2
+        / ((nu - 2.0) ** 2 * (nu - 4.0))
+        * linear_pricing_term
+        * volatility_contribution_term
+    )
+    return float(term1 + term2 + term3 + fourth_order_term)
 
 
-def cfvar2(alpha: float, u: FloatArray, q_matrix: FloatArray, x: FloatArray) -> float:
+def cfvar2(
+    alpha: float, u: FloatArray, q_matrix: FloatArray, x: FloatArray
+) -> float:
     """Eq. (S2.Ex22)."""
     validate_shapes(u, q_matrix, x)
     z_alpha = norm.ppf(alpha)
-    var_val = variance_quadratic(q_matrix, x)
-    return float(-expectation_linear(u, x) - z_alpha * np.sqrt(var_val))
+    variance_value = variance_quadratic(q_matrix, x)
+    return float(
+        -expectation_linear(u, x) - z_alpha * np.sqrt(variance_value)
+    )
 
 
 def cfvar3(
@@ -66,6 +91,12 @@ def cfvar3(
     """Eq. (S2.Ex23)."""
     validate_shapes(u, q_matrix, x)
     z_alpha = norm.ppf(alpha)
-    var_val = variance_quadratic(q_matrix, x)
-    correction = ((z_alpha**2 - 1.0) / 6.0) * (kappa3_value / var_val)
-    return float(-expectation_linear(u, x) - z_alpha * np.sqrt(var_val) - correction)
+    variance_value = variance_quadratic(q_matrix, x)
+    skewness_correction = (
+        (z_alpha**2 - 1.0) / 6.0 * (kappa3_value / variance_value)
+    )
+    return float(
+        -expectation_linear(u, x)
+        - z_alpha * np.sqrt(variance_value)
+        - skewness_correction
+    )

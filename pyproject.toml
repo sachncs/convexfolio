@@ -45,10 +45,16 @@ Issues = "https://github.com/sachncs/optimal-option-portfolios/issues"
 Changelog = "https://github.com/sachncs/optimal-option-portfolios/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
+yaml = [
+  "pyyaml>=6.0",
+]
 dev = [
   "pytest>=8.0",
   "mypy>=1.10",
   "ruff>=0.6",
+]
+bench = [
+  "pytest-benchmark>=4.0",
 ]
 docs = [
   "sphinx>=7.0",

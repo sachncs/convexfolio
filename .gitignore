@@ -51,6 +51,9 @@ htmlcov/
 coverage.xml
 *.cover
 
+# Sphinx
+docs/_build/
+
 # Distribution
 MANIFEST
 

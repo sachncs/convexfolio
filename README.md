@@ -116,14 +116,12 @@ Create a `config.json` to customize execution:
 
 | Parameter | Env Variable | Default | Description |
 |-----------|--------------|---------|-------------|
-| `runtime.seed` | `OOP_SEED` | `7` | Random seed for deterministic execution |
-| `runtime.log_level` | `OOP_LOG_LEVEL` | `INFO` | Logging verbosity (DEBUG, INFO, WARNING, ERROR) |
-| `runtime.output_dir` | `OOP_OUTPUT_DIR` | `artifacts` | Directory for output reports |
+| `runtime.seed` | — | `7` | Random seed for deterministic execution |
+| `runtime.log_level` | — | `INFO` | Logging verbosity (DEBUG, INFO, WARNING, ERROR) |
+| `runtime.output_dir` | — | `artifacts` | Directory for output reports |
 | `optimization.alpha` | — | `0.05` | Risk parameter (must be between 0 and 0.5) |
 | `optimization.method` | — | `all` | Optimization method to run |
 | `optimization.enforce_nu_greater_than_six` | — | `true` | Enforce nu > 6 constraint |
-
-See [`.env.example`](.env.example) for environment variable configuration.
 
 ---
 

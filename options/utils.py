@@ -13,22 +13,32 @@ from pathlib import Path
 import numpy as np
 
 from options.config import Experiment
-from options.math import CFVaR2Closed
-from options.math import CFVaR3Numerical
-from options.math import CFVaR3Objective
-from options.math import Greeks
-from options.math import Minimize
-from options.math import Risk
-from options.math import Variance
+from options.math import (
+    CFVaR2Closed,
+    CFVaR3Numerical,
+    CFVaR3Objective,
+    Minimize,
+    Risk,
+    Variance,
+)
 
 
 class Logger:
     """Logging facade over the stdlib ``logging`` module.
 
     Single concrete class; no subclasses, no polymorphism.
+
+    Attributes:
+        logger: The wrapped stdlib logger.
     """
 
     def __init__(self, level: str, name: str = "options") -> None:
+        """Initialise the wrapped stdlib logger with the given level.
+
+        Args:
+            level: ``logging`` level name (e.g. ``"INFO"``).
+            name: Logger name. Defaults to ``"options"``.
+        """
         self.logger = logging.getLogger(name)
         self.logger.setLevel(getattr(logging, level.upper(), logging.INFO))
         if not self.logger.handlers:
@@ -54,23 +64,26 @@ class Logger:
 
 
 def reproduce(experiment: Experiment) -> dict[str, object]:
-    """Runs the end-to-end optimisation once and returns structured outputs.
+    """Run the end-to-end optimisation once and return the structured report.
 
     Uses synthetic matrices as a self-contained smoke pipeline. External data
-    ingestion is project-dependent and plugin users can replace this stage.
+    ingestion is project-dependent; downstream users can replace this stage.
+
+    Args:
+        experiment: Top-level configuration.
+
+    Returns:
+        A JSON-serialisable dict with ``config``, ``inputs``, ``outputs``,
+        and ``uncertainty`` keys.
     """
     rng = np.random.default_rng(experiment.runtime.seed)
     n_instruments = 5
     sample_matrix = rng.normal(size=(n_instruments, n_instruments))
-    precision_matrix = (
-        sample_matrix.T @ sample_matrix + 0.5 * np.eye(n_instruments)
-    )
+    precision_matrix = sample_matrix.T @ sample_matrix + 0.5 * np.eye(n_instruments)
     cost_vector = np.abs(rng.normal(size=n_instruments)) + 0.1
     expected_payoff_vector = rng.normal(size=n_instruments)
 
-    variance_weights = Minimize(
-        Variance(precision_matrix), cost_vector
-    ).value
+    variance_weights = Minimize(Variance(precision_matrix), cost_vector).value
     cfvar2_weights = CFVaR2Closed(
         precision_matrix=precision_matrix,
         expected_payoff=expected_payoff_vector,
@@ -112,17 +125,32 @@ def reproduce(experiment: Experiment) -> dict[str, object]:
         "uncertainty": {
             "status": "ASSUMPTION",
             "items": [
-                "Pipeline demo uses synthetic inputs; real-market replication requires data-specific integration.",
+                (
+                    "Pipeline demo uses synthetic inputs; real-market "
+                    "replication requires data-specific integration."
+                ),
             ],
         },
     }
 
 
 class Report:
-    """Standard deterministic determinism result.
+    """Determinism result over repeated pipeline runs.
 
-    Holds repeated pipeline runs and exposes ``.save(path)`` to persist the
-    summary as JSON. Used by both ``determinism`` and ``pipeline``.
+    Holds the repeated run results, the JSON serialised forms, and exposes
+    ``.save(path)`` to persist the summary. Used by both ``determinism`` and
+    ``pipeline``.
+
+    Attributes:
+        config: The configuration used for the run.
+        repetitions: Number of repetitions performed.
+        results: The list of per-run result dicts.
+        serialized: The JSON serialised forms of ``results``.
+        all_match: Whether every run was byte-equivalent to the first.
+        summary: Public summary dict (safe to ``json.dumps``).
+        deterministic: ``bool`` view of the ``summary["deterministic"]``.
+        seed: ``int`` view of the ``summary["seed"]`` field.
+        reference: Reference report (the first run).
     """
 
     def __init__(
@@ -131,6 +159,16 @@ class Report:
         repetitions: int,
         results: list[dict[str, object]],
     ) -> None:
+        """Build a determinism Report.
+
+        Args:
+            config: The configuration used for the run.
+            repetitions: Number of repetitions (must be ``>= 2``).
+            results: The per-run result dicts (length must equal ``repetitions``).
+
+        Raises:
+            ValueError: If ``repetitions < 2`` or length mismatch.
+        """
         if repetitions < 2:
             raise ValueError("repetitions must be >= 2")
         if len(results) != repetitions:
@@ -154,17 +192,26 @@ class Report:
 
     @property
     def seed(self) -> int:
-        return int(self.summary["seed"])
+        seed = self.summary["seed"]
+        assert isinstance(seed, int)
+        return seed
 
     @property
     def reference(self) -> dict[str, object]:
-        return self.summary["reference"]
+        reference = self.summary["reference"]
+        assert isinstance(reference, dict)
+        return reference
 
     def save(self, path: str) -> Path:
-        """Persist the report summary as JSON. Returns the written path."""
+        """Persist the report summary as JSON.
+
+        Args:
+            path: Destination file path. Parent directories are created.
+
+        Returns:
+            The written ``Path``.
+        """
         output_path = Path(path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        output_path.write_text(
-            json.dumps(self.summary, indent=2), encoding="utf-8"
-        )
+        output_path.write_text(json.dumps(self.summary, indent=2), encoding="utf-8")
         return output_path

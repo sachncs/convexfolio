@@ -1,10 +1,6 @@
 import numpy as np
 
-from options.math import Compute
-from options.math import Greeks
-from options.math import Linear
-from options.math import PortfolioVariance
-from options.math import Reconstruct
+from options.math import Compute, Greeks, Linear, PortfolioVariance, Reconstruct
 
 
 def test_c_matches_theorem2_formula() -> None:
@@ -34,7 +30,12 @@ def test_reconstructed_q_matches_direct_variance_formula() -> None:
     delta_matrix = rng.normal(size=(payoff_dimension, instrument_count))
     price_drift = rng.normal(size=instrument_count)
     third_derivative = np.array(
-        [(g + g.T) / 2.0 for g in rng.normal(size=(instrument_count, payoff_dimension, payoff_dimension))]
+        [
+            (g + g.T) / 2.0
+            for g in rng.normal(
+                size=(instrument_count, payoff_dimension, payoff_dimension)
+            )
+        ]
     )
 
     precision_matrix = Reconstruct(

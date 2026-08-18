@@ -1,9 +1,6 @@
 import numpy as np
 
-from options.math import CFVaR2Closed
-from options.math import CFVaR3Numerical
-from options.math import Minimize
-from options.math import Variance
+from options.math import CFVaR2Closed, CFVaR3Numerical, Minimize, Variance
 
 
 def test_variance_solution_satisfies_budget_constraint() -> None:

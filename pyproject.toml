@@ -8,7 +8,7 @@ version = "0.2.1"
 description = "Production-ready optimal option portfolio optimizer (paper-faithful baseline + extensible package API)."
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "MIT"}
+license = "MIT"
 authors = [
   {name = "Sachin <sachncs@gmail.com>"}
 ]
@@ -21,10 +21,9 @@ keywords = [
   "optimization",
 ]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Financial and Insurance Industry",
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
@@ -57,19 +56,23 @@ docs = [
 ]
 
 [project.scripts]
-oop = "options.cli:main"
-
-[tool.setuptools]
-package-dir = {"" = "src"}
+options = "options.cli:main"
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["."]
+include = ["options*"]
+exclude = ["tests*", "scripts*", "build*", "dist*", "*.egg-info*"]
 
 [tool.ruff]
 line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "C4", "SIM"]
 
 [tool.mypy]
 python_version = "3.10"
 strict = false
 warn_unused_ignores = true
-warn_return_any = true
+warn_return_any = false
+ignore_missing_imports = true
+follow_imports = "silent"

@@ -10,35 +10,67 @@ order risk number.
 import math
 
 import numpy as np
-from scipy.optimize import minimize
-from scipy.optimize import minimize_scalar
+from scipy.optimize import minimize, minimize_scalar
 from scipy.stats import norm
 
 from options.types import FloatArray
 
 
-def shapes(expected_payoff: FloatArray, precision_matrix: FloatArray, weights: FloatArray) -> None:
+def shapes(
+    expected_payoff: FloatArray, precision_matrix: FloatArray, weights: FloatArray
+) -> None:
     """Validate tensor shapes used by risk and optimisation primitives."""
     if expected_payoff.ndim != 1 or weights.ndim != 1:
         raise ValueError("expected_payoff and weights must be 1D vectors")
-    if precision_matrix.ndim != 2 or precision_matrix.shape[0] != precision_matrix.shape[1]:
+    if (
+        precision_matrix.ndim != 2
+        or precision_matrix.shape[0] != precision_matrix.shape[1]
+    ):
         raise ValueError("precision_matrix must be square")
-    if precision_matrix.shape[0] != weights.shape[0] or expected_payoff.shape[0] != weights.shape[0]:
+    if (
+        precision_matrix.shape[0] != weights.shape[0]
+        or expected_payoff.shape[0] != weights.shape[0]
+    ):
         raise ValueError("Incompatible vector/matrix dimensions")
 
 
 class Compute:
-    """Skew-t coefficient c = sqrt(nu/pi) * Gamma((nu-1)/2) / Gamma(nu/2)."""
+    """Skew-t coefficient c.
+
+    Computes ``c = sqrt(nu/pi) * Gamma((nu-1)/2) / Gamma(nu/2)`` for the given
+    degrees of freedom of the skew-t distribution.
+
+    Args:
+        degrees_of_freedom: ``nu > 1`` for the coefficient to exist.
+
+    Attributes:
+        value: The numeric coefficient.
+    """
 
     def __init__(self, degrees_of_freedom: float) -> None:
         if degrees_of_freedom <= 1.0:
             raise ValueError("degrees_of_freedom must be > 1 for coeff to exist")
         self.degrees_of_freedom = degrees_of_freedom
-        self.value = math.sqrt(degrees_of_freedom / math.pi) * math.gamma((degrees_of_freedom - 1.0) / 2.0) / math.gamma(degrees_of_freedom / 2.0)
+        self.value = (
+            math.sqrt(degrees_of_freedom / math.pi)
+            * math.gamma((degrees_of_freedom - 1.0) / 2.0)
+            / math.gamma(degrees_of_freedom / 2.0)
+        )
 
 
 class Linear:
-    """h vector: Sigma*omega / sqrt(1 + omega^T Sigma omega)."""
+    """Linear bias vector ``h``.
+
+    Computes ``Sigma*omega / sqrt(1 + omega^T Sigma omega)`` for the given
+    covariance and skewness of the skew-t distribution.
+
+    Args:
+        covariance: 2-D covariance matrix.
+        skewness: 1-D skewness vector.
+
+    Attributes:
+        value: The 1-D bias vector.
+    """
 
     def __init__(self, covariance: FloatArray, skewness: FloatArray) -> None:
         self.covariance = covariance
@@ -48,7 +80,17 @@ class Linear:
 
 
 class Curvature:
-    """q vector: h^T Gamma^[m] h for each instrument m."""
+    """Curvature vector ``q``.
+
+    Computes ``h^T Gamma^[m] h`` for each instrument index ``m``.
+
+    Args:
+        third_derivative: Third-derivative tensor ``Gamma`` of shape ``(m, n, n)``.
+        h: 1-D bias vector.
+
+    Attributes:
+        values: 1-D vector of length ``m``.
+    """
 
     def __init__(self, third_derivative: FloatArray, h: FloatArray) -> None:
         self.third_derivative = third_derivative
@@ -61,7 +103,20 @@ class Curvature:
 
 
 class Bilinear:
-    """hmatrix: (D + B^T)^T Sigma [Gamma^[1]h, ..., Gamma^[M]h]."""
+    """Bilinear expansion matrix.
+
+    Computes ``(D + B^T)^T Sigma @ [Gamma^[1]h, ..., Gamma^[M]h]``.
+
+    Args:
+        delta_matrix: 2-D delta matrix ``D``.
+        budget_matrix: 2-D budget matrix ``B``.
+        covariance: 2-D covariance matrix ``Sigma``.
+        third_derivative: Third-derivative tensor ``Gamma``.
+        h: 1-D bias vector.
+
+    Attributes:
+        matrix: The 2-D bilinear expansion matrix.
+    """
 
     def __init__(
         self,
@@ -84,7 +139,20 @@ class Bilinear:
 
 
 class Cross:
-    """e matrix: H^T from bilinear expansion symmetry."""
+    """Cross-term matrix.
+
+    Transpose of the Bilinear matrix, ``Bilinear(...).matrix.T``.
+
+    Args:
+        delta_matrix: 2-D delta matrix ``D``.
+        budget_matrix: 2-D budget matrix ``B``.
+        covariance: 2-D covariance matrix ``Sigma``.
+        third_derivative: Third-derivative tensor ``Gamma``.
+        h: 1-D bias vector.
+
+    Attributes:
+        matrix: The 2-D cross-term matrix.
+    """
 
     def __init__(
         self,
@@ -105,7 +173,18 @@ class Cross:
 
 
 class Expect:
-    """E[ΔV(x)] = u^T x."""
+    """Portfolio expected payoff.
+
+    Computes the inner product ``u^T x`` between the expected-payoff vector
+    ``u`` and the weight vector ``x``.
+
+    Args:
+        expected_payoff: 1-D expected-payoff vector ``u``.
+        weights: 1-D weight vector ``x``.
+
+    Attributes:
+        value: The scalar expected payoff.
+    """
 
     def __init__(self, expected_payoff: FloatArray, weights: FloatArray) -> None:
         self.expected_payoff = expected_payoff
@@ -114,7 +193,17 @@ class Expect:
 
 
 class Quadratic:
-    """Var[ΔV(x)] = 0.5 x^T Q x."""
+    """Portfolio variance.
+
+    Computes ``0.5 x^T Q x`` for the given weights and precision matrix.
+
+    Args:
+        precision_matrix: 2-D precision matrix ``Q``.
+        weights: 1-D weight vector ``x``.
+
+    Attributes:
+        value: The scalar variance.
+    """
 
     def __init__(self, precision_matrix: FloatArray, weights: FloatArray) -> None:
         self.precision_matrix = precision_matrix
@@ -123,10 +212,14 @@ class Quadratic:
 
 
 class Variance:
-    """Portfolio variance objective: x → 0.5 x^T Q x.
+    """Callable portfolio variance objective.
 
-    Callable; pass ``weights`` to evaluate. Use ``Minimize(Variance(Q), v)`` to
-    solve for the closed-form minimising weights.
+    Stores a precision matrix ``Q``. Calling ``variance(weights)`` returns
+    ``0.5 x^T Q x``. Compose with ``Minimize(Variance(Q), c)`` to obtain the
+    closed-form minimising weights.
+
+    Args:
+        precision_matrix: 2-D precision matrix ``Q``.
     """
 
     def __init__(self, precision_matrix: FloatArray) -> None:
@@ -137,7 +230,24 @@ class Variance:
 
 
 class Cumulant:
-    """Eq. (S2.Ex24-S2.Ex26): third central moment approximation."""
+    """Third central moment approximation.
+
+    Computes Eq. (S2.Ex24-S2.Ex26): the third standardised cumulance of the
+    portfolio P&L.
+
+    Args:
+        weights: 1-D weight vector.
+        degrees_of_freedom: Degrees of freedom ``nu``.
+        pricing_vector: 1-D pricing vector.
+        residual_matrix: 2-D residual matrix.
+        delta_matrix: 2-D delta matrix ``D``.
+        budget_matrix: 2-D budget matrix ``B``.
+        covariance: 2-D covariance matrix ``Sigma``.
+        tau: 3-D fourth-moment tensor.
+
+    Attributes:
+        value: The scalar third cumulance.
+    """
 
     def __init__(
         self,
@@ -155,20 +265,34 @@ class Cumulant:
         linear_pricing_term = float(weights.T @ pricing_vector)
         quadratic_pricing_term = float(weights.T @ residual_matrix @ weights)
         volatility_contribution_term = float(
-            weights.T @ (delta_matrix.T + budget_matrix).T @ covariance @ (delta_matrix + budget_matrix.T) @ weights
+            weights.T
+            @ (delta_matrix.T + budget_matrix).T
+            @ covariance
+            @ (delta_matrix + budget_matrix.T)
+            @ weights
         )
-        fourth_order_term = float(np.einsum("ijk,i,j,k->", tau, weights, weights, weights))
+        fourth_order_term = float(
+            np.einsum("ijk,i,j,k->", tau, weights, weights, weights)
+        )
 
         term1 = (
             2.0
             * degrees_of_freedom**3
-            / ((degrees_of_freedom - 2.0) ** 3 * (degrees_of_freedom - 4.0) * (degrees_of_freedom - 6.0))
+            / (
+                (degrees_of_freedom - 2.0) ** 3
+                * (degrees_of_freedom - 4.0)
+                * (degrees_of_freedom - 6.0)
+            )
             * linear_pricing_term**3
         )
         term2 = (
             3.0
             * degrees_of_freedom**3
-            / ((degrees_of_freedom - 2.0) ** 2 * (degrees_of_freedom - 4.0) * (degrees_of_freedom - 6.0))
+            / (
+                (degrees_of_freedom - 2.0) ** 2
+                * (degrees_of_freedom - 4.0)
+                * (degrees_of_freedom - 6.0)
+            )
             * linear_pricing_term
             * quadratic_pricing_term
         )
@@ -183,7 +307,19 @@ class Cumulant:
 
 
 class CFVaR2nd:
-    """Eq. (S2.Ex22): second-order CFVaR risk number at given weights."""
+    """Second-order conditional fractional value-at-risk.
+
+    Computes Eq. (S2.Ex22) at the supplied weights.
+
+    Args:
+        alpha: Confidence level in ``(0, 1)``.
+        expected_payoff: 1-D expected-payoff vector ``u``.
+        precision_matrix: 2-D precision matrix ``Q``.
+        weights: 1-D weight vector ``x``.
+
+    Attributes:
+        value: The scalar CFVaR2 risk number.
+    """
 
     def __init__(
         self,
@@ -205,7 +341,21 @@ class CFVaR2nd:
 
 
 class CFVaR3rd:
-    """Eq. (S2.Ex23): third-order CFVaR risk number at given weights."""
+    """Third-order conditional fractional value-at-risk.
+
+    Computes Eq. (S2.Ex23) at the supplied weights, including the
+    third-cumulance skewness correction.
+
+    Args:
+        alpha: Confidence level in ``(0, 1)``.
+        expected_payoff: 1-D expected-payoff vector ``u``.
+        precision_matrix: 2-D precision matrix ``Q``.
+        weights: 1-D weight vector ``x``.
+        cumulant: Third cumulance value (from ``Cumulant(...).value``).
+
+    Attributes:
+        value: The scalar CFVaR3 risk number.
+    """
 
     def __init__(
         self,
@@ -223,9 +373,7 @@ class CFVaR3rd:
         self.cumulant = cumulant
         z_alpha = norm.ppf(alpha)
         variance_value = Quadratic(precision_matrix, weights).value
-        skewness_correction = (
-            (z_alpha**2 - 1.0) / 6.0 * (cumulant / variance_value)
-        )
+        skewness_correction = (z_alpha**2 - 1.0) / 6.0 * (cumulant / variance_value)
         self.value = float(
             -Expect(expected_payoff, weights).value
             - z_alpha * np.sqrt(variance_value)
@@ -249,7 +397,15 @@ class Minimize:
 
 
 class Loss:
-    """Quadratic variance term at epsilon for the Lagrange multiplier search."""
+    """Quadratic variance term.
+
+    Callable: ``loss(epsilon)`` returns ``a ε² + b ε + c``.
+
+    Args:
+        coeff_a: Coefficient of ``ε²``.
+        coeff_b: Coefficient of ``ε``.
+        coeff_c: Constant term.
+    """
 
     def __init__(self, coeff_a: float, coeff_b: float, coeff_c: float) -> None:
         self.coeff_a = coeff_a
@@ -261,7 +417,17 @@ class Loss:
 
 
 class Score:
-    """CFVaR2 upper bound at epsilon."""
+    """CFVaR2 upper-bound score at epsilon.
+
+    Callable: ``score(epsilon)`` returns ``-ε - z·sqrt(loss(epsilon))``,
+    or ``+inf`` when the loss becomes non-positive (constraint violation).
+
+    Args:
+        coeff_a: Coefficient of ``ε²``.
+        coeff_b: Coefficient of ``ε``.
+        coeff_c: Constant term.
+        z_score: Standard-normal quantile for confidence level ``alpha``.
+    """
 
     def __init__(
         self,
@@ -284,7 +450,10 @@ class Score:
 
 
 class OptimalEpsilon:
-    """Computes epsilon_star using Appendix B derivation.
+    """Compute the optimal Lagrange multiplier.
+
+    Preferred path: closed-form roots from Appendix B. Deterministic
+    fallback: bounded numerical minimisation if root conditions fail.
 
     Preferred path: closed-form roots from Appendix B.
     Deterministic fallback: bounded numerical minimisation if root conditions fail.
@@ -307,15 +476,19 @@ class OptimalEpsilon:
 
         precision_inverse = np.linalg.inv(precision_matrix)
         constraint_matrix = np.vstack([expected_payoff.T, cost_vector.T])
-        projection = precision_inverse @ constraint_matrix.T @ np.linalg.inv(
-            constraint_matrix @ precision_inverse @ constraint_matrix.T
+        projection = (
+            precision_inverse
+            @ constraint_matrix.T
+            @ np.linalg.inv(constraint_matrix @ precision_inverse @ constraint_matrix.T)
         )
 
         loss_gradient = projection[:, 0]
         constraint_gradient = projection[:, 1]
         coeff_a = 0.5 * float(loss_gradient.T @ precision_matrix @ loss_gradient)
         coeff_b = float(constraint_gradient.T @ precision_matrix @ loss_gradient)
-        coeff_c = 0.5 * float(constraint_gradient.T @ precision_matrix @ constraint_gradient)
+        coeff_c = 0.5 * float(
+            constraint_gradient.T @ precision_matrix @ constraint_gradient
+        )
 
         score_a = 4.0 * coeff_a * coeff_a * z_score * z_score - 4.0 * coeff_a
         score_b = 4.0 * coeff_a * coeff_b * z_score * z_score - 4.0 * coeff_b
@@ -327,9 +500,15 @@ class OptimalEpsilon:
         if abs(score_a) > 1e-12 and discriminant >= 0.0:
             epsilon_plus = (-score_b + math.sqrt(discriminant)) / (2.0 * score_a)
             epsilon_minus = (-score_b - math.sqrt(discriminant)) / (2.0 * score_a)
-            if 2.0 * coeff_a * epsilon_plus + coeff_b > 0.0 and self.score(epsilon_plus) > 0.0:
+            if (
+                2.0 * coeff_a * epsilon_plus + coeff_b > 0.0
+                and self.score(epsilon_plus) > 0.0
+            ):
                 candidate_solutions.append(epsilon_plus)
-            if 2.0 * coeff_a * epsilon_minus + coeff_b > 0.0 and self.score(epsilon_minus) > 0.0:
+            if (
+                2.0 * coeff_a * epsilon_minus + coeff_b > 0.0
+                and self.score(epsilon_minus) > 0.0
+            ):
                 candidate_solutions.append(epsilon_minus)
 
         if candidate_solutions:
@@ -341,12 +520,26 @@ class OptimalEpsilon:
             self.score, method="bounded", bounds=(-search_radius, search_radius)
         )
         if not result.success or not np.isfinite(result.fun):
-            raise ValueError("Could not compute epsilon_star via closed-form or fallback solver")
+            raise ValueError(
+                "Could not compute epsilon_star via closed-form or fallback solver"
+            )
         self.value = float(result.x)
 
 
 class CFVaR2Closed:
-    """Eq. (5)-(6) for P2 with determined epsilon_star. Returns optimal weights."""
+    """Closed-form CFVaR2 weight solver.
+
+    Computes Eq. (5)-(6) for P2 with the determined epsilon-star.
+
+    Args:
+        precision_matrix: 2-D precision matrix ``Q``.
+        expected_payoff: 1-D expected-payoff vector ``u``.
+        cost_vector: 1-D cost vector ``v``.
+        alpha: Confidence level in ``(0, 1)``.
+
+    Attributes:
+        value: Closed-form optimal weights ``x*``.
+    """
 
     def __init__(
         self,
@@ -377,7 +570,20 @@ class CFVaR2Closed:
 
 
 class CFVaR3Numerical:
-    """Numerical solution for P3 with equality constraint x^T v = 1."""
+    """Numerical CFVaR3 weight solver.
+
+    Solves the equality-constrained problem ``min cfvar3(x) s.t. x.T v == 1``
+    via ``scipy.optimize.minimize`` with the SLSQP method.
+
+    Args:
+        cost_vector: 1-D cost vector ``v``.
+        initial_weights: 1-D starting point.
+        objective_callable: Callable ``f(x) -> float`` returning the
+            CFVaR3 objective value.
+
+    Attributes:
+        value: The numerical optimal weights ``x*``.
+    """
 
     def __init__(
         self,
@@ -388,9 +594,14 @@ class CFVaR3Numerical:
         self.cost_vector = cost_vector
         self.initial_weights = initial_weights
         self.objective_callable = objective_callable
-        constraints = [{"type": "eq", "fun": lambda x: float(np.dot(x, cost_vector) - 1.0)}]
+        constraints = [
+            {"type": "eq", "fun": lambda x: float(np.dot(x, cost_vector) - 1.0)}
+        ]
         result = minimize(
-            objective_callable, x0=initial_weights, method="SLSQP", constraints=constraints
+            objective_callable,
+            x0=initial_weights,
+            method="SLSQP",
+            constraints=constraints,
         )
         if not result.success:
             raise RuntimeError(f"Optimisation failed: {result.message}")
@@ -398,7 +609,18 @@ class CFVaR3Numerical:
 
 
 class CFVaR3Objective:
-    """Callable wrapper around ``CFVaR3rd`` for use with scipy solvers."""
+    """Callable CFVaR3 objective for scipy solvers.
+
+    Wraps ``CFVaR3rd`` so that ``objective(x) -> float`` returns the
+    third-order CFVaR value at ``x``, with the third cumulance provided
+    by ``kappa3_callback``.
+
+    Args:
+        alpha: Confidence level.
+        expected_payoff: 1-D expected-payoff vector.
+        precision_matrix: 2-D precision matrix.
+        kappa3_callback: Callable mapping weights to the third cumulance.
+    """
 
     def __init__(
         self,
@@ -449,7 +671,19 @@ class Risk:
 
 
 class QualityScore:
-    """Returns CFVaR2 value at closed-form solution for sanity checks."""
+    """Sanity-check the CFVaR2 closed-form solver.
+
+    Returns the CFVaR2 risk number at the closed-form weights.
+
+    Args:
+        alpha: Confidence level.
+        expected_payoff: 1-D expected-payoff vector.
+        cost_vector: 1-D cost vector.
+        precision_matrix: 2-D precision matrix.
+
+    Attributes:
+        value: The CFVaR2 risk number at the closed-form optimum.
+    """
 
     def __init__(
         self,
@@ -473,7 +707,21 @@ class QualityScore:
 
 
 class Greeks:
-    """Theta, delta, gamma for a portfolio of options."""
+    """First-, second-, and third-order portfolio Greeks.
+
+    Returns ``theta``, ``delta``, ``gamma`` for the given weight vector.
+
+    Args:
+        weights: 1-D weight vector ``x``.
+        price_drift: 1-D price-drift vector.
+        delta_matrix: 2-D delta matrix.
+        third_derivative: 3-D third-derivative tensor.
+
+    Attributes:
+        theta: Scalar ``theta``.
+        delta: 1-D delta vector.
+        gamma: 2-D gamma matrix.
+    """
 
     def __init__(
         self,
@@ -492,7 +740,23 @@ class Greeks:
 
 
 class PortfolioVariance:
-    """Direct scalar variance formula from Section 2.4."""
+    """Direct scalar portfolio-variance formula.
+
+    Computes the closed-form scalar variance at the supplied greeks and
+    model parameters (Section 2.4 of the paper).
+
+    Args:
+        gamma_matrix: 2-D gamma matrix.
+        delta_vector: 1-D delta vector.
+        expected_payoff: 1-D expected-payoff vector.
+        covariance: 2-D covariance matrix.
+        degrees_of_freedom: Degrees of freedom ``nu``.
+        c_coefficient: Skew-t coefficient.
+        h: 1-D bias vector ``h``.
+
+    Attributes:
+        value: The scalar variance.
+    """
 
     def __init__(
         self,
@@ -512,30 +776,57 @@ class PortfolioVariance:
         self.c_coefficient = c_coefficient
         self.h = h
         auxiliary_vector = gamma_matrix @ expected_payoff + delta_vector
-        term1 = (degrees_of_freedom**2 / (2.0 * (degrees_of_freedom - 2.0) * (degrees_of_freedom - 4.0))) * np.trace(
-            (gamma_matrix @ covariance) @ (gamma_matrix @ covariance)
-        )
-        term2 = (degrees_of_freedom**2 / (2.0 * (degrees_of_freedom - 2.0) ** 2 * (degrees_of_freedom - 4.0))) * (
-            np.trace(gamma_matrix @ covariance) ** 2
-        )
+        term1 = (
+            degrees_of_freedom**2
+            / (2.0 * (degrees_of_freedom - 2.0) * (degrees_of_freedom - 4.0))
+        ) * np.trace((gamma_matrix @ covariance) @ (gamma_matrix @ covariance))
+        term2 = (
+            degrees_of_freedom**2
+            / (2.0 * (degrees_of_freedom - 2.0) ** 2 * (degrees_of_freedom - 4.0))
+        ) * (np.trace(gamma_matrix @ covariance) ** 2)
         term3 = (degrees_of_freedom / (degrees_of_freedom - 2.0)) * float(
             auxiliary_vector.T @ covariance @ auxiliary_vector
         )
-        term4 = (2.0 * c_coefficient * degrees_of_freedom / (degrees_of_freedom - 3.0)) * float(
-            auxiliary_vector.T @ covariance @ gamma_matrix @ h
+        term4 = (
+            2.0 * c_coefficient * degrees_of_freedom / (degrees_of_freedom - 3.0)
+        ) * float(auxiliary_vector.T @ covariance @ gamma_matrix @ h)
+        term5 = (
+            (
+                c_coefficient
+                * degrees_of_freedom
+                / ((degrees_of_freedom - 2.0) * (degrees_of_freedom - 3.0))
+            )
+            * float(auxiliary_vector.T @ h)
+            * float(np.trace(gamma_matrix @ covariance))
         )
-        term5 = (c_coefficient * degrees_of_freedom / ((degrees_of_freedom - 2.0) * (degrees_of_freedom - 3.0))) * float(
-            auxiliary_vector.T @ h
-        ) * float(np.trace(gamma_matrix @ covariance))
-        term6 = -(c_coefficient * degrees_of_freedom / (degrees_of_freedom - 3.0)) * float(
-            auxiliary_vector.T @ h
-        ) * float(h.T @ gamma_matrix @ h)
+        term6 = (
+            -(c_coefficient * degrees_of_freedom / (degrees_of_freedom - 3.0))
+            * float(auxiliary_vector.T @ h)
+            * float(h.T @ gamma_matrix @ h)
+        )
         term7 = -(c_coefficient**2) * (float(auxiliary_vector.T @ h) ** 2)
         self.value = float(term1 + term2 + term3 + term4 + term5 + term6 + term7)
 
 
 class Linearize:
-    """Build linearised expected return and precision matrix for the section-2.4 problem."""
+    """Linearised expected return and precision matrix.
+
+    Builds ``u`` and ``Q`` for the linearised section-2.4 problem.
+
+    Args:
+        price_drift: 1-D price-drift vector.
+        delta_matrix: 2-D delta matrix.
+        third_derivative: 3-D third-derivative tensor.
+        expected_payoff: 1-D expected-payoff vector.
+        covariance: 2-D covariance matrix.
+        degrees_of_freedom: Degrees of freedom ``nu``.
+        skewness: 1-D skewness vector.
+        time_increment: Time increment ``dt``.
+
+    Attributes:
+        dual_residual: 1-D linearised expected return ``u``.
+        precision_matrix: 2-D linearised precision matrix ``Q``.
+    """
 
     def __init__(
         self,
@@ -560,7 +851,10 @@ class Linearize:
             dtype=float,
         )
         budget_matrix = np.vstack(
-            [expected_payoff.T @ third_derivative[idx] for idx in range(instrument_count)]
+            [
+                expected_payoff.T @ third_derivative[idx]
+                for idx in range(instrument_count)
+            ]
         )
         xi_intercept = np.array(
             [
@@ -596,8 +890,15 @@ class Linearize:
 
         uncertainty_matrix = (
             (2.0 * degrees_of_freedom / (degrees_of_freedom - 2.0))
-            * ((delta_matrix.T + budget_matrix) @ covariance @ (delta_matrix.T + budget_matrix).T)
-            + (degrees_of_freedom**2 / ((degrees_of_freedom - 2.0) * (degrees_of_freedom - 4.0)))
+            * (
+                (delta_matrix.T + budget_matrix)
+                @ covariance
+                @ (delta_matrix.T + budget_matrix).T
+            )
+            + (
+                degrees_of_freedom**2
+                / ((degrees_of_freedom - 2.0) * (degrees_of_freedom - 4.0))
+            )
             * residual_matrix
             + (
                 degrees_of_freedom**2
@@ -625,14 +926,20 @@ class Linearize:
         delta_plus_budget_transpose = budget_matrix + delta_matrix.T
         q_symmetric_part = (
             uncertainty_matrix
-            + (4.0 * c_coefficient * degrees_of_freedom / (degrees_of_freedom - 3.0)) * (hmatrix + e)
-            + (2.0 * c_coefficient * degrees_of_freedom / ((degrees_of_freedom - 2.0) * (degrees_of_freedom - 3.0))) * np.outer(
-                delta_plus_budget_transpose @ h, pricing_vector
+            + (4.0 * c_coefficient * degrees_of_freedom / (degrees_of_freedom - 3.0))
+            * (hmatrix + e)
+            + (
+                2.0
+                * c_coefficient
+                * degrees_of_freedom
+                / ((degrees_of_freedom - 2.0) * (degrees_of_freedom - 3.0))
             )
-            - (2.0 * c_coefficient * degrees_of_freedom / (degrees_of_freedom - 3.0)) * np.outer(
-                delta_plus_budget_transpose @ h, q
-            )
-            - 2.0 * c_coefficient**2 * np.outer(
+            * np.outer(delta_plus_budget_transpose @ h, pricing_vector)
+            - (2.0 * c_coefficient * degrees_of_freedom / (degrees_of_freedom - 3.0))
+            * np.outer(delta_plus_budget_transpose @ h, q)
+            - 2.0
+            * c_coefficient**2
+            * np.outer(
                 delta_plus_budget_transpose @ h,
                 delta_plus_budget_transpose @ h,
             )
@@ -643,7 +950,23 @@ class Linearize:
 
 
 class Reconstruct:
-    """Reconstruct Q from portfolio variance evaluations."""
+    """Reconstruct the precision matrix.
+
+    Recovers the symmetric ``Q`` by evaluating the portfolio variance at
+    basis vectors and pairwise sums.
+
+    Args:
+        price_drift: 1-D price-drift vector.
+        delta_matrix: 2-D delta matrix.
+        third_derivative: 3-D third-derivative tensor.
+        expected_payoff: 1-D expected-payoff vector.
+        covariance: 2-D covariance matrix.
+        degrees_of_freedom: Degrees of freedom ``nu``.
+        skewness: 1-D skewness vector.
+
+    Attributes:
+        value: 2-D reconstructed precision matrix ``Q``.
+    """
 
     def __init__(
         self,

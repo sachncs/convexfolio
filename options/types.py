@@ -1,44 +1,7 @@
-"""Typed data containers for the paper equations."""
-
-from dataclasses import dataclass
+"""Type aliases used across the options package."""
 
 import numpy as np
 from numpy.typing import NDArray
 
 FloatArray = NDArray[np.float64]
-
-
-@dataclass(frozen=True)
-class PortfolioState:
-    """State variables in Setting 2.1."""
-
-    option_prices_v: FloatArray
-    theta: FloatArray
-    delta_matrix_d: FloatArray
-    gamma_tensor: FloatArray
-
-
-@dataclass(frozen=True)
-class DistributionParameters:
-    """Distributional objects appearing in Section 2 and 4."""
-
-    mu: FloatArray
-    sigma: FloatArray
-    nu: float
-    omega: FloatArray
-
-
-@dataclass(frozen=True)
-class IntermediateMoments:
-    """Intermediate vectors/matrices from Eq. (3) expansion.
-
-    Notes:
-      This container is retained for compatibility; quantities are now computed
-      by modules `moments.py` and `reproduction_math.py`.
-    """
-
-    c_scalar: float
-    h: FloatArray
-    q: FloatArray
-    hmatrix: FloatArray
-    e: FloatArray
+"""A 1- or 2-D ``numpy`` array of ``float64`` elements."""

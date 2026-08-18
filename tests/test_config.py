@@ -3,8 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from options.config import load
-from options.config import validate
+from options.config import load, validate
 
 
 def test_load_defaults() -> None:
@@ -18,12 +17,14 @@ def test_validate_rejects_invalid_alpha(tmp_path: Path) -> None:
         "runtime": {
             "seed": experiment.runtime.seed,
             "log_level": experiment.runtime.log_level,
-            "output_dir": experiment.runtime.output_dir,
+            "output_directory": experiment.runtime.output_directory,
         },
         "optimization": {
             "alpha": 0.6,
             "method": experiment.optimization.method,
-            "enforce_nu_greater_than_six": experiment.optimization.enforce_nu_greater_than_six,
+            "enforce_nu_greater_than_six": (
+                experiment.optimization.enforce_nu_greater_than_six
+            ),
         },
     }
     config_file = tmp_path / "oop_bad_config.json"

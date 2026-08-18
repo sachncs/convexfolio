@@ -1,9 +1,6 @@
 import numpy as np
 
-from options.math import CFVaR2nd
-from options.math import CFVaR3rd
-from options.math import Quadratic
-from options.math import shapes
+from options.math import CFVaR2nd, CFVaR3rd, Quadratic, shapes
 
 
 def test_shapes_raises_on_incompatible_dims() -> None:
@@ -22,9 +19,7 @@ def test_variance_quadratic_non_negative_for_psd_q() -> None:
 
 def test_cfvar3_reduces_to_cfvar2_when_kappa3_zero() -> None:
     expected_payoff = np.array([0.2, -0.1, 0.3])
-    precision_matrix = np.array(
-        [[2.0, 0.1, 0.0], [0.1, 1.5, 0.2], [0.0, 0.2, 1.2]]
-    )
+    precision_matrix = np.array([[2.0, 0.1, 0.0], [0.1, 1.5, 0.2], [0.0, 0.2, 1.2]])
     weights = np.array([0.5, 0.2, 0.1])
     alpha = 0.05
     second = CFVaR2nd(alpha, expected_payoff, precision_matrix, weights).value

@@ -6,11 +6,15 @@ import json
 from options.config import load
 from options.determinism import check
 from options.pipeline import run_and_save
-from options.utils import Logger
-from options.utils import reproduce
+from options.utils import Logger, reproduce
 
 
 def parser() -> argparse.ArgumentParser:
+    """Build the CLI argument parser.
+
+    Returns:
+        The configured ``ArgumentParser``.
+    """
     argument_parser = argparse.ArgumentParser(
         prog="options", description="Optimal option portfolio optimizer"
     )
@@ -31,6 +35,7 @@ def parser() -> argparse.ArgumentParser:
 
 
 def main() -> None:
+    """CLI entrypoint. Dispatches on ``--command`` and logs results."""
     argument_parser = parser()
     parsed_args = argument_parser.parse_args()
     experiment = load(parsed_args.config)
@@ -44,7 +49,7 @@ def main() -> None:
         return
 
     if parsed_args.command == "reproduce-report":
-        output_path = run_and_save(experiment, experiment.runtime.output_dir)
+        output_path = run_and_save(experiment, experiment.runtime.output_directory)
         log.info(str(output_path))
         return
 

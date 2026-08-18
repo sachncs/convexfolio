@@ -215,6 +215,120 @@ class ConditionalFractionalValueAtRisk3rdOrder:
         )
 
 
+class ConditionalFractionalValueAtRisk:
+    """Single dispatch over the CFVaR risk measure, by ``order`` and ``type``.
+
+    Construct:
+
+        ConditionalFractionalValueAtRisk(
+            order=2,
+            type="value",
+            alpha=0.05,
+            mean=expected_payoff,
+            cov=precision_matrix,
+            weights=weights,
+        ).value
+
+        ConditionalFractionalValueAtRisk(
+            order=2,
+            type="weights",
+            alpha=0.05,
+            mean=expected_payoff,
+            cov=precision_matrix,
+            cost=cost_vector,
+        ).weights
+
+        ConditionalFractionalValueAtRisk(
+            order=3,
+            type="weights",
+            alpha=0.05,
+            mean=expected_payoff,
+            cov=precision_matrix,
+            cost=cost_vector,
+            initial_weights=x0,
+            objective_callable=objective,
+        ).weights
+
+    ``order`` is 2 (variance-only) or 3 (with skewness). ``type`` is
+    ``"value"`` for an analytical risk number, ``"weights"`` for the
+    closed-form weight vector, or ``"numerical"`` for the numerical solver.
+
+    Required kwargs by combination:
+      - ``type="value"``: ``weights`` (and ``third_order_cumulant`` if order=3).
+      - ``type="weights"``: ``cost``; if order=3, also ``initial_weights`` and
+        ``objective_callable``.
+    """
+
+    def __init__(
+        self,
+        *,
+        order: int,
+        type: str,
+        alpha: float,
+        mean: FloatArray,
+        cov: FloatArray,
+        weights: FloatArray | None = None,
+        third_order_cumulant: float | None = None,
+        cost: FloatArray | None = None,
+        initial_weights: FloatArray | None = None,
+        objective_callable=None,
+    ) -> None:
+        self.order = order
+        self.type = type
+        self.alpha = alpha
+        self.mean = mean
+        self.cov = cov
+        self.weights_input = weights
+        self.third_order_cumulant = third_order_cumulant
+        self.cost = cost
+        self.initial_weights = initial_weights
+        self.objective_callable = objective_callable
+
+        if type == "value" and order == 2:
+            if weights is None:
+                raise ValueError("type='value' requires weights")
+            self.value = ConditionalFractionalValueAtRisk2ndOrder(
+                alpha=alpha,
+                expected_payoff=mean,
+                precision_matrix=cov,
+                weights=weights,
+            ).value
+        elif type == "value" and order == 3:
+            if weights is None or third_order_cumulant is None:
+                raise ValueError(
+                    "type='value' order=3 requires weights and third_order_cumulant"
+                )
+            self.value = ConditionalFractionalValueAtRisk3rdOrder(
+                alpha=alpha,
+                expected_payoff=mean,
+                precision_matrix=cov,
+                weights=weights,
+                third_order_cumulant=third_order_cumulant,
+            ).value
+        elif type == "weights" and order == 2:
+            if cost is None:
+                raise ValueError("type='weights' requires cost")
+            self.weights = SolveCFVaR2ClosedForm(
+                precision_matrix=cov,
+                expected_payoff=mean,
+                cost_vector=cost,
+                alpha=alpha,
+            ).value
+        elif type == "weights" and order == 3:
+            if cost is None or initial_weights is None or objective_callable is None:
+                raise ValueError(
+                    "type='weights' order=3 requires cost, initial_weights, "
+                    "objective_callable"
+                )
+            self.weights = SolveCFVaR3Numerical(
+                cost_vector=cost,
+                initial_weights=initial_weights,
+                objective_callable=objective_callable,
+            ).value
+        else:
+            raise ValueError(f"unsupported order={order}, type={type}")
+
+
 class MinimizeVariance:
     """Closed form Eq. (4) for P1."""
 

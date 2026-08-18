@@ -24,6 +24,7 @@ from options.math import Reconstruct
 from options.math import Risk
 from options.math import Score
 from options.math import ConditionalFractionalValueAtRisk2ndOrder
+from options.math import ConditionalFractionalValueAtRisk
 from options.math import SolveCFVaR2ClosedForm
 from options.math import SolveCFVaR3Numerical
 from options.math import Solve as SolveDispatcher
@@ -38,6 +39,7 @@ from options.utils import reproduce
 __all__ = [
     "Bilinear",
     "Compute",
+    "ConditionalFractionalValueAtRisk",
     "Cross",
     "Curvature",
     "Experiment",

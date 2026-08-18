@@ -17,7 +17,7 @@ from options.math import Greeks
 from options.math import Linearize
 from options.math import Reconstruct
 from options.math import Risk
-from options.math import Solve as SolveDispatcher
+from options.math import Solve
 from options.math import ThirdOrderObjective
 
 
@@ -67,12 +67,12 @@ def reproduce(experiment: Experiment) -> dict[str, object]:
     cost_vector = np.abs(rng.normal(size=n_instruments)) + 0.1
     expected_payoff_vector = rng.normal(size=n_instruments)
 
-    variance_solution = SolveDispatcher(
+    variance_solution = Solve(
         kind="variance",
         cost_vector=cost_vector,
         precision_matrix=precision_matrix,
     ).value
-    cfvar2_solution = SolveDispatcher(
+    cfvar2_solution = Solve(
         kind="cfvar2",
         precision_matrix=precision_matrix,
         expected_payoff=expected_payoff_vector,
@@ -92,7 +92,7 @@ def reproduce(experiment: Experiment) -> dict[str, object]:
         kappa3_callback=lambda weights: 0.0,
     )
     initial_weights = np.ones(n_instruments) / np.sum(cost_vector)
-    cfvar3_solution = SolveDispatcher(
+    cfvar3_solution = Solve(
         kind="cfvar3",
         cost_vector=cost_vector,
         initial_weights=initial_weights,

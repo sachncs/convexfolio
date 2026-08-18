@@ -25,9 +25,9 @@ from options.math import Risk
 from options.math import Score
 from options.math import ConditionalFractionalValueAtRisk2ndOrder
 from options.math import ConditionalFractionalValueAtRisk
+from options.math import Solve
 from options.math import SolveCFVaR2ClosedForm
 from options.math import SolveCFVaR3Numerical
-from options.math import Solve as SolveDispatcher
 from options.math import ThirdOrderCumulant
 from options.math import ThirdOrderObjective
 from options.math import ConditionalFractionalValueAtRisk3rdOrder
@@ -61,9 +61,9 @@ __all__ = [
     "Runtime",
     "Score",
     "ConditionalFractionalValueAtRisk2ndOrder",
+    "Solve",
     "SolveCFVaR2ClosedForm",
     "SolveCFVaR3Numerical",
-    "SolveDispatcher",
     "ThirdOrderCumulant",
     "ThirdOrderObjective",
     "ConditionalFractionalValueAtRisk3rdOrder",

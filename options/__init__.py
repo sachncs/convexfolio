@@ -23,13 +23,13 @@ from options.math import Quadratic
 from options.math import Reconstruct
 from options.math import Risk
 from options.math import Score
-from options.math import SecondOrderRisk
+from options.math import ConditionalFractionalValueAtRisk2ndOrder
 from options.math import SolveCFVaR2ClosedForm
 from options.math import SolveCFVaR3Numerical
 from options.math import Solve as SolveDispatcher
 from options.math import ThirdOrderCumulant
 from options.math import ThirdOrderObjective
-from options.math import ThirdOrderRisk
+from options.math import ConditionalFractionalValueAtRisk3rdOrder
 from options.pipeline import run_and_save
 from options.utils import Logger
 from options.utils import Report
@@ -58,13 +58,13 @@ __all__ = [
     "Risk",
     "Runtime",
     "Score",
-    "SecondOrderRisk",
+    "ConditionalFractionalValueAtRisk2ndOrder",
     "SolveCFVaR2ClosedForm",
     "SolveCFVaR3Numerical",
     "SolveDispatcher",
     "ThirdOrderCumulant",
     "ThirdOrderObjective",
-    "ThirdOrderRisk",
+    "ConditionalFractionalValueAtRisk3rdOrder",
     "check",
     "load",
     "reproduce",

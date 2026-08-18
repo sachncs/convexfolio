@@ -165,7 +165,7 @@ class ThirdOrderCumulant:
         self.value = float(term1 + term2 + term3 + fourth_order_term)
 
 
-class SecondOrderRisk:
+class ConditionalFractionalValueAtRisk2ndOrder:
     """Eq. (S2.Ex22)."""
 
     def __init__(
@@ -187,7 +187,7 @@ class SecondOrderRisk:
         )
 
 
-class ThirdOrderRisk:
+class ConditionalFractionalValueAtRisk3rdOrder:
     """Eq. (S2.Ex23)."""
 
     def __init__(
@@ -389,7 +389,7 @@ class Risk:
         self.precision_matrix = precision_matrix
 
     def second(self, weights: FloatArray) -> float:
-        return SecondOrderRisk(
+        return ConditionalFractionalValueAtRisk2ndOrder(
             self.alpha,
             self.expected_payoff,
             self.precision_matrix,
@@ -397,7 +397,7 @@ class Risk:
         ).value
 
     def third(self, weights: FloatArray, kappa3_callback) -> float:
-        return ThirdOrderRisk(
+        return ConditionalFractionalValueAtRisk3rdOrder(
             self.alpha,
             self.expected_payoff,
             self.precision_matrix,
@@ -407,7 +407,7 @@ class Risk:
 
 
 class ThirdOrderObjective:
-    """Callable wrapper around ThirdOrderRisk for use with scipy solvers."""
+    """Callable wrapper around ConditionalFractionalValueAtRisk3rdOrder for use with scipy solvers."""
 
     def __init__(
         self,
@@ -422,7 +422,7 @@ class ThirdOrderObjective:
         self.kappa3_callback = kappa3_callback
 
     def __call__(self, weights: FloatArray) -> float:
-        return ThirdOrderRisk(
+        return ConditionalFractionalValueAtRisk3rdOrder(
             self.alpha,
             self.expected_payoff,
             self.precision_matrix,
@@ -447,7 +447,7 @@ class QualityScore:
             cost_vector=cost_vector,
             alpha=alpha,
         ).value
-        self.value = SecondOrderRisk(
+        self.value = ConditionalFractionalValueAtRisk2ndOrder(
             alpha=alpha,
             expected_payoff=expected_payoff,
             precision_matrix=precision_matrix,

@@ -1,7 +1,10 @@
 """Math operations for the optimal option portfolio optimizer.
 
-All numerical routines live in classes. Each class wraps a deterministic
-math construction from the paper; same inputs always produce the same output.
+Each numerical routine lives in a concrete class. Class instantiation captures
+the deterministic inputs; ``.value`` (or named attribute) holds the result.
+Polymorphic composition: ``Minimize(Variance(Q), c).value`` runs a closed-form
+variance minimizer; ``CFVaR2nd(alpha, mean, Q, x).value`` evaluates the second
+order risk number.
 """
 
 import math
@@ -15,7 +18,7 @@ from options.types import FloatArray
 
 
 def shapes(expected_payoff: FloatArray, precision_matrix: FloatArray, weights: FloatArray) -> None:
-    """Validate tensor shapes used by risk and optimization primitives."""
+    """Validate tensor shapes used by risk and optimisation primitives."""
     if expected_payoff.ndim != 1 or weights.ndim != 1:
         raise ValueError("expected_payoff and weights must be 1D vectors")
     if precision_matrix.ndim != 2 or precision_matrix.shape[0] != precision_matrix.shape[1]:
@@ -119,7 +122,21 @@ class Quadratic:
         self.value = float(0.5 * weights.T @ precision_matrix @ weights)
 
 
-class ThirdOrderCumulant:
+class Variance:
+    """Portfolio variance objective: x → 0.5 x^T Q x.
+
+    Callable; pass ``weights`` to evaluate. Use ``Minimize(Variance(Q), v)`` to
+    solve for the closed-form minimising weights.
+    """
+
+    def __init__(self, precision_matrix: FloatArray) -> None:
+        self.precision_matrix = precision_matrix
+
+    def __call__(self, weights: FloatArray) -> float:
+        return Quadratic(self.precision_matrix, weights).value
+
+
+class Cumulant:
     """Eq. (S2.Ex24-S2.Ex26): third central moment approximation."""
 
     def __init__(
@@ -165,8 +182,8 @@ class ThirdOrderCumulant:
         self.value = float(term1 + term2 + term3 + fourth_order_term)
 
 
-class ConditionalFractionalValueAtRisk2ndOrder:
-    """Eq. (S2.Ex22)."""
+class CFVaR2nd:
+    """Eq. (S2.Ex22): second-order CFVaR risk number at given weights."""
 
     def __init__(
         self,
@@ -187,8 +204,8 @@ class ConditionalFractionalValueAtRisk2ndOrder:
         )
 
 
-class ConditionalFractionalValueAtRisk3rdOrder:
-    """Eq. (S2.Ex23)."""
+class CFVaR3rd:
+    """Eq. (S2.Ex23): third-order CFVaR risk number at given weights."""
 
     def __init__(
         self,
@@ -196,17 +213,18 @@ class ConditionalFractionalValueAtRisk3rdOrder:
         expected_payoff: FloatArray,
         precision_matrix: FloatArray,
         weights: FloatArray,
-        third_order_cumulant: float,
+        cumulant: float,
     ) -> None:
         shapes(expected_payoff, precision_matrix, weights)
         self.alpha = alpha
         self.expected_payoff = expected_payoff
         self.precision_matrix = precision_matrix
         self.weights = weights
+        self.cumulant = cumulant
         z_alpha = norm.ppf(alpha)
         variance_value = Quadratic(precision_matrix, weights).value
         skewness_correction = (
-            (z_alpha**2 - 1.0) / 6.0 * (third_order_cumulant / variance_value)
+            (z_alpha**2 - 1.0) / 6.0 * (cumulant / variance_value)
         )
         self.value = float(
             -Expect(expected_payoff, weights).value
@@ -215,127 +233,17 @@ class ConditionalFractionalValueAtRisk3rdOrder:
         )
 
 
-class ConditionalFractionalValueAtRisk:
-    """Single dispatch over the CFVaR risk measure, by ``order`` and ``type``.
+class Minimize:
+    """Closed-form minimisation of a Variance objective under budget.
 
-    Construct:
-
-        ConditionalFractionalValueAtRisk(
-            order=2,
-            type="value",
-            alpha=0.05,
-            mean=expected_payoff,
-            cov=precision_matrix,
-            weights=weights,
-        ).value
-
-        ConditionalFractionalValueAtRisk(
-            order=2,
-            type="weights",
-            alpha=0.05,
-            mean=expected_payoff,
-            cov=precision_matrix,
-            cost=cost_vector,
-        ).weights
-
-        ConditionalFractionalValueAtRisk(
-            order=3,
-            type="weights",
-            alpha=0.05,
-            mean=expected_payoff,
-            cov=precision_matrix,
-            cost=cost_vector,
-            initial_weights=x0,
-            objective_callable=objective,
-        ).weights
-
-    ``order`` is 2 (variance-only) or 3 (with skewness). ``type`` is
-    ``"value"`` for an analytical risk number, ``"weights"`` for the
-    closed-form weight vector, or ``"numerical"`` for the numerical solver.
-
-    Required kwargs by combination:
-      - ``type="value"``: ``weights`` (and ``third_order_cumulant`` if order=3).
-      - ``type="weights"``: ``cost``; if order=3, also ``initial_weights`` and
-        ``objective_callable``.
+    Usage: ``Minimize(Variance(Q), c).value`` returns the weights
+    minimising variance subject to ``c.T @ x == 1``.
     """
 
-    def __init__(
-        self,
-        *,
-        order: int,
-        type: str,
-        alpha: float,
-        mean: FloatArray,
-        cov: FloatArray,
-        weights: FloatArray | None = None,
-        third_order_cumulant: float | None = None,
-        cost: FloatArray | None = None,
-        initial_weights: FloatArray | None = None,
-        objective_callable=None,
-    ) -> None:
-        self.order = order
-        self.type = type
-        self.alpha = alpha
-        self.mean = mean
-        self.cov = cov
-        self.weights_input = weights
-        self.third_order_cumulant = third_order_cumulant
-        self.cost = cost
-        self.initial_weights = initial_weights
-        self.objective_callable = objective_callable
-
-        if type == "value" and order == 2:
-            if weights is None:
-                raise ValueError("type='value' requires weights")
-            self.value = ConditionalFractionalValueAtRisk2ndOrder(
-                alpha=alpha,
-                expected_payoff=mean,
-                precision_matrix=cov,
-                weights=weights,
-            ).value
-        elif type == "value" and order == 3:
-            if weights is None or third_order_cumulant is None:
-                raise ValueError(
-                    "type='value' order=3 requires weights and third_order_cumulant"
-                )
-            self.value = ConditionalFractionalValueAtRisk3rdOrder(
-                alpha=alpha,
-                expected_payoff=mean,
-                precision_matrix=cov,
-                weights=weights,
-                third_order_cumulant=third_order_cumulant,
-            ).value
-        elif type == "weights" and order == 2:
-            if cost is None:
-                raise ValueError("type='weights' requires cost")
-            self.weights = SolveCFVaR2ClosedForm(
-                precision_matrix=cov,
-                expected_payoff=mean,
-                cost_vector=cost,
-                alpha=alpha,
-            ).value
-        elif type == "weights" and order == 3:
-            if cost is None or initial_weights is None or objective_callable is None:
-                raise ValueError(
-                    "type='weights' order=3 requires cost, initial_weights, "
-                    "objective_callable"
-                )
-            self.weights = SolveCFVaR3Numerical(
-                cost_vector=cost,
-                initial_weights=initial_weights,
-                objective_callable=objective_callable,
-            ).value
-        else:
-            raise ValueError(f"unsupported order={order}, type={type}")
-
-
-class MinimizeVariance:
-    """Closed form Eq. (4) for P1."""
-
-    def __init__(self, cost_vector: FloatArray, precision_matrix: FloatArray) -> None:
+    def __init__(self, variance: Variance, cost_vector: FloatArray) -> None:
+        self.variance = variance
         self.cost_vector = cost_vector
-        self.precision_matrix = precision_matrix
-        precision_inverse = np.linalg.inv(precision_matrix)
+        precision_inverse = np.linalg.inv(variance.precision_matrix)
         denominator = float(cost_vector.T @ precision_inverse @ cost_vector)
         self.value = (precision_inverse @ cost_vector) / denominator
 
@@ -379,7 +287,7 @@ class OptimalEpsilon:
     """Computes epsilon_star using Appendix B derivation.
 
     Preferred path: closed-form roots from Appendix B.
-    Deterministic fallback: bounded numerical minimization if root conditions fail.
+    Deterministic fallback: bounded numerical minimisation if root conditions fail.
     """
 
     def __init__(
@@ -437,8 +345,8 @@ class OptimalEpsilon:
         self.value = float(result.x)
 
 
-class SolveCFVaR2ClosedForm:
-    """Eq. (5)-(6) for P2 with determined epsilon_star."""
+class CFVaR2Closed:
+    """Eq. (5)-(6) for P2 with determined epsilon_star. Returns optimal weights."""
 
     def __init__(
         self,
@@ -468,7 +376,7 @@ class SolveCFVaR2ClosedForm:
         self.value = left_factor @ right_factor
 
 
-class SolveCFVaR3Numerical:
+class CFVaR3Numerical:
     """Numerical solution for P3 with equality constraint x^T v = 1."""
 
     def __init__(
@@ -485,43 +393,12 @@ class SolveCFVaR3Numerical:
             objective_callable, x0=initial_weights, method="SLSQP", constraints=constraints
         )
         if not result.success:
-            raise RuntimeError(f"Optimization failed: {result.message}")
+            raise RuntimeError(f"Optimisation failed: {result.message}")
         self.value = np.asarray(result.x, dtype=float)
 
 
-class Risk:
-    """Risk measure facade. Standard deterministic computation of risk numbers."""
-
-    def __init__(
-        self,
-        alpha: float,
-        expected_payoff: FloatArray,
-        precision_matrix: FloatArray,
-    ) -> None:
-        self.alpha = alpha
-        self.expected_payoff = expected_payoff
-        self.precision_matrix = precision_matrix
-
-    def second(self, weights: FloatArray) -> float:
-        return ConditionalFractionalValueAtRisk2ndOrder(
-            self.alpha,
-            self.expected_payoff,
-            self.precision_matrix,
-            weights,
-        ).value
-
-    def third(self, weights: FloatArray, kappa3_callback) -> float:
-        return ConditionalFractionalValueAtRisk3rdOrder(
-            self.alpha,
-            self.expected_payoff,
-            self.precision_matrix,
-            weights,
-            float(kappa3_callback(weights)),
-        ).value
-
-
-class ThirdOrderObjective:
-    """Callable wrapper around ConditionalFractionalValueAtRisk3rdOrder for use with scipy solvers."""
+class CFVaR3Objective:
+    """Callable wrapper around ``CFVaR3rd`` for use with scipy solvers."""
 
     def __init__(
         self,
@@ -536,12 +413,38 @@ class ThirdOrderObjective:
         self.kappa3_callback = kappa3_callback
 
     def __call__(self, weights: FloatArray) -> float:
-        return ConditionalFractionalValueAtRisk3rdOrder(
+        return CFVaR3rd(
             self.alpha,
             self.expected_payoff,
             self.precision_matrix,
             np.asarray(weights, dtype=float),
             float(self.kappa3_callback(weights)),
+        ).value
+
+
+class Risk:
+    """Risk measure facade, removed in favour of direct class composition."""
+
+    def __init__(self, alpha, expected_payoff, precision_matrix):
+        self.alpha = alpha
+        self.expected_payoff = expected_payoff
+        self.precision_matrix = precision_matrix
+
+    def second(self, weights: FloatArray) -> float:
+        return CFVaR2nd(
+            self.alpha,
+            self.expected_payoff,
+            self.precision_matrix,
+            weights,
+        ).value
+
+    def third(self, weights: FloatArray, kappa3_callback) -> float:
+        return CFVaR3rd(
+            self.alpha,
+            self.expected_payoff,
+            self.precision_matrix,
+            weights,
+            float(kappa3_callback(weights)),
         ).value
 
 
@@ -555,73 +458,18 @@ class QualityScore:
         cost_vector: FloatArray,
         precision_matrix: FloatArray,
     ) -> None:
-        closed_form_weights = SolveCFVaR2ClosedForm(
+        closed_form_weights = CFVaR2Closed(
             precision_matrix=precision_matrix,
             expected_payoff=expected_payoff,
             cost_vector=cost_vector,
             alpha=alpha,
         ).value
-        self.value = ConditionalFractionalValueAtRisk2ndOrder(
+        self.value = CFVaR2nd(
             alpha=alpha,
             expected_payoff=expected_payoff,
             precision_matrix=precision_matrix,
             weights=closed_form_weights,
         ).value
-
-
-class Solve:
-    """Single dispatch over all the optimiser's solver operations.
-
-    Use ``Solve(kind=..., **kwargs).value``. Kinds:
-
-        - ``"variance"``: closed-form variance minimisation (P1); needs
-          ``cost_vector`` and ``precision_matrix``.
-        - ``"epsilon"``: optimal Lagrange multiplier (Appendix B); needs
-          ``alpha``, ``expected_payoff``, ``cost_vector``, ``precision_matrix``.
-        - ``"cfvar2"``: closed-form CFVaR2 (P2); needs ``precision_matrix``,
-          ``expected_payoff``, ``cost_vector``, ``alpha``.
-        - ``"cfvar3"``: numerical CFVaR3 (P3); needs ``cost_vector``,
-          ``initial_weights``, ``objective_callable``.
-        - ``"quality"``: CFVaR2 value at the closed-form solution; same
-          arguments as ``"cfvar2"``.
-    """
-
-    def __init__(self, kind: str, **kwargs) -> None:
-        self.kind = kind
-        if kind == "variance":
-            self.value = MinimizeVariance(
-                cost_vector=kwargs["cost_vector"],
-                precision_matrix=kwargs["precision_matrix"],
-            ).value
-        elif kind == "epsilon":
-            self.value = OptimalEpsilon(
-                alpha=kwargs["alpha"],
-                expected_payoff=kwargs["expected_payoff"],
-                cost_vector=kwargs["cost_vector"],
-                precision_matrix=kwargs["precision_matrix"],
-            ).value
-        elif kind == "cfvar2":
-            self.value = SolveCFVaR2ClosedForm(
-                precision_matrix=kwargs["precision_matrix"],
-                expected_payoff=kwargs["expected_payoff"],
-                cost_vector=kwargs["cost_vector"],
-                alpha=kwargs["alpha"],
-            ).value
-        elif kind == "cfvar3":
-            self.value = SolveCFVaR3Numerical(
-                cost_vector=kwargs["cost_vector"],
-                initial_weights=kwargs["initial_weights"],
-                objective_callable=kwargs["objective_callable"],
-            ).value
-        elif kind == "quality":
-            self.value = QualityScore(
-                alpha=kwargs["alpha"],
-                expected_payoff=kwargs["expected_payoff"],
-                cost_vector=kwargs["cost_vector"],
-                precision_matrix=kwargs["precision_matrix"],
-            ).value
-        else:
-            raise ValueError(f"unknown solve kind: {kind}")
 
 
 class Greeks:
@@ -687,7 +535,7 @@ class PortfolioVariance:
 
 
 class Linearize:
-    """Build linearized expected return and precision matrix for the section-2.4 problem."""
+    """Build linearised expected return and precision matrix for the section-2.4 problem."""
 
     def __init__(
         self,

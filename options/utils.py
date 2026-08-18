@@ -1,7 +1,7 @@
 """Cross-cutting helpers for the options package.
 
 Holds the deterministic primitives that are shared by ``determinism`` and
-``pipeline``: Logger for output, Report for determinism results, and
+``pipeline``: ``Logger`` for output, ``Report`` for determinism results, and
 ``reproduce`` for the single-run pipeline execution.
 """
 
@@ -13,12 +13,13 @@ from pathlib import Path
 import numpy as np
 
 from options.config import Experiment
+from options.math import CFVaR2Closed
+from options.math import CFVaR3Numerical
+from options.math import CFVaR3Objective
 from options.math import Greeks
-from options.math import Linearize
-from options.math import Reconstruct
+from options.math import Minimize
 from options.math import Risk
-from options.math import Solve
-from options.math import ThirdOrderObjective
+from options.math import Variance
 
 
 class Logger:
@@ -53,7 +54,7 @@ class Logger:
 
 
 def reproduce(experiment: Experiment) -> dict[str, object]:
-    """Runs the end-to-end optimization once and returns structured outputs.
+    """Runs the end-to-end optimisation once and returns structured outputs.
 
     Uses synthetic matrices as a self-contained smoke pipeline. External data
     ingestion is project-dependent and plugin users can replace this stage.
@@ -67,13 +68,10 @@ def reproduce(experiment: Experiment) -> dict[str, object]:
     cost_vector = np.abs(rng.normal(size=n_instruments)) + 0.1
     expected_payoff_vector = rng.normal(size=n_instruments)
 
-    variance_solution = Solve(
-        kind="variance",
-        cost_vector=cost_vector,
-        precision_matrix=precision_matrix,
+    variance_weights = Minimize(
+        Variance(precision_matrix), cost_vector
     ).value
-    cfvar2_solution = Solve(
-        kind="cfvar2",
+    cfvar2_weights = CFVaR2Closed(
         precision_matrix=precision_matrix,
         expected_payoff=expected_payoff_vector,
         cost_vector=cost_vector,
@@ -85,15 +83,14 @@ def reproduce(experiment: Experiment) -> dict[str, object]:
         expected_payoff=expected_payoff_vector,
         precision_matrix=precision_matrix,
     )
-    objective = ThirdOrderObjective(
+    objective = CFVaR3Objective(
         alpha=experiment.optimization.alpha,
         expected_payoff=expected_payoff_vector,
         precision_matrix=precision_matrix,
         kappa3_callback=lambda weights: 0.0,
     )
     initial_weights = np.ones(n_instruments) / np.sum(cost_vector)
-    cfvar3_solution = Solve(
-        kind="cfvar3",
+    cfvar3_weights = CFVaR3Numerical(
         cost_vector=cost_vector,
         initial_weights=initial_weights,
         objective_callable=objective,
@@ -107,10 +104,10 @@ def reproduce(experiment: Experiment) -> dict[str, object]:
             "qmatrix": precision_matrix.tolist(),
         },
         "outputs": {
-            "variance_solution": variance_solution.tolist(),
-            "cfvar2_solution": cfvar2_solution.tolist(),
-            "cfvar3_solution": cfvar3_solution.tolist(),
-            "cfvar2_at_variance_solution": risk.second(variance_solution),
+            "variance_weights": variance_weights.tolist(),
+            "cfvar2_weights": cfvar2_weights.tolist(),
+            "cfvar3_weights": cfvar3_weights.tolist(),
+            "cfvar2_at_variance_weights": risk.second(variance_weights),
         },
         "uncertainty": {
             "status": "ASSUMPTION",

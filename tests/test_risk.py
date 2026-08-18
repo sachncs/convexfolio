@@ -1,9 +1,8 @@
 import numpy as np
 
-from options.math import Expect
+from options.math import CFVaR2nd
+from options.math import CFVaR3rd
 from options.math import Quadratic
-from options.math import ConditionalFractionalValueAtRisk2ndOrder
-from options.math import ConditionalFractionalValueAtRisk3rdOrder
 from options.math import shapes
 
 
@@ -28,6 +27,6 @@ def test_cfvar3_reduces_to_cfvar2_when_kappa3_zero() -> None:
     )
     weights = np.array([0.5, 0.2, 0.1])
     alpha = 0.05
-    second = ConditionalFractionalValueAtRisk2ndOrder(alpha, expected_payoff, precision_matrix, weights).value
-    third = ConditionalFractionalValueAtRisk3rdOrder(alpha, expected_payoff, precision_matrix, weights, 0.0).value
+    second = CFVaR2nd(alpha, expected_payoff, precision_matrix, weights).value
+    third = CFVaR3rd(alpha, expected_payoff, precision_matrix, weights, 0.0).value
     assert np.isclose(second, third, atol=1e-10)

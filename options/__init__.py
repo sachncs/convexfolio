@@ -7,30 +7,28 @@ from options.config import load
 from options.config import validate
 from options.determinism import check
 from options.math import Bilinear
+from options.math import CFVaR2Closed
+from options.math import CFVaR2nd
+from options.math import CFVaR3Numerical
+from options.math import CFVaR3Objective
+from options.math import CFVaR3rd
 from options.math import Compute
 from options.math import Cross
+from options.math import Cumulant
 from options.math import Curvature
 from options.math import Expect
 from options.math import Greeks
 from options.math import Linear
 from options.math import Linearize
 from options.math import Loss
-from options.math import MinimizeVariance
+from options.math import Minimize
 from options.math import OptimalEpsilon
 from options.math import PortfolioVariance
 from options.math import QualityScore
 from options.math import Quadratic
 from options.math import Reconstruct
-from options.math import Risk
 from options.math import Score
-from options.math import ConditionalFractionalValueAtRisk2ndOrder
-from options.math import ConditionalFractionalValueAtRisk
-from options.math import Solve
-from options.math import SolveCFVaR2ClosedForm
-from options.math import SolveCFVaR3Numerical
-from options.math import ThirdOrderCumulant
-from options.math import ThirdOrderObjective
-from options.math import ConditionalFractionalValueAtRisk3rdOrder
+from options.math import Variance
 from options.pipeline import run_and_save
 from options.utils import Logger
 from options.utils import Report
@@ -38,9 +36,14 @@ from options.utils import reproduce
 
 __all__ = [
     "Bilinear",
+    "CFVaR2Closed",
+    "CFVaR2nd",
+    "CFVaR3Numerical",
+    "CFVaR3Objective",
+    "CFVaR3rd",
     "Compute",
-    "ConditionalFractionalValueAtRisk",
     "Cross",
+    "Cumulant",
     "Curvature",
     "Experiment",
     "Expect",
@@ -49,7 +52,7 @@ __all__ = [
     "Linearize",
     "Logger",
     "Loss",
-    "MinimizeVariance",
+    "Minimize",
     "OptimalEpsilon",
     "Optimization",
     "PortfolioVariance",
@@ -57,16 +60,9 @@ __all__ = [
     "Quadratic",
     "Reconstruct",
     "Report",
-    "Risk",
     "Runtime",
     "Score",
-    "ConditionalFractionalValueAtRisk2ndOrder",
-    "Solve",
-    "SolveCFVaR2ClosedForm",
-    "SolveCFVaR3Numerical",
-    "ThirdOrderCumulant",
-    "ThirdOrderObjective",
-    "ConditionalFractionalValueAtRisk3rdOrder",
+    "Variance",
     "check",
     "load",
     "reproduce",

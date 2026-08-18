@@ -19,6 +19,23 @@ def solve_variance_minimization(v: FloatArray, q_matrix: FloatArray) -> FloatArr
     return (precision_inverse @ v) / denominator
 
 
+def loss_term(
+    epsilon: float, coeff_a: float, coeff_b: float, coeff_c: float
+) -> float:
+    """Quadratic variance term in 1-D search over epsilon.
+
+    Args:
+        epsilon: Candidate Lagrange multiplier for the variance budget.
+        coeff_a: Coefficient of epsilon^2 derived from the projection.
+        coeff_b: Coefficient of epsilon.
+        coeff_c: Constant term.
+
+    Returns:
+        The quadratic value at ``epsilon``.
+    """
+    return coeff_a * epsilon * epsilon + coeff_b * epsilon + coeff_c
+
+
 def compute_epsilon_star(
     alpha: float, u: FloatArray, v: FloatArray, q_matrix: FloatArray
 ) -> float:
@@ -43,11 +60,8 @@ def compute_epsilon_star(
     coeff_b = float(constraint_gradient.T @ q_matrix @ loss_gradient)
     coeff_c = 0.5 * float(constraint_gradient.T @ q_matrix @ constraint_gradient)
 
-    def variance_term(epsilon: float) -> float:
-        return coeff_a * epsilon * epsilon + coeff_b * epsilon + coeff_c
-
     def score(epsilon: float) -> float:
-        term = variance_term(epsilon)
+        term = loss_term(epsilon, coeff_a, coeff_b, coeff_c)
         if term <= 0.0:
             return float("inf")
         return -epsilon - z_score * math.sqrt(term)
@@ -61,9 +75,9 @@ def compute_epsilon_star(
     if abs(score_a) > 1e-12 and discriminant >= 0.0:
         epsilon_plus = (-score_b + math.sqrt(discriminant)) / (2.0 * score_a)
         epsilon_minus = (-score_b - math.sqrt(discriminant)) / (2.0 * score_a)
-        if 2.0 * coeff_a * epsilon_plus + coeff_b > 0.0 and variance_term(epsilon_plus) > 0.0:
+        if 2.0 * coeff_a * epsilon_plus + coeff_b > 0.0 and loss_term(epsilon_plus, coeff_a, coeff_b, coeff_c) > 0.0:
             candidate_solutions.append(epsilon_plus)
-        if 2.0 * coeff_a * epsilon_minus + coeff_b > 0.0 and variance_term(epsilon_minus) > 0.0:
+        if 2.0 * coeff_a * epsilon_minus + coeff_b > 0.0 and loss_term(epsilon_minus, coeff_a, coeff_b, coeff_c) > 0.0:
             candidate_solutions.append(epsilon_minus)
 
     if candidate_solutions:

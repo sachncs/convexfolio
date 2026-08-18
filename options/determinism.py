@@ -1,8 +1,8 @@
 """Determinism checks for production reproducibility."""
 
 from options.config import Experiment
-from options.pipeline import reproduce
 from options.utils import Report
+from options.utils import reproduce
 
 
 def check(config: Experiment, repetitions: int = 2) -> Report:

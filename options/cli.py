@@ -5,8 +5,9 @@ import json
 
 from options.config import load
 from options.determinism import check
-from options.pipeline import reproduce
+from options.pipeline import run_and_save
 from options.utils import Logger
+from options.utils import reproduce
 
 
 def parser() -> argparse.ArgumentParser:
@@ -43,7 +44,6 @@ def main() -> None:
         return
 
     if parsed_args.command == "reproduce-report":
-        from options.pipeline import run_and_save
         output_path = run_and_save(experiment, experiment.runtime.output_dir)
         log.info(str(output_path))
         return

@@ -1,23 +1,23 @@
 import numpy as np
 
-from options.math import compute
-from options.math import greeks
-from options.math import linear
-from options.math import portfolio_variance
-from options.math import reconstruct
+from options.math import Compute
+from options.math import Greeks
+from options.math import Linear
+from options.math import PortfolioVariance
+from options.math import Reconstruct
 
 
 def test_c_matches_theorem2_formula() -> None:
     degrees_of_freedom = 8.0
-    c_value = compute(degrees_of_freedom)
+    c_value = Compute(degrees_of_freedom).value
     assert c_value > 0.0
 
 
 def test_h_has_expected_shape() -> None:
     covariance = np.eye(3)
     skewness = np.array([0.3, -0.2, 0.1])
-    h = linear(covariance, skewness)
-    assert h.shape == (3,)
+    h_vector = Linear(covariance, skewness).value
+    assert h_vector.shape == (3,)
 
 
 def test_reconstructed_q_matches_direct_variance_formula() -> None:
@@ -37,7 +37,7 @@ def test_reconstructed_q_matches_direct_variance_formula() -> None:
         [(g + g.T) / 2.0 for g in rng.normal(size=(instrument_count, payoff_dimension, payoff_dimension))]
     )
 
-    precision_matrix = reconstruct(
+    precision_matrix = Reconstruct(
         price_drift=price_drift,
         delta_matrix=delta_matrix,
         third_derivative=third_derivative,
@@ -45,27 +45,27 @@ def test_reconstructed_q_matches_direct_variance_formula() -> None:
         covariance=covariance,
         degrees_of_freedom=degrees_of_freedom,
         skewness=skewness,
-    )
+    ).value
 
-    c_coefficient = compute(degrees_of_freedom)
-    h = linear(covariance, skewness)
+    c_coefficient = Compute(degrees_of_freedom).value
+    h_vector = Linear(covariance, skewness).value
 
     for _ in range(25):
         x = rng.normal(size=instrument_count)
-        _, delta_vector, gamma_matrix = greeks(
+        greeks = Greeks(
             weights=x,
             price_drift=price_drift,
             delta_matrix=delta_matrix,
             third_derivative=third_derivative,
         )
-        direct_var = portfolio_variance(
-            gamma_matrix=gamma_matrix,
-            delta_vector=delta_vector,
+        direct_var = PortfolioVariance(
+            gamma_matrix=greeks.gamma,
+            delta_vector=greeks.delta,
             expected_payoff=expected_payoff,
             covariance=covariance,
             degrees_of_freedom=degrees_of_freedom,
             c_coefficient=c_coefficient,
-            h=h,
-        )
+            h=h_vector,
+        ).value
         matrix_var = 0.5 * float(x.T @ precision_matrix @ x)
         assert np.isclose(direct_var, matrix_var, atol=1e-7)

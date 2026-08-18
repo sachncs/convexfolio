@@ -12,8 +12,12 @@ from oop.pipeline import save_report
 
 def build_parser() -> argparse.ArgumentParser:
     """Builds CLI parser."""
-    parser = argparse.ArgumentParser(prog="oop", description="Optimal option portfolio optimizer")
-    parser.add_argument("--config", type=str, default=None, help="Path to JSON config file")
+    parser = argparse.ArgumentParser(
+        prog="oop", description="Optimal option portfolio optimizer"
+    )
+    parser.add_argument(
+        "--config", type=str, default=None, help="Path to JSON config file"
+    )
     parser.add_argument(
         "--command",
         type=str,
@@ -21,28 +25,32 @@ def build_parser() -> argparse.ArgumentParser:
         choices=["reproduce-report", "print-report", "validate-determinism"],
         help="Execution command",
     )
-    parser.add_argument("--repetitions", type=int, default=3, help="Determinism repetitions")
+    parser.add_argument(
+        "--repetitions", type=int, default=3, help="Determinism repetitions"
+    )
     return parser
 
 
 def main() -> None:
     """CLI entrypoint."""
     parser = build_parser()
-    args = parser.parse_args()
-    config = load_config(args.config)
-    configure_logging(config.runtime.log_level)
+    parsed_args = parser.parse_args()
+    experiment = load_config(parsed_args.config)
+    configure_logging(experiment.runtime.log_level)
 
-    if args.command == "validate-determinism":
-        summary = deterministic_report(config=config, repetitions=args.repetitions)
-        print(json.dumps(summary, indent=2))
-        if not summary["deterministic"]:
+    if parsed_args.command == "validate-determinism":
+        determinism_summary = deterministic_report(
+            config=experiment, repetitions=parsed_args.repetitions
+        )
+        print(json.dumps(determinism_summary, indent=2))
+        if not determinism_summary["deterministic"]:
             raise SystemExit(2)
         return
 
-    report = run_reproduction(config)
-    if args.command == "reproduce-report":
-        path = save_report(report, config.runtime.output_dir)
-        print(str(path))
+    report = run_reproduction(experiment)
+    if parsed_args.command == "reproduce-report":
+        output_path = save_report(report, experiment.runtime.output_dir)
+        print(str(output_path))
         return
     print(json.dumps(report, indent=2))
 

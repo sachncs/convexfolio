@@ -6,8 +6,7 @@ import os
 from concurrent.futures import ProcessPoolExecutor
 
 from options.config import Experiment
-from options.utils import Report
-from options.utils import reproduce
+from options.utils import Report, reproduce
 
 
 def _parallel_threshold() -> int:

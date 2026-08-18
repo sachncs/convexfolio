@@ -11,9 +11,8 @@ Use ``load(path)`` to read a JSON or YAML file (or ``load(None)`` for
 defaults), and ``validate(config)`` to enforce semantic bounds.
 """
 
-from dataclasses import dataclass
-from dataclasses import field
 import json
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -63,7 +62,7 @@ class Experiment:
 
 def _load_yaml(path: Path) -> dict[str, Any]:
     """Load a YAML file using PyYAML. Raises ``ImportError`` if missing."""
-    import yaml  # type: ignore[import-not-found]
+    import yaml
 
     return yaml.safe_load(path.read_text(encoding="utf-8"))
 

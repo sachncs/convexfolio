@@ -3,8 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from options.config import load
-from options.config import validate
+from options.config import load, validate
 
 
 def test_load_defaults() -> None:

@@ -30,7 +30,7 @@ jobs:
         run: ruff check src tests scripts
 
       - name: Mypy
-        run: mypy src/oop
+        run: mypy options
 
       - name: Pytest
         run: PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
@@ -55,4 +55,4 @@ jobs:
       - name: Install wheel smoke test
         run: |
           pip install dist/*.whl
-          oop --command print-report > /tmp/oop_report.json
+          options --command print-report > /tmp/oop_report.json

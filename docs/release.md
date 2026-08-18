@@ -17,7 +17,7 @@ This project follows [Semantic Versioning](https://semver.org/):
 ### Code Quality
 
 - [ ] All tests passing: `PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q`
-- [ ] No type errors: `mypy src/oop`
+- [ ] No type errors: `mypy options`
 - [ ] No lint errors: `ruff check src tests scripts`
 - [ ] Code coverage acceptable
 
@@ -81,7 +81,7 @@ git tag vX.Y.Z
 
 ```bash
 ruff check src tests scripts
-mypy src/oop
+mypy options
 PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 python -m build
 ```

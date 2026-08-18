@@ -6,12 +6,12 @@ from pathlib import Path
 
 import numpy as np
 
-from oop.config import ExperimentConfig
-from oop.optimization import build_cfvar3_objective
-from oop.optimization import solve_cfvar2_closed_form
-from oop.optimization import solve_cfvar3_numerical
-from oop.optimization import solve_variance_minimization
-from oop.risk import cfvar2
+from options.config import ExperimentConfig
+from options.optimization import build_cfvar3_objective
+from options.optimization import solve_cfvar2_closed_form
+from options.optimization import solve_cfvar3_numerical
+from options.optimization import solve_variance_minimization
+from options.risk import cfvar2
 
 
 def run_reproduction(experiment: ExperimentConfig) -> dict[str, object]:

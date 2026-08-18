@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "oop"
+name = "options"
 version = "0.2.1"
 description = "Production-ready optimal option portfolio optimizer (paper-faithful baseline + extensible package API)."
 readme = "README.md"
@@ -57,7 +57,7 @@ docs = [
 ]
 
 [project.scripts]
-oop = "oop.cli:main"
+oop = "options.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

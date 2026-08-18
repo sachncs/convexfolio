@@ -3,17 +3,17 @@ from pathlib import Path
 
 import pytest
 
-from oop.config import load_config
-from oop.config import validate_config
+from options.config import load
+from options.config import validate
 
 
-def test_load_config_defaults() -> None:
-    experiment = load_config(None)
+def test_load_defaults() -> None:
+    experiment = load(None)
     assert experiment.optimization.alpha == 0.05
 
 
-def test_validate_config_rejects_invalid_alpha(tmp_path: Path) -> None:
-    experiment = load_config(None)
+def test_validate_rejects_invalid_alpha(tmp_path: Path) -> None:
+    experiment = load(None)
     raw_config = {
         "runtime": {
             "seed": experiment.runtime.seed,
@@ -29,4 +29,4 @@ def test_validate_config_rejects_invalid_alpha(tmp_path: Path) -> None:
     config_file = tmp_path / "oop_bad_config.json"
     config_file.write_text(json.dumps(raw_config), encoding="utf-8")
     with pytest.raises(ValueError):
-        validate_config(load_config(str(config_file)))
+        validate(load(str(config_file)))

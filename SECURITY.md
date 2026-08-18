@@ -43,7 +43,7 @@ We follow a coordinated disclosure process:
 
 When using this package:
 
-- Keep dependencies updated: `pip install --upgrade oop`
+- Keep dependencies updated: `pip install --upgrade -e .[dev]` from the cloned source tree
 - Use virtual environments to isolate dependencies
 - Review configuration files before use
 - Do not expose sensitive data in logs or outputs
@@ -53,7 +53,7 @@ When using this package:
 
 This security policy applies to:
 
-- The `oop` Python package
+- The `options` Python package
 - Official GitHub repository: `sachncs/optimal-option-portfolios`
 - Documentation and examples in this repository
 

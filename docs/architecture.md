@@ -7,7 +7,7 @@ The Optimal Option Portfolios package implements portfolio optimization algorith
 ## Package Structure
 
 ```
-src/oop/
+options/
 ├── __init__.py          # Public API exports
 ├── cli.py               # Command-line interface
 ├── config.py            # Configuration management

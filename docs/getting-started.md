@@ -22,7 +22,7 @@ pip install -e .[dev]
 ### Verify Installation
 
 ```bash
-python -c "import oop; print(oop.__all__)"
+python -c "import options; print(oop.__all__)"
 ```
 
 ## Quick Start
@@ -31,7 +31,7 @@ python -c "import oop; print(oop.__all__)"
 
 ```python
 import numpy as np
-from oop import solve_variance_minimization
+from options import solve_variance_minimization
 
 # Define problem inputs
 q_matrix = np.array([[2.0, 0.1], [0.1, 1.5]])
@@ -47,13 +47,13 @@ print(f"Budget constraint: {weights.T @ v:.6f} (should be 1.0)")
 
 ```bash
 # Generate a reproduction report
-oop --command reproduce-report
+options --command reproduce-report
 
 # Print report to stdout
-oop --command print-report
+options --command print-report
 
 # Validate deterministic behavior
-oop --command validate-determinism
+options --command validate-determinism
 ```
 
 ## Configuration
@@ -78,7 +78,7 @@ Create a `config.json` file:
 Use it with:
 
 ```bash
-oop --config config.json --command reproduce-report
+options --config config.json --command reproduce-report
 ```
 
 ## Next Steps

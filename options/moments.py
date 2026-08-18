@@ -8,7 +8,7 @@ import math
 
 import numpy as np
 
-from oop.types import FloatArray
+from options.types import FloatArray
 
 
 def compute_c_scalar(nu: float) -> float:

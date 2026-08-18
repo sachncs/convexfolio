@@ -7,7 +7,7 @@ The public API is exported from the `oop` package.
 ### Imports
 
 ```python
-from oop import (
+from options import (
     solve_variance_minimization,
     solve_cfvar2_closed_form,
     solve_cfvar3_numerical,
@@ -40,7 +40,7 @@ Solve minimum variance portfolio optimization under budget constraint.
 **Example:**
 ```python
 import numpy as np
-from oop import solve_variance_minimization
+from options import solve_variance_minimization
 
 q = np.array([[2.0, 0.1], [0.1, 1.5]])
 v = np.array([1.2, 0.8])
@@ -75,7 +75,7 @@ Solve CFVaR2 portfolio optimization using closed-form solution.
 **Example:**
 ```python
 import numpy as np
-from oop import solve_cfvar2_closed_form
+from options import solve_cfvar2_closed_form
 
 q = np.array([[2.5, 0.0], [0.0, 1.5]])
 u = np.array([0.1, 0.3])
@@ -188,7 +188,7 @@ Calculate CFVaR3 for a given portfolio.
 Generate and save a reproduction report.
 
 ```bash
-oop --command reproduce-report [--config CONFIG]
+options --command reproduce-report [--config CONFIG]
 ```
 
 #### `print-report`
@@ -196,7 +196,7 @@ oop --command reproduce-report [--config CONFIG]
 Print the reproduction report to stdout.
 
 ```bash
-oop --command print-report [--config CONFIG]
+options --command print-report [--config CONFIG]
 ```
 
 #### `validate-determinism`
@@ -204,7 +204,7 @@ oop --command print-report [--config CONFIG]
 Validate that the package produces deterministic results.
 
 ```bash
-oop --command validate-determinism [--repetitions N] [--config CONFIG]
+options --command validate-determinism [--repetitions N] [--config CONFIG]
 ```
 
 ### Options

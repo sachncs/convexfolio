@@ -5,7 +5,6 @@
     <a href="#installation"><img src="https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue" alt="Python"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License"></a>
     <a href="https://github.com/sachncs/optimal-option-portfolios/actions"><img src="https://img.shields.io/github/actions/workflow/status/sachncs/optimal-option-portfolios/ci.yml?branch=main" alt="CI"></a>
-    <a href="https://pypi.org/project/oop/"><img src="https://img.shields.io/pypi/v/oop" alt="PyPI"></a>
     <a href="https://github.com/sachncs/optimal-option-portfolios/stargazers"><img src="https://img.shields.io/github/stars/sachncs/optimal-option-portfolios" alt="Stars"></a>
     <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/badge/code%20style-ruff-000000.svg" alt="Ruff"></a>
     <a href="https://mypy-lang.org/"><img src="https://img.shields.io/badge/type%20checked-mypy-blue.svg" alt="mypy"></a>
@@ -31,12 +30,6 @@ based on [arXiv:2601.07991v2](https://arxiv.org/abs/2601.07991v2).
 
 ## Installation
 
-### From PyPI
-
-```bash
-pip install oop
-```
-
 ### From source
 
 ```bash
@@ -55,23 +48,23 @@ pip install -e .[dev]
 
 ```bash
 # Generate reproduction report
-oop --command reproduce-report
+options --command reproduce-report
 
 # Print report to stdout
-oop --command print-report
+options --command print-report
 
 # Validate deterministic behavior
-oop --command validate-determinism --repetitions 3
+options --command validate-determinism --repetitions 3
 
 # Use custom config
-oop --config config.json --command reproduce-report
+options --config config.json --command reproduce-report
 ```
 
 ### Python API
 
 ```python
 import numpy as np
-from oop import solve_variance_minimization, solve_cfvar2_closed_form
+from options import solve_variance_minimization, solve_cfvar2_closed_form
 
 # Define inputs
 q_matrix = np.array([[2.0, 0.1], [0.1, 1.5]])
@@ -146,16 +139,16 @@ Create a `config.json` to customize execution:
 
 ```bash
 # 1. Run the canonical reproduction and write artifacts to the default dir.
-oop --command reproduce-report
+options --command reproduce-report
 
 # 2. Print the same report to stdout for inspection.
-oop --command print-report
+options --command print-report
 
 # 3. Confirm three consecutive runs produce identical output.
-oop --command validate-determinism --repetitions 3
+options --command validate-determinism --repetitions 3
 
 # 4. Re-run the reproduction with a different alpha and output dir.
-oop --config config.json --command reproduce-report
+options --config config.json --command reproduce-report
 ```
 
 A runnable end-to-end demo is provided:
@@ -170,7 +163,7 @@ python scripts/demo.py
 
 ```
 optimal-option-portfolios/
-├── src/oop/              # Main package source
+├── options/              # Main package source
 │   ├── __init__.py       # Public API exports
 │   ├── cli.py            # Command-line interface
 │   ├── config.py         # Configuration management
@@ -202,7 +195,7 @@ pip install -e .[dev]
 ruff check src tests scripts
 
 # Run type checker
-mypy src/oop
+mypy options
 
 # Run tests
 PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
@@ -218,7 +211,7 @@ python scripts/demo.py
 
 ```bash
 # Full quality check
-ruff check src tests scripts && mypy src/oop && PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q && python -m build
+ruff check src tests scripts && mypy options && PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q && python -m build
 ```
 
 ---
@@ -227,7 +220,7 @@ ruff check src tests scripts && mypy src/oop && PYTHONPATH=src PYTEST_DISABLE_PL
 
 ```bash
 PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
-PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest --cov=oop
+PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest --cov=options
 ```
 
 ---

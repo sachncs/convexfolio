@@ -4,7 +4,7 @@
 
 ### What is Optimal Option Portfolios?
 
-Optimal Option Portfolios (oop) is a Python package for portfolio optimization based on the paper [arXiv:2601.07991v2](https://arxiv.org/abs/2601.07991v2). It implements variance minimization and risk-aware optimization using conditional fractional Value-at-Risk (CFVaR).
+Optimal Option Portfolios (options) is a Python package for portfolio optimization based on the paper [arXiv:2601.07991v2](https://arxiv.org/abs/2601.07991v2). It implements variance minimization and risk-aware optimization using conditional fractional Value-at-Risk (CFVaR).
 
 ### What Python versions are supported?
 
@@ -48,7 +48,7 @@ Development:
 
 ```python
 import numpy as np
-from oop import solve_variance_minimization
+from options import solve_variance_minimization
 
 q_matrix = np.array([[2.0, 0.1], [0.1, 1.5]])
 v = np.array([1.2, 0.8])
@@ -75,7 +75,7 @@ This is automatically enforced by all solvers.
 
 2. Validate determinism:
    ```bash
-   oop --command validate-determinism --repetitions 3
+   options --command validate-determinism --repetitions 3
    ```
 
 ### What is CFVaR?
@@ -91,7 +91,7 @@ CFVaR (Conditional Fractional Value-at-Risk) is a risk measure that captures tai
 Create a `config.json` file and pass it to the CLI:
 
 ```bash
-oop --config config.json --command reproduce-report
+options --config config.json --command reproduce-report
 ```
 
 ### What is the alpha parameter?
@@ -119,7 +119,7 @@ ruff check src tests scripts
 ### How do I run the type checker?
 
 ```bash
-mypy src/oop
+mypy options
 ```
 
 ### How do I contribute?

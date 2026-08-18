@@ -50,7 +50,7 @@ This project adheres to our [Code of Conduct](CODE_OF_CONDUCT.md). By participat
 3. **Verify setup**:
    ```bash
    ruff check src tests scripts
-   mypy src/oop
+   mypy options
    PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
    ```
 
@@ -127,7 +127,7 @@ chore(deps): update scipy to 1.12
 4. **Run quality checks**:
    ```bash
    ruff check src tests scripts
-   mypy src/oop
+   mypy options
    PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
    ```
 
@@ -197,8 +197,8 @@ import numpy as np
 from scipy import optimize
 
 # Local
-from oop.config import ExperimentConfig
-from oop.risk import cfvar2
+from options.config import ExperimentConfig
+from options.risk import cfvar2
 ```
 
 ## Running Tests
@@ -218,7 +218,7 @@ PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest tests/test_optimization.p
 ### With Coverage
 
 ```bash
-PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest --cov=oop --cov-report=html
+PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest --cov=options --cov-report=html
 ```
 
 ## Documentation

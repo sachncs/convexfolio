@@ -2,8 +2,8 @@
 
 import json
 
-from oop.config import ExperimentConfig
-from oop.pipeline import run_reproduction
+from options.config import ExperimentConfig
+from options.pipeline import run_reproduction
 
 
 def deterministic_report(

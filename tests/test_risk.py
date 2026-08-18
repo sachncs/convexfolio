@@ -1,10 +1,10 @@
 import numpy as np
 import pytest
 
-from oop.risk import cfvar2
-from oop.risk import cfvar3
-from oop.risk import validate_shapes
-from oop.risk import variance_quadratic
+from options.risk import cfvar2
+from options.risk import cfvar3
+from options.risk import validate_shapes
+from options.risk import variance_quadratic
 
 
 def test_validate_shapes_raises_on_incompatible_dims() -> None:

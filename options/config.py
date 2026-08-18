@@ -33,7 +33,7 @@ class ExperimentConfig:
     optimization: OptimizationConfig = field(default_factory=OptimizationConfig)
 
 
-def load_config(path: str | None) -> ExperimentConfig:
+def load(path: str | None) -> ExperimentConfig:
     """Loads config from JSON. If absent, returns defaults.
 
     YAML is NOT DETERMINED for baseline dependencies minimization.
@@ -45,11 +45,11 @@ def load_config(path: str | None) -> ExperimentConfig:
     runtime = RuntimeConfig(**raw_config.get("runtime", {}))
     optimization = OptimizationConfig(**raw_config.get("optimization", {}))
     config = ExperimentConfig(runtime=runtime, optimization=optimization)
-    validate_config(config)
+    validate(config)
     return config
 
 
-def validate_config(config: ExperimentConfig) -> None:
+def validate(config: ExperimentConfig) -> None:
     """Validates semantic constraints for safe operation."""
     if not (0.0 < config.optimization.alpha < 0.5):
         raise ValueError("alpha must satisfy 0 < alpha < 0.5")

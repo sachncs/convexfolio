@@ -1,10 +1,10 @@
 import numpy as np
 
-from oop.moments import compute_c_scalar
-from oop.moments import compute_h_vector
-from oop.reproduction_math import portfolio_greeks_from_shares
-from oop.reproduction_math import reconstruct_q_matrix_from_direct_variance
-from oop.reproduction_math import variance_direct_formula
+from options.moments import compute_c_scalar
+from options.moments import compute_h_vector
+from options.reproduction_math import portfolio_greeks_from_shares
+from options.reproduction_math import reconstruct_q_matrix_from_direct_variance
+from options.reproduction_math import variance_direct_formula
 
 
 def test_c_matches_theorem2_formula() -> None:

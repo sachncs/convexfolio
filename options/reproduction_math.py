@@ -2,12 +2,12 @@
 
 import numpy as np
 
-from oop.moments import compute_c_scalar
-from oop.moments import compute_e_matrix
-from oop.moments import compute_h_matrix
-from oop.moments import compute_h_vector
-from oop.moments import compute_q_vector
-from oop.types import FloatArray
+from options.moments import compute_c_scalar
+from options.moments import compute_e_matrix
+from options.moments import compute_h_matrix
+from options.moments import compute_h_vector
+from options.moments import compute_q_vector
+from options.types import FloatArray
 
 
 def portfolio_greeks_from_shares(

@@ -12,8 +12,8 @@
 
 ```bash
 # Create virtual environment
-python -m venv /opt/oop/venv
-source /opt/oop/venv/bin/activate
+python -m venv /opt/options/venv
+source /opt/options/venv/bin/activate
 
 # Install package (without dev dependencies)
 pip install -e .
@@ -28,7 +28,7 @@ Create a production configuration file:
   "runtime": {
     "seed": 7,
     "log_level": "WARNING",
-    "output_dir": "/var/oop/artifacts"
+    "output_dir": "/var/options/artifacts"
   },
   "optimization": {
     "alpha": 0.05,
@@ -42,7 +42,7 @@ Create a production configuration file:
 
 #### Using systemd (Linux)
 
-Create `/etc/systemd/system/oop.service`:
+Create `/etc/systemd/system/options.service`:
 
 ```ini
 [Unit]
@@ -54,7 +54,7 @@ Type=oneshot
 User=oop
 Group=oop
 WorkingDirectory=/opt/oop
-ExecStart=/opt/oop/venv/bin/oop --config /etc/oop/config.json --command reproduce-report
+ExecStart=/opt/options/venv/bin/oop --config /etc/options/config.json --command reproduce-report
 StandardOutput=journal
 StandardError=journal
 
@@ -73,7 +73,7 @@ sudo systemctl start oop
 
 ```bash
 # Run daily at 2 AM
-0 2 * * * /opt/oop/venv/bin/oop --config /etc/oop/config.json --command reproduce-report >> /var/log/oop.log 2>&1
+0 2 * * * /opt/options/venv/bin/oop --config /etc/options/config.json --command reproduce-report >> /var/log/oop.log 2>&1
 ```
 
 ## Docker Deployment
@@ -117,7 +117,7 @@ Configure logging level via config or environment:
 
 ```bash
 export OOP_LOG_LEVEL=DEBUG
-oop --command reproduce-report
+options --command reproduce-report
 ```
 
 ### Output Monitoring
@@ -125,7 +125,7 @@ oop --command reproduce-report
 Monitor the output directory for new reports:
 
 ```bash
-watch -n 5 ls -la /var/oop/artifacts/
+watch -n 5 ls -la /var/options/artifacts/
 ```
 
 ## Backup
@@ -134,14 +134,14 @@ watch -n 5 ls -la /var/oop/artifacts/
 
 ```bash
 # Backup artifacts
-tar -czf oop-artifacts-$(date +%Y%m%d).tar.gz /var/oop/artifacts/
+tar -czf options-artifacts-$(date +%Y%m%d).tar.gz /var/options/artifacts/
 ```
 
 ### Configuration
 
 ```bash
 # Backup config
-cp /etc/oop/config.json /etc/oop/config.json.bak.$(date +%Y%m%d)
+cp /etc/options/config.json /etc/options/config.json.bak.$(date +%Y%m%d)
 ```
 
 ## Scaling

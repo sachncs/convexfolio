@@ -1,8 +1,8 @@
 import numpy as np
 
-from oop.optimization import solve_cfvar2_closed_form
-from oop.optimization import solve_cfvar3_numerical
-from oop.optimization import solve_variance_minimization
+from options.optimization import solve_cfvar2_closed_form
+from options.optimization import solve_cfvar3_numerical
+from options.optimization import solve_variance_minimization
 
 
 def test_variance_solution_satisfies_budget_constraint() -> None:

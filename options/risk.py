@@ -3,7 +3,7 @@
 import numpy as np
 from scipy.stats import norm
 
-from oop.types import FloatArray
+from options.types import FloatArray
 
 
 def validate_shapes(

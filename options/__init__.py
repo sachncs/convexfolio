@@ -1,12 +1,11 @@
 """Public package API for the options package."""
 
-from options.config import ExperimentConfig
-from options.config import OptimizationConfig
-from options.config import RuntimeConfig
+from options.config import Experiment
+from options.config import Optimization
+from options.config import Runtime
 from options.config import load
 from options.config import validate
-from options.determinism import Report
-from options.determinism import deterministic_report
+from options.determinism import check
 from options.math import Bilinear
 from options.math import Cross
 from options.math import Curvature
@@ -35,26 +34,27 @@ from options.math import solve_cfvar3_numerical
 from options.math import third_order_cumulant
 from options.math import third_order_objective
 from options.math import third_order_risk
-from options.pipeline import run_reproduction
-from options.pipeline import save_report
+from options.pipeline import run_and_save
+from options.pipeline import reproduce
 from options.utils import Logger
+from options.utils import Report
 
 __all__ = [
     "Bilinear",
     "Cross",
     "Curvature",
-    "ExperimentConfig",
+    "Experiment",
     "Logger",
     "Objective",
-    "OptimizationConfig",
+    "Optimization",
     "Report",
     "Risk",
-    "RuntimeConfig",
+    "Runtime",
     "bilinear",
+    "check",
     "compute",
     "cross",
     "curvature",
-    "deterministic_report",
     "expect",
     "greeks",
     "linear",
@@ -67,8 +67,8 @@ __all__ = [
     "quality_score",
     "quadratic",
     "reconstruct",
-    "run_reproduction",
-    "save_report",
+    "run_and_save",
+    "reproduce",
     "score",
     "second_order_risk",
     "shapes",

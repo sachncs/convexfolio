@@ -1,12 +1,11 @@
 """Production execution pipeline for reproducible optimization runs."""
 
-import json
 from dataclasses import asdict
 from pathlib import Path
 
 import numpy as np
 
-from options.config import ExperimentConfig
+from options.config import Experiment
 from options.math import Objective
 from options.math import Risk
 from options.math import minimize_variance
@@ -15,7 +14,7 @@ from options.math import solve_cfvar3_numerical
 from options.math import third_order_objective
 
 
-def run_reproduction(experiment: ExperimentConfig) -> dict[str, object]:
+def reproduce(experiment: Experiment) -> dict[str, object]:
     """Runs end-to-end optimization and returns structured outputs.
 
     Uses synthetic matrices as a self-contained production smoke pipeline.
@@ -80,10 +79,9 @@ def run_reproduction(experiment: ExperimentConfig) -> dict[str, object]:
     }
 
 
-def save_report(report: dict[str, object], output_directory: str) -> Path:
-    """Persists JSON report for reproducibility and downstream systems."""
-    output_path = Path(output_directory)
-    output_path.mkdir(parents=True, exist_ok=True)
-    report_file = output_path / "reproduction_report.json"
-    report_file.write_text(json.dumps(report, indent=2), encoding="utf-8")
-    return report_file
+def run_and_save(experiment: Experiment, output_dir: str) -> Path:
+    """Runs determinism check and saves the Report summary as JSON."""
+    from options.determinism import check
+    report = check(experiment, repetitions=3)
+    target = Path(output_dir) / "report.json"
+    return report.save(str(target))

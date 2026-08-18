@@ -8,7 +8,7 @@ from typing import Any
 
 
 @dataclass(frozen=True)
-class RuntimeConfig:
+class Runtime:
     """Runtime controls for deterministic and auditable execution."""
 
     seed: int = 7
@@ -17,7 +17,7 @@ class RuntimeConfig:
 
 
 @dataclass(frozen=True)
-class OptimizationConfig:
+class Optimization:
     """Input controls for portfolio optimization routines."""
 
     alpha: float = 0.05
@@ -26,30 +26,30 @@ class OptimizationConfig:
 
 
 @dataclass(frozen=True)
-class ExperimentConfig:
+class Experiment:
     """Top-level package configuration."""
 
-    runtime: RuntimeConfig = field(default_factory=RuntimeConfig)
-    optimization: OptimizationConfig = field(default_factory=OptimizationConfig)
+    runtime: Runtime = field(default_factory=Runtime)
+    optimization: Optimization = field(default_factory=Optimization)
 
 
-def load(path: str | None) -> ExperimentConfig:
+def load(path: str | None) -> Experiment:
     """Loads config from JSON. If absent, returns defaults.
 
     YAML is NOT DETERMINED for baseline dependencies minimization.
     """
     if path is None:
-        return ExperimentConfig()
+        return Experiment()
     input_path = Path(path)
     raw_config: dict[str, Any] = json.loads(input_path.read_text(encoding="utf-8"))
-    runtime = RuntimeConfig(**raw_config.get("runtime", {}))
-    optimization = OptimizationConfig(**raw_config.get("optimization", {}))
-    config = ExperimentConfig(runtime=runtime, optimization=optimization)
+    runtime = Runtime(**raw_config.get("runtime", {}))
+    optimization = Optimization(**raw_config.get("optimization", {}))
+    config = Experiment(runtime=runtime, optimization=optimization)
     validate(config)
     return config
 
 
-def validate(config: ExperimentConfig) -> None:
+def validate(config: Experiment) -> None:
     """Validates semantic constraints for safe operation."""
     if not (0.0 < config.optimization.alpha < 0.5):
         raise ValueError("alpha must satisfy 0 < alpha < 0.5")

@@ -4,9 +4,8 @@ import argparse
 import json
 
 from options.config import load
-from options.determinism import deterministic_report
-from options.pipeline import run_reproduction
-from options.pipeline import save_report
+from options.determinism import check
+from options.pipeline import reproduce
 from options.utils import Logger
 
 
@@ -37,20 +36,20 @@ def main() -> None:
     log = Logger(level=experiment.runtime.log_level)
 
     if parsed_args.command == "validate-determinism":
-        summary = deterministic_report(
-            config=experiment, repetitions=parsed_args.repetitions
-        )
-        log.info(json.dumps(summary, indent=2))
-        if not summary["deterministic"]:
+        report = check(experiment, repetitions=parsed_args.repetitions)
+        log.info(json.dumps(report.summary, indent=2))
+        if not report.deterministic:
             raise SystemExit(2)
         return
 
-    report = run_reproduction(experiment)
     if parsed_args.command == "reproduce-report":
-        output_path = save_report(report, experiment.runtime.output_dir)
+        from options.pipeline import run_and_save
+        output_path = run_and_save(experiment, experiment.runtime.output_dir)
         log.info(str(output_path))
         return
-    log.info(json.dumps(report, indent=2))
+
+    result = reproduce(experiment)
+    log.info(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":

@@ -1,8 +1,8 @@
-from options.config import ExperimentConfig
-from options.determinism import deterministic_report
+from options.config import Experiment
+from options.determinism import check
 
 
 def test_pipeline_is_deterministic_given_same_seed() -> None:
-    config = ExperimentConfig()
-    summary = deterministic_report(config=config, repetitions=3)
-    assert summary["deterministic"] is True
+    experiment = Experiment()
+    report = check(experiment, repetitions=3)
+    assert report.deterministic is True

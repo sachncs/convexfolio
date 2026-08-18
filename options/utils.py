@@ -15,11 +15,9 @@ import numpy as np
 from options.config import Experiment
 from options.math import Greeks
 from options.math import Linearize
-from options.math import MinimizeVariance
 from options.math import Reconstruct
 from options.math import Risk
-from options.math import SolveCFVaR2ClosedForm
-from options.math import SolveCFVaR3Numerical
+from options.math import Solve as SolveDispatcher
 from options.math import ThirdOrderObjective
 
 
@@ -69,8 +67,13 @@ def reproduce(experiment: Experiment) -> dict[str, object]:
     cost_vector = np.abs(rng.normal(size=n_instruments)) + 0.1
     expected_payoff_vector = rng.normal(size=n_instruments)
 
-    variance_solution = MinimizeVariance(cost_vector, precision_matrix).value
-    cfvar2_solution = SolveCFVaR2ClosedForm(
+    variance_solution = SolveDispatcher(
+        kind="variance",
+        cost_vector=cost_vector,
+        precision_matrix=precision_matrix,
+    ).value
+    cfvar2_solution = SolveDispatcher(
+        kind="cfvar2",
         precision_matrix=precision_matrix,
         expected_payoff=expected_payoff_vector,
         cost_vector=cost_vector,
@@ -89,7 +92,8 @@ def reproduce(experiment: Experiment) -> dict[str, object]:
         kappa3_callback=lambda weights: 0.0,
     )
     initial_weights = np.ones(n_instruments) / np.sum(cost_vector)
-    cfvar3_solution = SolveCFVaR3Numerical(
+    cfvar3_solution = SolveDispatcher(
+        kind="cfvar3",
         cost_vector=cost_vector,
         initial_weights=initial_weights,
         objective_callable=objective,

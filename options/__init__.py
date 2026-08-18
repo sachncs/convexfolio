@@ -26,6 +26,7 @@ from options.math import Score
 from options.math import SecondOrderRisk
 from options.math import SolveCFVaR2ClosedForm
 from options.math import SolveCFVaR3Numerical
+from options.math import Solve as SolveDispatcher
 from options.math import ThirdOrderCumulant
 from options.math import ThirdOrderObjective
 from options.math import ThirdOrderRisk
@@ -60,6 +61,7 @@ __all__ = [
     "SecondOrderRisk",
     "SolveCFVaR2ClosedForm",
     "SolveCFVaR3Numerical",
+    "SolveDispatcher",
     "ThirdOrderCumulant",
     "ThirdOrderObjective",
     "ThirdOrderRisk",

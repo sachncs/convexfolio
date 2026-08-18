@@ -455,6 +455,61 @@ class QualityScore:
         ).value
 
 
+class Solve:
+    """Single dispatch over all the optimiser's solver operations.
+
+    Use ``Solve(kind=..., **kwargs).value``. Kinds:
+
+        - ``"variance"``: closed-form variance minimisation (P1); needs
+          ``cost_vector`` and ``precision_matrix``.
+        - ``"epsilon"``: optimal Lagrange multiplier (Appendix B); needs
+          ``alpha``, ``expected_payoff``, ``cost_vector``, ``precision_matrix``.
+        - ``"cfvar2"``: closed-form CFVaR2 (P2); needs ``precision_matrix``,
+          ``expected_payoff``, ``cost_vector``, ``alpha``.
+        - ``"cfvar3"``: numerical CFVaR3 (P3); needs ``cost_vector``,
+          ``initial_weights``, ``objective_callable``.
+        - ``"quality"``: CFVaR2 value at the closed-form solution; same
+          arguments as ``"cfvar2"``.
+    """
+
+    def __init__(self, kind: str, **kwargs) -> None:
+        self.kind = kind
+        if kind == "variance":
+            self.value = MinimizeVariance(
+                cost_vector=kwargs["cost_vector"],
+                precision_matrix=kwargs["precision_matrix"],
+            ).value
+        elif kind == "epsilon":
+            self.value = OptimalEpsilon(
+                alpha=kwargs["alpha"],
+                expected_payoff=kwargs["expected_payoff"],
+                cost_vector=kwargs["cost_vector"],
+                precision_matrix=kwargs["precision_matrix"],
+            ).value
+        elif kind == "cfvar2":
+            self.value = SolveCFVaR2ClosedForm(
+                precision_matrix=kwargs["precision_matrix"],
+                expected_payoff=kwargs["expected_payoff"],
+                cost_vector=kwargs["cost_vector"],
+                alpha=kwargs["alpha"],
+            ).value
+        elif kind == "cfvar3":
+            self.value = SolveCFVaR3Numerical(
+                cost_vector=kwargs["cost_vector"],
+                initial_weights=kwargs["initial_weights"],
+                objective_callable=kwargs["objective_callable"],
+            ).value
+        elif kind == "quality":
+            self.value = QualityScore(
+                alpha=kwargs["alpha"],
+                expected_payoff=kwargs["expected_payoff"],
+                cost_vector=kwargs["cost_vector"],
+                precision_matrix=kwargs["precision_matrix"],
+            ).value
+        else:
+            raise ValueError(f"unknown solve kind: {kind}")
+
+
 class Greeks:
     """Theta, delta, gamma for a portfolio of options."""
 

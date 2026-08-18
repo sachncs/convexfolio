@@ -2,9 +2,9 @@ import numpy as np
 
 from options.moments import compute_c_scalar
 from options.moments import compute_h_vector
-from options.reproduction_math import portfolio_greeks_from_shares
-from options.reproduction_math import reconstruct_q_matrix_from_direct_variance
-from options.reproduction_math import portfolio_variance
+from options.reproduction import greeks
+from options.reproduction import reconstruct
+from options.reproduction import portfolio_variance
 
 
 def test_c_matches_theorem2_formula() -> None:
@@ -37,7 +37,7 @@ def test_reconstructed_q_matches_direct_variance_formula() -> None:
         [(g + g.T) / 2.0 for g in rng.normal(size=(instrument_count, payoff_dimension, payoff_dimension))]
     )
 
-    precision_matrix = reconstruct_q_matrix_from_direct_variance(
+    precision_matrix = reconstruct(
         price_drift=price_drift,
         delta_matrix=delta_matrix,
         third_derivative_tensor=third_derivative_tensor,
@@ -52,7 +52,7 @@ def test_reconstructed_q_matches_direct_variance_formula() -> None:
 
     for _ in range(25):
         x = rng.normal(size=instrument_count)
-        _, delta_vector, gamma_matrix = portfolio_greeks_from_shares(
+        _, delta_vector, gamma_matrix = greeks(
             x=x,
             price_drift=price_drift,
             delta_matrix=delta_matrix,

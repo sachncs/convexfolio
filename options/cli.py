@@ -13,7 +13,7 @@ from options.pipeline import save_report
 logger = logging.getLogger(__name__)
 
 
-def build_parser() -> argparse.ArgumentParser:
+def parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="options", description="Optimal option portfolio optimizer"
     )
@@ -34,7 +34,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> None:
-    parser = build_parser()
+    parser = parser()
     parsed_args = parser.parse_args()
     experiment = load(parsed_args.config)
     configure_logging(experiment.runtime.log_level)

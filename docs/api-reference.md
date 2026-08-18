@@ -114,7 +114,7 @@ def cfvar3_objective(
     alpha: float,
     u: FloatArray,
     q_matrix: FloatArray,
-    kappa3_fn: Callable[[np.ndarray], float],
+    kappa3_callback: Callable[[np.ndarray], float],
 ) -> Callable[[np.ndarray], float]:
 ```
 
@@ -124,7 +124,7 @@ CFVaR3 objective function for numerical optimization.
 - `alpha` (float): Risk parameter
 - `u` (FloatArray): Expected returns vector
 - `q_matrix` (FloatArray): Covariance matrix
-- `kappa3_fn` (Callable): Third-order cumulant function
+- `kappa3_callback` (Callable): Third-order cumulant function
 
 **Returns:**
 - `Callable`: Objective function compatible with `solve_cfvar3_numerical`

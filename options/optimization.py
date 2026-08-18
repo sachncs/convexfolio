@@ -126,12 +126,12 @@ def solve_cfvar3_numerical(
 
 
 def cfvar3_objective(
-    alpha: float, u: FloatArray, q_matrix: FloatArray, kappa3_fn
+    alpha: float, u: FloatArray, q_matrix: FloatArray, kappa3_callback
 ):
     """Factory for numerical P3 objective."""
 
     def objective(x: FloatArray) -> float:
-        return cfvar3(alpha, u, q_matrix, np.asarray(x, dtype=float), float(kappa3_fn(x)))
+        return cfvar3(alpha, u, q_matrix, np.asarray(x, dtype=float), float(kappa3_callback(x)))
 
     return objective
 

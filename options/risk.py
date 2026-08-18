@@ -86,14 +86,14 @@ def cfvar3(
     u: FloatArray,
     q_matrix: FloatArray,
     x: FloatArray,
-    kappa3_value: float,
+    third_order_cumulant: float,
 ) -> float:
     """Eq. (S2.Ex23)."""
     validate_shapes(u, q_matrix, x)
     z_alpha = norm.ppf(alpha)
     variance_value = variance_quadratic(q_matrix, x)
     skewness_correction = (
-        (z_alpha**2 - 1.0) / 6.0 * (kappa3_value / variance_value)
+        (z_alpha**2 - 1.0) / 6.0 * (third_order_cumulant / variance_value)
     )
     return float(
         -expectation_linear(u, x)

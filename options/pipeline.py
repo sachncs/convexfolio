@@ -42,7 +42,7 @@ def run_reproduction(experiment: ExperimentConfig) -> dict[str, object]:
         alpha=experiment.optimization.alpha,
         u=expected_payoff_vector,
         q_matrix=precision_matrix,
-        kappa3_fn=kappa3_callback,
+        kappa3_callback=kappa3_callback,
     )
     initial_weights = np.ones(n_instruments) / np.sum(cost_vector)
     cfvar3_solution = solve_cfvar3_numerical(

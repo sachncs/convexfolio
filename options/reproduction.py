@@ -10,7 +10,7 @@ from options.moments import compute_q_vector
 from options.types import FloatArray
 
 
-def portfolio_greeks_from_shares(
+def greeks(
     x: FloatArray,
     price_drift: FloatArray,
     delta_matrix: FloatArray,
@@ -56,7 +56,7 @@ def portfolio_variance(
     return float(term1 + term2 + term3 + term4 + term5 + term6 + term7)
 
 
-def build_linearized_matrices(
+def linearize(
     price_drift: FloatArray,
     delta_matrix: FloatArray,
     third_derivative_tensor: FloatArray,
@@ -163,7 +163,7 @@ def build_linearized_matrices(
     return dual_residual, precision_matrix
 
 
-def reconstruct_q_matrix_from_direct_variance(
+def reconstruct(
     price_drift: FloatArray,
     delta_matrix: FloatArray,
     third_derivative_tensor: FloatArray,
@@ -182,7 +182,7 @@ def reconstruct_q_matrix_from_direct_variance(
     precision_matrix = np.zeros((instrument_count, instrument_count), dtype=float)
 
     def variance_at(x_vec: FloatArray) -> float:
-        _, delta_vec, gamma_mat = portfolio_greeks_from_shares(
+        _, delta_vec, gamma_mat = greeks(
             x=x_vec,
             price_drift=price_drift,
             delta_matrix=delta_matrix,

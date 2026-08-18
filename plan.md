@@ -92,7 +92,7 @@ Plus 1 dedicated doc-fix commit listed in Phase F for index/api-reference sync =
 | `options/risk.py` | `sigma_matrix`→`covariance`; `omega`→`skewness` (where it's a vector); `tau_tensor`→`fourth_moment_tensor`; `core`→`linear_core_term`; `q_matrix` argument→`precision_matrix`. |
 | `options/reproduction.py` | `theta_vector`→`price_drift`; `d_matrix`→`delta_matrix`; `gamma_tensor`→`third_derivative_tensor`; `nu`→`degrees_of_freedom`; `c_scalar`→`c_coefficient`; `p_vector`→`pricing_vector`; `b_matrix`→`budget_matrix`; `xi_vector`→`xi_intercept`; `zeta`→`zeta_intercept`; `u_vector`→`dual_residual`; `r_matrix`→`residual_matrix`; `u_matrix`→`uncertainty_matrix`; `q_tilde`→`q_symmetric_part`; `eps_star`→`optimal_epsilon`; `variance_at`→`direct_variance` (in hoist commit). |
 | `options/moments.py` | `m`→`instrument_count`; `gamma`→`third_derivative` where it's a tensor input. |
-| `options/pipeline.py` | `random_matrix`→`sample_matrix`; `kappa3_fn`→`kappa3_callback`; `initial_x`→`initial_weights`; `instrument_count`→`n_instruments`; `mock_kappa3` function ref replaced by `lambda x: 0.0`. |
+| `options/pipeline.py` | `random_matrix`→`sample_matrix`; `kappa3_callback`→`kappa3_callback`; `initial_x`→`initial_weights`; `instrument_count`→`n_instruments`; `mock_kappa3` function ref replaced by `lambda x: 0.0`. |
 | `options/cli.py` | `cfg`→`experiment`; `summary`→`determinism_summary`; `path`→`output_path`; `args`→`parsed_args`. |
 | `options/determinism.py` | `is_equal`→`all_match`; `serialized`→`serialized_reports`. |
 | `options/config.py` | `payload`→`raw_config`; `runtime`/`optimization` (locals)→`runtime_config`/`optimization_config` to mirror types during deprecation window. |
@@ -162,11 +162,11 @@ Raises:
 | 28 | `options/moments.py` | `c`, `h`, `q`, `hg`, `eg` |
 | 29 | `options/risk.py` | `validate_shapes`, `expectation_linear`, `variance_quadratic`, `cfvar2`, `cfvar3`, `kappa3` |
 | 30 | `options/optimization.py` | `solve_variance_minimization`, `compute_epsilon_star`, `solve_cfvar2_closed_form`, `solve_cfvar3_numerical`, `build_cfvar3_objective`, `quality_score`, `loss_term`, `score`, `objective` |
-| 31 | `options/reproduction.py` | `portfolio_greeks_from_shares`, `variance_direct_formula`, `build_linearized_matrices`, `reconstruct_q_matrix_from_direct_variance`, `direct_variance` |
+| 31 | `options/reproduction.py` | `greeks`, `variance_direct_formula`, `linearize`, `reconstruct`, `direct_variance` |
 | 32 | `options/pipeline.py` | `run_reproduction`, `save_report` |
 | 33 | `options/determinism.py` | `deterministic_report` |
 | 34 | `options/logging.py` | `configure_logging` |
-| 35 | `options/cli.py` | `build_parser`, `main` |
+| 35 | `options/cli.py` | `parser`, `main` |
 | 36 | `options/types.py` | `FloatArray` alias |
 | 37 | `docs/`: api-reference + index sync | — |
 

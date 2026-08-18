@@ -4,7 +4,7 @@
   <p align="center">
     <a href="#installation"><img src="https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue" alt="Python"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License"></a>
-    <a href="https://github.com/sachncs/optimal-option-portfolios/actions"><img src="https://img.shields.io/github/actions/workflow/status/sachncs/optimal-option-portfolios/ci.yml?branch=master" alt="CI"></a>
+    <a href="https://github.com/sachncs/optimal-option-portfolios/actions"><img src="https://img.shields.io/github/actions/workflow/status/sachncs/optimal-option-portfolios/ci.yml?branch=main" alt="CI"></a>
     <a href="https://pypi.org/project/oop/"><img src="https://img.shields.io/pypi/v/oop" alt="PyPI"></a>
     <a href="https://github.com/sachncs/optimal-option-portfolios/stargazers"><img src="https://img.shields.io/github/stars/sachncs/optimal-option-portfolios" alt="Stars"></a>
     <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/badge/code%20style-ruff-000000.svg" alt="Ruff"></a>
@@ -132,11 +132,14 @@ See [`.env.example`](.env.example) for environment variable configuration.
 | Symbol | Type | Description |
 |--------|------|-------------|
 | `solve_variance_minimization` | function | Closed-form QP for the minimum-variance portfolio |
+| `compute_epsilon_star` | function | Bisection root of the constrained 1-D variance/CFVaR2 equation |
 | `solve_cfvar2_closed_form` | function | Closed-form QP for 2nd-order CFVaR |
 | `solve_cfvar3_numerical` | function | Iterative solver for 3rd-order (and higher) CFVaR |
-| `PipelineConfig` | dataclass | Runtime + optimization configuration object |
-| `ReproductionReport` | dataclass | Structured JSON-serialisable report |
-| `DeterminismValidator` | class | Validates deterministic execution across runs |
+| `build_cfvar3_objective` | function | Closure factory for the cfvar3 objective (use `solve_cfvar3_numerical`) |
+| `validate_shapes` | function | Validates shape compatibility across risk / optimization inputs |
+| `cfvar2`, `cfvar3`, `kappa3` | functions | Risk primitives: 2nd/3rd-order CFVaR and 3rd standardized cumulant |
+| `Experiment` | dataclass | Runtime + optimization configuration object (flattened in 0.3.0) |
+| `load`, `validate` | functions | JSON config loader and validator |
 | `main` | function | CLI entry point (`oop`) |
 
 ---

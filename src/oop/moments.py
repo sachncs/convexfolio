@@ -26,9 +26,9 @@ def compute_h_vector(sigma: FloatArray, omega: FloatArray) -> FloatArray:
 
 def compute_q_vector(gamma_tensor: FloatArray, h_vector: FloatArray) -> FloatArray:
     """Computes q_m = h^T Gamma^[m] h for each instrument m."""
-    m = gamma_tensor.shape[0]
-    values = np.zeros(m, dtype=float)
-    for index in range(m):
+    instrument_count = gamma_tensor.shape[0]
+    values = np.zeros(instrument_count, dtype=float)
+    for index in range(instrument_count):
         values[index] = float(h_vector.T @ gamma_tensor[index] @ h_vector)
     return values
 
@@ -41,9 +41,11 @@ def compute_h_matrix(
     h_vector: FloatArray,
 ) -> FloatArray:
     """Computes H = (D + B^T)^T Sigma [Gamma^[1]h, ..., Gamma^[M]h]."""
-    m = gamma_tensor.shape[0]
-    g_matrix = np.column_stack([gamma_tensor[index] @ h_vector for index in range(m)])
-    return (d_matrix + b_matrix.T).T @ sigma @ g_matrix
+    instrument_count = gamma_tensor.shape[0]
+    third_derivative_column_stack = np.column_stack(
+        [gamma_tensor[index] @ h_vector for index in range(instrument_count)]
+    )
+    return (d_matrix + b_matrix.T).T @ sigma @ third_derivative_column_stack
 
 
 def compute_e_matrix(

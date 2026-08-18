@@ -12,8 +12,8 @@ from options import (
     solve_cfvar2_closed_form,
     solve_cfvar3_numerical,
     cfvar3_objective,
-    cfvar2,
-    cfvar3,
+    second_order_risk,
+    third_order_risk,
 )
 ```
 
@@ -131,10 +131,10 @@ CFVaR3 objective function for numerical optimization.
 
 ---
 
-#### `cfvar2`
+#### `second_order_risk`
 
 ```python
-def cfvar2(
+def second_order_risk(
     alpha: float,
     u: FloatArray,
     q_matrix: FloatArray,
@@ -155,15 +155,15 @@ Calculate CFVaR2 for a given portfolio.
 
 ---
 
-#### `cfvar3`
+#### `third_order_risk`
 
 ```python
-def cfvar3(
+def third_order_risk(
     alpha: float,
     u: FloatArray,
     q_matrix: FloatArray,
     x: FloatArray,
-    kappa3: float,
+    third_order_cumulant: float,
 ) -> float:
 ```
 
@@ -174,7 +174,7 @@ Calculate CFVaR3 for a given portfolio.
 - `u` (FloatArray): Expected returns vector
 - `q_matrix` (FloatArray): Covariance matrix
 - `x` (FloatArray): Portfolio weights
-- `kappa3` (float): Third-order cumulant
+- `third_order_cumulant` (float): Third-order cumulant
 
 **Returns:**
 - `float`: CFVaR3 value

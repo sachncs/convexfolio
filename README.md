@@ -126,9 +126,9 @@ Create a `config.json` to customize execution:
 | `compute_epsilon_star` | function | Bisection root of the constrained 1-D variance/CFVaR2 equation |
 | `solve_cfvar2_closed_form` | function | Closed-form QP for 2nd-order CFVaR |
 | `solve_cfvar3_numerical` | function | Iterative solver for 3rd-order (and higher) CFVaR |
-| `cfvar3_objective` | function | Closure factory for the cfvar3 objective (use `solve_cfvar3_numerical`) |
+| `cfvar3_objective` | function | Closure factory for the third_order_risk objective (use `solve_cfvar3_numerical`) |
 | `validate_shapes` | function | Validates shape compatibility across risk / optimization inputs |
-| `cfvar2`, `cfvar3`, `kappa3` | functions | Risk primitives: 2nd/3rd-order CFVaR and 3rd standardized cumulant |
+| `second_order_risk`, `third_order_risk`, `third_order_cumulant` | functions | Risk primitives: 2nd/3rd-order CFVaR and 3rd standardized cumulant |
 | `Experiment` | dataclass | Runtime + optimization configuration object (flattened in 0.3.0) |
 | `load`, `validate` | functions | JSON config loader and validator |
 | `main` | function | CLI entry point (`oop`) |

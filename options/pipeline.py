@@ -7,11 +7,11 @@ from pathlib import Path
 import numpy as np
 
 from options.config import ExperimentConfig
-from options.optimization import cfvar3_objective
-from options.optimization import solve_cfvar2_closed_form
-from options.optimization import solve_cfvar3_numerical
-from options.optimization import solve_variance_minimization
-from options.risk import cfvar2
+from options.math import second_order_risk
+from options.math import cfvar3_objective
+from options.math import minimize_variance
+from options.math import solve_cfvar2_closed_form
+from options.math import solve_cfvar3_numerical
 
 
 def run_reproduction(experiment: ExperimentConfig) -> dict[str, object]:
@@ -29,25 +29,25 @@ def run_reproduction(experiment: ExperimentConfig) -> dict[str, object]:
     cost_vector = np.abs(rng.normal(size=n_instruments)) + 0.1
     expected_payoff_vector = rng.normal(size=n_instruments)
 
-    variance_solution = solve_variance_minimization(cost_vector, precision_matrix)
+    variance_solution = minimize_variance(cost_vector, precision_matrix)
     cfvar2_solution = solve_cfvar2_closed_form(
-        q_matrix=precision_matrix,
-        u=expected_payoff_vector,
-        v=cost_vector,
+        precision_matrix=precision_matrix,
+        expected_payoff=expected_payoff_vector,
+        cost_vector=cost_vector,
         alpha=experiment.optimization.alpha,
     )
 
     kappa3_callback = lambda x: 0.0
     objective = cfvar3_objective(
         alpha=experiment.optimization.alpha,
-        u=expected_payoff_vector,
-        q_matrix=precision_matrix,
+        expected_payoff=expected_payoff_vector,
+        precision_matrix=precision_matrix,
         kappa3_callback=kappa3_callback,
     )
     initial_weights = np.ones(n_instruments) / np.sum(cost_vector)
     cfvar3_solution = solve_cfvar3_numerical(
-        v=cost_vector,
-        initial_x=initial_weights,
+        cost_vector=cost_vector,
+        initial_weights=initial_weights,
         objective_callable=objective,
     )
 
@@ -62,7 +62,7 @@ def run_reproduction(experiment: ExperimentConfig) -> dict[str, object]:
             "variance_solution": variance_solution.tolist(),
             "cfvar2_solution": cfvar2_solution.tolist(),
             "cfvar3_solution": cfvar3_solution.tolist(),
-            "cfvar2_at_variance_solution": cfvar2(
+            "cfvar2_at_variance_solution": second_order_risk(
                 experiment.optimization.alpha,
                 expected_payoff_vector,
                 precision_matrix,

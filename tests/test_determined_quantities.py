@@ -1,22 +1,22 @@
 import numpy as np
 
-from options.moments import compute_c_scalar
-from options.moments import compute_h_vector
-from options.reproduction import greeks
-from options.reproduction import reconstruct
-from options.reproduction import portfolio_variance
+from options.math import compute
+from options.math import greeks
+from options.math import linear
+from options.math import portfolio_variance
+from options.math import reconstruct
 
 
 def test_c_matches_theorem2_formula() -> None:
     degrees_of_freedom = 8.0
-    c_value = compute_c_scalar(degrees_of_freedom)
+    c_value = compute(degrees_of_freedom)
     assert c_value > 0.0
 
 
 def test_h_has_expected_shape() -> None:
     covariance = np.eye(3)
     skewness = np.array([0.3, -0.2, 0.1])
-    h_vector = compute_h_vector(sigma=covariance, omega=skewness)
+    h_vector = linear(covariance, skewness)
     assert h_vector.shape == (3,)
 
 
@@ -47,13 +47,13 @@ def test_reconstructed_q_matches_direct_variance_formula() -> None:
         skewness=skewness,
     )
 
-    c_coefficient = compute_c_scalar(degrees_of_freedom)
-    h_vector = compute_h_vector(sigma=covariance, omega=skewness)
+    c_coefficient = compute(degrees_of_freedom)
+    h_vector = linear(covariance, skewness)
 
     for _ in range(25):
         x = rng.normal(size=instrument_count)
         _, delta_vector, gamma_matrix = greeks(
-            x=x,
+            weights=x,
             price_drift=price_drift,
             delta_matrix=delta_matrix,
             third_derivative_tensor=third_derivative_tensor,

@@ -7,11 +7,12 @@ from pathlib import Path
 import numpy as np
 
 from options.config import ExperimentConfig
-from options.math import second_order_risk
-from options.math import cfvar3_objective
+from options.math import Objective
+from options.math import Risk
 from options.math import minimize_variance
 from options.math import solve_cfvar2_closed_form
 from options.math import solve_cfvar3_numerical
+from options.math import third_order_objective
 
 
 def run_reproduction(experiment: ExperimentConfig) -> dict[str, object]:
@@ -37,8 +38,14 @@ def run_reproduction(experiment: ExperimentConfig) -> dict[str, object]:
         alpha=experiment.optimization.alpha,
     )
 
-    kappa3_callback = lambda x: 0.0
-    objective = cfvar3_objective(
+    risk = Risk(
+        alpha=experiment.optimization.alpha,
+        expected_payoff=expected_payoff_vector,
+        precision_matrix=precision_matrix,
+    )
+    kappa3_callback = lambda weights: 0.0
+    objective = Objective(
+        third_order_objective,
         alpha=experiment.optimization.alpha,
         expected_payoff=expected_payoff_vector,
         precision_matrix=precision_matrix,
@@ -56,18 +63,13 @@ def run_reproduction(experiment: ExperimentConfig) -> dict[str, object]:
         "inputs": {
             "u": expected_payoff_vector.tolist(),
             "v": cost_vector.tolist(),
-            "q_matrix": precision_matrix.tolist(),
+            "qmatrix": precision_matrix.tolist(),
         },
         "outputs": {
             "variance_solution": variance_solution.tolist(),
             "cfvar2_solution": cfvar2_solution.tolist(),
             "cfvar3_solution": cfvar3_solution.tolist(),
-            "cfvar2_at_variance_solution": second_order_risk(
-                experiment.optimization.alpha,
-                expected_payoff_vector,
-                precision_matrix,
-                variance_solution,
-            ),
+            "cfvar2_at_variance_solution": risk.second(variance_solution),
         },
         "uncertainty": {
             "status": "ASSUMPTION",

@@ -11,12 +11,8 @@ def deterministic_report(
 ) -> dict[str, object]:
     """Runs repeated reports and asserts deterministic equality.
 
-    Args:
-      config: Runtime and optimization configuration.
-      repetitions: Number of repeated runs.
-
-    Returns:
-      A summary dictionary including pass/fail and first report.
+    Same ``config`` and ``repetitions`` always produce the same summary;
+    standard deterministic behaviour.
     """
     if repetitions < 2:
         raise ValueError("repetitions must be >= 2")
@@ -35,3 +31,27 @@ def deterministic_report(
         "seed": config.runtime.seed,
         "reference_report": reports[0],
     }
+
+
+class Report:
+    """Standard deterministic determinism check.
+
+    Wraps ``deterministic_report`` with attribute access for the summary fields.
+    """
+
+    def __init__(self, config: ExperimentConfig, repetitions: int = 2) -> None:
+        self.config = config
+        self.repetitions = repetitions
+        self.summary = deterministic_report(config, repetitions)
+
+    @property
+    def deterministic(self) -> bool:
+        return bool(self.summary["deterministic"])
+
+    @property
+    def seed(self) -> int:
+        return int(self.summary["seed"])
+
+    @property
+    def reference(self) -> dict[str, object]:
+        return self.summary["reference_report"]

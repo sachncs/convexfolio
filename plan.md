@@ -15,7 +15,7 @@ Make the repository **readable** and **reliable** for production use.
 
 1. **No semi-private naming.** No leading-underscore on top-level names (`_helper`, `_validate_internal`, etc.). No `__dunder__` other than Python-mandated. Public surface declared explicitly via `__all__` in `options/__init__.py`.
 2. **No `try/except` without a typed reason.** Catch only specific named exceptions (`ValueError`, `FileNotFoundError`, `json.JSONDecodeError`, etc.). Never `except Exception:` or bare `except:`. If something must be caught, it must be rethrown as a typed error.
-3. **Elaborative locals.** Math shorthand is banned. `g1`/`g2`/`q`/`eps_star`/`nu`/`sigma`/`omega`/`theta`/`m`/`x`/`z`/`psi`/`tau`/`kappa3` are forbidden as identifier names. Replacement names use full words (`loss_gradient`, `precision_matrix`, `optimal_epsilon`, `degrees_of_freedom`, `covariance`, `skewness`, `price_drift`, `instrument_count`, `weights`, `z_score`, `dual_variable`, `fourth_moment_tensor`, `third_order_cumulant`).
+3. **Elaborative locals.** Math shorthand is banned. `g1`/`g2`/`q`/`eps_star`/`nu`/`sigma`/`omega`/`theta`/`m`/`x`/`z`/`psi`/`tau`/`kappa3` are forbidden as identifier names. Replacement names use full words (`loss_gradient`, `precision_matrix`, `optimal_epsilon`, `degrees_of_freedom`, `covariance`, `skewness`, `price_drift`, `instrument_count`, `weights`, `z_score`, `dual_variable`, `tau`, `third_order_cumulant`).
 4. **No new abstraction.** No `Builder`/`Manager`/`Factory`/`Strategy`/`Handler`/`Service`/`Helper`/`Util` suffixes. No ABC, no `Protocol`, no `isinstance` dispatch, no closure factories. Inline closures where they fit; hoist the rest as module-level functions.
 5. **Pinned dependencies stay loose.** Loose floors only; no lockfile.
 6. **One commit per identifier rename.** Larger logical changes (rename dataclass, hoist closure, add module) get their own commit. Each commit must leave the tree green.
@@ -88,9 +88,9 @@ Plus 1 dedicated doc-fix commit listed in Phase F for index/api-reference sync =
 
 | File | Renames |
 |---|---|
-| `options/optimization.py` | `g1`→`loss_gradient`; `g2`→`constraint_gradient`; `eps_star`→`optimal_epsilon`; `eps_plus`/`eps_minus`→`epsilon_plus`/`epsilon_minus`; `a_cal`/`b_cal`/`c_cal`→`coeff_a`/`coeff_b`/`coeff_c`; `a_scr`/`b_scr`/`c_scr`→`score_a`/`score_b`/`score_c`; `disc`→`discriminant`; `denom`→`denominator`; `psi_star`→`optimal_dual`. |
-| `options/risk.py` | `sigma_matrix`→`covariance`; `omega`→`skewness` (where it's a vector); `tau_tensor`→`fourth_moment_tensor`; `core`→`linear_core_term`; `q_matrix` argument→`precision_matrix`. |
-| `options/reproduction.py` | `theta_vector`→`price_drift`; `d_matrix`→`delta_matrix`; `gamma_tensor`→`third_derivative_tensor`; `nu`→`degrees_of_freedom`; `c_scalar`→`c_coefficient`; `p_vector`→`pricing_vector`; `b_matrix`→`budget_matrix`; `xi_vector`→`xi_intercept`; `zeta`→`zeta_intercept`; `u_vector`→`dual_residual`; `r_matrix`→`residual_matrix`; `u_matrix`→`uncertainty_matrix`; `q_tilde`→`q_symmetric_part`; `eps_star`→`optimal_epsilon`; `variance_at`→`direct_variance` (in hoist commit). |
+| `options/optimization.py` | `g1`→`loss_gradient`; `g2`→`constraint_gradient`; `eps_star`→`optimal_epsilon`; `eps_plus`/`eps_minus`→`epsilon_plus`/`epsilon_minus`; `acal`/`bcal`/`ccal`→`coeff_a`/`coeff_b`/`coeff_c`; `ascr`/`bscr`/`cscr`→`score_a`/`score_b`/`score_c`; `disc`→`discriminant`; `denom`→`denominator`; `psi_star`→`optimal_dual`. |
+| `options/risk.py` | `sigma`→`covariance`; `omega`→`skewness` (where it's a vector); `tau`→`tau`; `core`→`linear_core_term`; `qmatrix` argument→`precision_matrix`. |
+| `options/reproduction.py` | `theta_vector`→`price_drift`; `d`→`delta_matrix`; `gamma_tensor`→`third_derivative`; `nu`→`degrees_of_freedom`; `c_scalar`→`c_coefficient`; `p_vector`→`pricing_vector`; `b`→`budget_matrix`; `xi_vector`→`xi_intercept`; `zeta`→`zeta_intercept`; `u`→`dual_residual`; `r`→`residual_matrix`; `umatrix`→`uncertainty_matrix`; `q_tilde`→`q_symmetric_part`; `eps_star`→`optimal_epsilon`; `variance_at`→`direct_variance` (in hoist commit). |
 | `options/moments.py` | `m`→`instrument_count`; `gamma`→`third_derivative` where it's a tensor input. |
 | `options/pipeline.py` | `random_matrix`→`sample_matrix`; `kappa3_callback`→`kappa3_callback`; `initial_x`→`initial_weights`; `instrument_count`→`n_instruments`; `mock_kappa3` function ref replaced by `lambda x: 0.0`. |
 | `options/cli.py` | `cfg`→`experiment`; `summary`→`determinism_summary`; `path`→`output_path`; `args`→`parsed_args`. |
@@ -117,10 +117,10 @@ Plus 1 dedicated doc-fix commit listed in Phase F for index/api-reference sync =
 | `loss_term(eps, loss_grad, constraint_grad, precision, optimal_eps)` | `optimization.py` `variance_term` (line ~42) | scalars + 1-D |
 | `score(eps, loss_grad, constraint_grad, precision, optimal_eps)` | `optimization.py` `objective` (line ~45) | scalars + 1-D |
 | `objective(x, alpha, u, precision, kappa3_callback)` | `optimization.py` `objective` (line ~108) | 1-D + scalars |
-| `direct_variance(x_vec, theta, delta, third_deriv, mu, cov, dof, c_coef, h_vec)` | `reproduction.py` `variance_at` (line ~115) | 1-D + many 1-D/2-D |
-| `normalizer_integrand(z, sigma_t, density, x_p, x_c, p_p, p_c)` | `pricing.py` `integrand` (line ~31) | scalar + scalars |
-| `call_integrand(val, spot_price, strike, risk_free_rate, maturity, sigma_t, density)` | `pricing.py` `integrand` (line ~55) | scalar + scalars |
-| `put_integrand(val, spot_price, strike, risk_free_rate, maturity, sigma_t, density)` | `pricing.py` `integrand` (line ~79) | scalar + scalars |
+| `direct_variance(xvec, theta, delta, third_deriv, mu, cov, dof, c_coef, h_vec)` | `reproduction.py` `variance_at` (line ~115) | 1-D + many 1-D/2-D |
+| `normalizer_integrand(z, sigmat, density, xp, xc, pp, pc)` | `pricing.py` `integrand` (line ~31) | scalar + scalars |
+| `call_integrand(val, spot_price, strike, risk_free_rate, maturity, sigmat, density)` | `pricing.py` `integrand` (line ~55) | scalar + scalars |
+| `put_integrand(val, spot_price, strike, risk_free_rate, maturity, sigmat, density)` | `pricing.py` `integrand` (line ~79) | scalar + scalars |
 | `mock_kappa3` deleted | `pipeline.py` (line ~38) | inline `lambda x: 0.0` at call site |
 
 ### Acceptance criteria

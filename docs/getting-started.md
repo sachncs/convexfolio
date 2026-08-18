@@ -34,11 +34,11 @@ import numpy as np
 from options import solve_variance_minimization
 
 # Define problem inputs
-q_matrix = np.array([[2.0, 0.1], [0.1, 1.5]])
+qmatrix = np.array([[2.0, 0.1], [0.1, 1.5]])
 v = np.array([1.2, 0.8])
 
 # Solve
-weights = solve_variance_minimization(v=v, q_matrix=q_matrix)
+weights = solve_variance_minimization(v=v, qmatrix=qmatrix)
 print(f"Optimal weights: {weights}")
 print(f"Budget constraint: {weights.T @ v:.6f} (should be 1.0)")
 ```

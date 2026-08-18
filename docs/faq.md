@@ -50,10 +50,10 @@ Development:
 import numpy as np
 from options import solve_variance_minimization
 
-q_matrix = np.array([[2.0, 0.1], [0.1, 1.5]])
+qmatrix = np.array([[2.0, 0.1], [0.1, 1.5]])
 v = np.array([1.2, 0.8])
 
-weights = solve_variance_minimization(v=v, q_matrix=q_matrix)
+weights = solve_variance_minimization(v=v, qmatrix=qmatrix)
 ```
 
 ### What is the budget constraint?

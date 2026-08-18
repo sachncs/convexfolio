@@ -67,16 +67,16 @@ import numpy as np
 from options import solve_variance_minimization, solve_cfvar2_closed_form
 
 # Define inputs
-q_matrix = np.array([[2.0, 0.1], [0.1, 1.5]])
+qmatrix = np.array([[2.0, 0.1], [0.1, 1.5]])
 v = np.array([1.2, 0.8])
 u = np.array([0.1, 0.3])
 
 # Solve variance minimization
-weights = solve_variance_minimization(v=v, q_matrix=q_matrix)
+weights = solve_variance_minimization(v=v, qmatrix=qmatrix)
 print(f"Variance solution: {weights}")
 
 # Solve CFVaR2
-cfvar2_weights = solve_cfvar2_closed_form(q_matrix=q_matrix, u=u, v=v, alpha=0.05)
+cfvar2_weights = solve_cfvar2_closed_form(qmatrix=qmatrix, u=u, v=v, alpha=0.05)
 print(f"CFVaR2 solution: {cfvar2_weights}")
 ```
 

@@ -27,42 +27,138 @@ def linear(covariance: FloatArray, skewness: FloatArray) -> FloatArray:
     return (covariance @ skewness) / denominator
 
 
-def curvature(third_derivative_tensor: FloatArray, h_vector: FloatArray) -> FloatArray:
+def curvature(third_derivative: FloatArray, h: FloatArray) -> FloatArray:
     """Compute the q vector: h^T Gamma^[m] h for each instrument m."""
-    instrument_count = third_derivative_tensor.shape[0]
+    instrument_count = third_derivative.shape[0]
     values = np.zeros(instrument_count, dtype=float)
     for index in range(instrument_count):
-        values[index] = float(h_vector.T @ third_derivative_tensor[index] @ h_vector)
+        values[index] = float(h.T @ third_derivative[index] @ h)
     return values
+
+
+class Curvature:
+    """Deterministic q vector: h^T Gamma^[m] h for each instrument m.
+
+    Standard, deterministic behaviour. Same ``third_derivative`` and
+    ``h`` always produce the same vector.
+    """
+
+    def __init__(self, third_derivative: FloatArray, h: FloatArray) -> None:
+        self.third_derivative = third_derivative
+        self.h = h
+        self.values = curvature(third_derivative, h)
+
+    @property
+    def vector(self) -> FloatArray:
+        return self.values
 
 
 def bilinear(
     delta_matrix: FloatArray,
     budget_matrix: FloatArray,
     covariance: FloatArray,
-    third_derivative_tensor: FloatArray,
-    h_vector: FloatArray,
+    third_derivative: FloatArray,
+    h: FloatArray,
 ) -> FloatArray:
-    """Compute the h matrix: (D + B^T)^T Sigma [Gamma^[1]h, ..., Gamma^[M]h]."""
-    instrument_count = third_derivative_tensor.shape[0]
-    third_derivative_column_stack = np.column_stack(
-        [third_derivative_tensor[index] @ h_vector for index in range(instrument_count)]
+    """Compute the hmatrix: (D + B^T)^T Sigma [Gamma^[1]h, ..., Gamma^[M]h]."""
+    instrument_count = third_derivative.shape[0]
+    gammacolumns = np.column_stack(
+        [third_derivative[index] @ h for index in range(instrument_count)]
     )
-    return (delta_matrix + budget_matrix.T).T @ covariance @ third_derivative_column_stack
+    return (delta_matrix + budget_matrix.T).T @ covariance @ gammacolumns
+
+
+class Bilinear:
+    """Deterministic hmatrix: (D + B^T)^T Sigma [Gamma^[1]h, ..., Gamma^[M]h].
+
+    Standard, deterministic behaviour. Same inputs always produce the same matrix.
+    """
+
+    def __init__(
+        self,
+        delta_matrix: FloatArray,
+        budget_matrix: FloatArray,
+        covariance: FloatArray,
+        third_derivative: FloatArray,
+        h: FloatArray,
+    ) -> None:
+        self.delta_matrix = delta_matrix
+        self.budget_matrix = budget_matrix
+        self.covariance = covariance
+        self.third_derivative = third_derivative
+        self.h = h
+        self.matrix = bilinear(
+            delta_matrix,
+            budget_matrix,
+            covariance,
+            third_derivative,
+            h,
+        )
+
+    @property
+    def values(self) -> FloatArray:
+        return self.matrix
 
 
 def cross(
     delta_matrix: FloatArray,
     budget_matrix: FloatArray,
     covariance: FloatArray,
-    third_derivative_tensor: FloatArray,
-    h_vector: FloatArray,
+    third_derivative: FloatArray,
+    h: FloatArray,
+) -> FloatArray:
+    """Compute the h matrix: (D + B^T)^T Sigma [Gamma^[1]h, ..., Gamma^[M]h]."""
+    instrument_count = third_derivative.shape[0]
+    gammacolumns = np.column_stack(
+        [third_derivative[index] @ h for index in range(instrument_count)]
+    )
+    return (delta_matrix + budget_matrix.T).T @ covariance @ gammacolumns
+
+
+def cross(
+    delta_matrix: FloatArray,
+    budget_matrix: FloatArray,
+    covariance: FloatArray,
+    third_derivative: FloatArray,
+    h: FloatArray,
 ) -> FloatArray:
     """Compute the e matrix: H^T from bilinear expansion symmetry."""
-    h_matrix = bilinear(
-        delta_matrix, budget_matrix, covariance, third_derivative_tensor, h_vector
+    hmatrix = bilinear(
+        delta_matrix, budget_matrix, covariance, third_derivative, h
     )
-    return h_matrix.T
+    return hmatrix.T
+
+
+class Cross:
+    """Deterministic e matrix: H^T from bilinear expansion symmetry.
+
+    Standard, deterministic behaviour. Same inputs always produce the same matrix.
+    """
+
+    def __init__(
+        self,
+        delta_matrix: FloatArray,
+        budget_matrix: FloatArray,
+        covariance: FloatArray,
+        third_derivative: FloatArray,
+        h: FloatArray,
+    ) -> None:
+        self.delta_matrix = delta_matrix
+        self.budget_matrix = budget_matrix
+        self.covariance = covariance
+        self.third_derivative = third_derivative
+        self.h = h
+        self.matrix = cross(
+            delta_matrix,
+            budget_matrix,
+            covariance,
+            third_derivative,
+            h,
+        )
+
+    @property
+    def values(self) -> FloatArray:
+        return self.matrix
 
 
 def shapes(expected_payoff: FloatArray, precision_matrix: FloatArray, weights: FloatArray) -> None:
@@ -93,7 +189,7 @@ def third_order_cumulant(
     delta_matrix: FloatArray,
     budget_matrix: FloatArray,
     covariance: FloatArray,
-    fourth_moment_tensor: FloatArray,
+    tau: FloatArray,
 ) -> float:
     """Eq. (S2.Ex24-S2.Ex26): third central moment approximation."""
     linear_pricing_term = float(weights.T @ pricing_vector)
@@ -101,7 +197,7 @@ def third_order_cumulant(
     volatility_contribution_term = float(
         weights.T @ (delta_matrix.T + budget_matrix).T @ covariance @ (delta_matrix + budget_matrix.T) @ weights
     )
-    fourth_order_term = float(np.einsum("ijk,i,j,k->", fourth_moment_tensor, weights, weights, weights))
+    fourth_order_term = float(np.einsum("ijk,i,j,k->", tau, weights, weights, weights))
 
     term1 = (
         2.0
@@ -278,14 +374,76 @@ def solve_cfvar3_numerical(
     return np.asarray(result.x, dtype=float)
 
 
-def cfvar3_objective(
-    alpha: float, expected_payoff: FloatArray, precision_matrix: FloatArray, kappa3_callback
-):
-    """Return a callable mapping weights to the third_order_risk objective value."""
-    def objective(weights: FloatArray) -> float:
-        return third_order_risk(alpha, expected_payoff, precision_matrix, np.asarray(weights, dtype=float), float(kappa3_callback(weights)))
+def third_order_objective(
+    weights: FloatArray,
+    alpha: float,
+    expected_payoff: FloatArray,
+    precision_matrix: FloatArray,
+    kappa3_callback,
+) -> float:
+    """Body of the third-order Objective: same pattern as second_order_risk."""
+    return third_order_risk(
+        alpha,
+        expected_payoff,
+        precision_matrix,
+        np.asarray(weights, dtype=float),
+        float(kappa3_callback(weights)),
+    )
 
-    return objective
+
+class Objective:
+    """Deterministic callable wrapper around any scalar objective function.
+
+    The objective body is a callable of the form ``f(weights=..., **parameters)``.
+    Parameters are captured at construction; the instance binds them and exposes
+    ``__call__(weights)``. Same parameters and same weights always produce the
+    same output. Standard, deterministic behaviour; no polymorphism.
+    """
+
+    def __init__(self, function, **parameters) -> None:
+        self.function = function
+        self.parameters = parameters
+
+    def __call__(self, weights: FloatArray) -> float:
+        return self.function(weights=weights, **self.parameters)
+
+
+class Risk:
+    """Risk measure facade. Standard deterministic computation of risk numbers.
+
+    Holds a fixed ``alpha``, ``expected_payoff``, and ``precision_matrix`` and
+    delegates evaluation to ``Objective`` instances.
+    """
+
+    def __init__(
+        self,
+        alpha: float,
+        expected_payoff: FloatArray,
+        precision_matrix: FloatArray,
+    ) -> None:
+        self.alpha = alpha
+        self.expected_payoff = expected_payoff
+        self.precision_matrix = precision_matrix
+        self.second_order = Objective(
+            second_order_risk,
+            alpha=alpha,
+            expected_payoff=expected_payoff,
+            precision_matrix=precision_matrix,
+        )
+
+    def second(self, weights: FloatArray) -> float:
+        return self.second_order(weights)
+
+    def third(
+        self, weights: FloatArray, kappa3_callback
+    ) -> float:
+        return Objective(
+            third_order_objective,
+            alpha=self.alpha,
+            expected_payoff=self.expected_payoff,
+            precision_matrix=self.precision_matrix,
+            kappa3_callback=kappa3_callback,
+        )(weights)
 
 
 def quality_score(
@@ -313,12 +471,12 @@ def greeks(
     weights: FloatArray,
     price_drift: FloatArray,
     delta_matrix: FloatArray,
-    third_derivative_tensor: FloatArray,
+    third_derivative: FloatArray,
 ) -> tuple[float, FloatArray, FloatArray]:
     """Compute theta, delta, gamma for a portfolio of options."""
     theta_value = float(price_drift.T @ weights)
     delta_vector = delta_matrix @ weights
-    gamma_matrix = np.einsum("m,mij->ij", weights, third_derivative_tensor)
+    gamma_matrix = np.einsum("m,mij->ij", weights, third_derivative)
     return theta_value, delta_vector, gamma_matrix
 
 
@@ -329,7 +487,7 @@ def portfolio_variance(
     covariance: FloatArray,
     degrees_of_freedom: float,
     c_coefficient: float,
-    h_vector: FloatArray,
+    h: FloatArray,
 ) -> float:
     """Direct scalar variance formula from Section 2.4."""
     auxiliary_vector = gamma_matrix @ expected_payoff + delta_vector
@@ -343,22 +501,22 @@ def portfolio_variance(
         auxiliary_vector.T @ covariance @ auxiliary_vector
     )
     term4 = (2.0 * c_coefficient * degrees_of_freedom / (degrees_of_freedom - 3.0)) * float(
-        auxiliary_vector.T @ covariance @ gamma_matrix @ h_vector
+        auxiliary_vector.T @ covariance @ gamma_matrix @ h
     )
     term5 = (c_coefficient * degrees_of_freedom / ((degrees_of_freedom - 2.0) * (degrees_of_freedom - 3.0))) * float(
-        auxiliary_vector.T @ h_vector
+        auxiliary_vector.T @ h
     ) * float(np.trace(gamma_matrix @ covariance))
     term6 = -(c_coefficient * degrees_of_freedom / (degrees_of_freedom - 3.0)) * float(
-        auxiliary_vector.T @ h_vector
-    ) * float(h_vector.T @ gamma_matrix @ h_vector)
-    term7 = -(c_coefficient**2) * (float(auxiliary_vector.T @ h_vector) ** 2)
+        auxiliary_vector.T @ h
+    ) * float(h.T @ gamma_matrix @ h)
+    term7 = -(c_coefficient**2) * (float(auxiliary_vector.T @ h) ** 2)
     return float(term1 + term2 + term3 + term4 + term5 + term6 + term7)
 
 
 def linearize(
     price_drift: FloatArray,
     delta_matrix: FloatArray,
-    third_derivative_tensor: FloatArray,
+    third_derivative: FloatArray,
     expected_payoff: FloatArray,
     covariance: FloatArray,
     degrees_of_freedom: float,
@@ -366,23 +524,23 @@ def linearize(
     time_increment: float,
 ) -> tuple[FloatArray, FloatArray]:
     """Build linearized expected return and precision matrix for the section-2.4 problem."""
-    instrument_count = third_derivative_tensor.shape[0]
+    instrument_count = third_derivative.shape[0]
     c_coefficient = compute(degrees_of_freedom)
-    h_vector = linear(covariance, skewness)
+    h = linear(covariance, skewness)
 
     pricing_vector = np.array(
         [
-            np.trace(third_derivative_tensor[idx] @ covariance)
+            np.trace(third_derivative[idx] @ covariance)
             for idx in range(instrument_count)
         ],
         dtype=float,
     )
     budget_matrix = np.vstack(
-        [expected_payoff.T @ third_derivative_tensor[idx] for idx in range(instrument_count)]
+        [expected_payoff.T @ third_derivative[idx] for idx in range(instrument_count)]
     )
     xi_intercept = np.array(
         [
-            0.5 * float(expected_payoff.T @ third_derivative_tensor[idx] @ expected_payoff)
+            0.5 * float(expected_payoff.T @ third_derivative[idx] @ expected_payoff)
             for idx in range(instrument_count)
         ],
         dtype=float,
@@ -396,8 +554,8 @@ def linearize(
     )
     dual_residual = (
         zeta_intercept
-        + c_coefficient * budget_matrix @ h_vector
-        + c_coefficient * delta_matrix.T @ h_vector
+        + c_coefficient * budget_matrix @ h
+        + c_coefficient * delta_matrix.T @ h
     )
 
     residual_matrix = np.zeros((instrument_count, instrument_count), dtype=float)
@@ -405,9 +563,9 @@ def linearize(
         for j in range(instrument_count):
             residual_matrix[i, j] = float(
                 np.trace(
-                    third_derivative_tensor[i]
+                    third_derivative[i]
                     @ covariance
-                    @ third_derivative_tensor[j]
+                    @ third_derivative[j]
                     @ covariance
                 )
             )
@@ -424,37 +582,37 @@ def linearize(
         * np.outer(pricing_vector, pricing_vector)
     )
 
-    q_vector = curvature(
-        third_derivative_tensor=third_derivative_tensor, h_vector=h_vector
+    q = curvature(
+        third_derivative=third_derivative, h=h
     )
-    h_matrix = bilinear(
+    hmatrix = bilinear(
         delta_matrix=delta_matrix,
         budget_matrix=budget_matrix,
         covariance=covariance,
-        third_derivative_tensor=third_derivative_tensor,
-        h_vector=h_vector,
+        third_derivative=third_derivative,
+        h=h,
     )
-    e_matrix = cross(
+    e = cross(
         delta_matrix=delta_matrix,
         budget_matrix=budget_matrix,
         covariance=covariance,
-        third_derivative_tensor=third_derivative_tensor,
-        h_vector=h_vector,
+        third_derivative=third_derivative,
+        h=h,
     )
 
     delta_plus_budget_transpose = budget_matrix + delta_matrix.T
     q_symmetric_part = (
         uncertainty_matrix
-        + (4.0 * c_coefficient * degrees_of_freedom / (degrees_of_freedom - 3.0)) * (h_matrix + e_matrix)
+        + (4.0 * c_coefficient * degrees_of_freedom / (degrees_of_freedom - 3.0)) * (hmatrix + e)
         + (2.0 * c_coefficient * degrees_of_freedom / ((degrees_of_freedom - 2.0) * (degrees_of_freedom - 3.0))) * np.outer(
-            delta_plus_budget_transpose @ h_vector, pricing_vector
+            delta_plus_budget_transpose @ h, pricing_vector
         )
         - (2.0 * c_coefficient * degrees_of_freedom / (degrees_of_freedom - 3.0)) * np.outer(
-            delta_plus_budget_transpose @ h_vector, q_vector
+            delta_plus_budget_transpose @ h, q
         )
         - 2.0 * c_coefficient**2 * np.outer(
-            delta_plus_budget_transpose @ h_vector,
-            delta_plus_budget_transpose @ h_vector,
+            delta_plus_budget_transpose @ h,
+            delta_plus_budget_transpose @ h,
         )
     )
 
@@ -465,7 +623,7 @@ def linearize(
 def reconstruct(
     price_drift: FloatArray,
     delta_matrix: FloatArray,
-    third_derivative_tensor: FloatArray,
+    third_derivative: FloatArray,
     expected_payoff: FloatArray,
     covariance: FloatArray,
     degrees_of_freedom: float,
@@ -475,17 +633,17 @@ def reconstruct(
 
     Since Var[ΔV(x)] is quadratic in x, this recovers the exact symmetric Q.
     """
-    instrument_count = third_derivative_tensor.shape[0]
+    instrument_count = third_derivative.shape[0]
     c_coefficient = compute(degrees_of_freedom)
-    h_vector = linear(covariance, skewness)
+    h = linear(covariance, skewness)
     precision_matrix = np.zeros((instrument_count, instrument_count), dtype=float)
 
-    def variance_at(x_vec: FloatArray) -> float:
+    def variance_at(xvec: FloatArray) -> float:
         _, delta_vec, gamma_mat = greeks(
-            weights=x_vec,
+            weights=xvec,
             price_drift=price_drift,
             delta_matrix=delta_matrix,
-            third_derivative_tensor=third_derivative_tensor,
+            third_derivative=third_derivative,
         )
         return portfolio_variance(
             gamma_matrix=gamma_mat,
@@ -494,7 +652,7 @@ def reconstruct(
             covariance=covariance,
             degrees_of_freedom=degrees_of_freedom,
             c_coefficient=c_coefficient,
-            h_vector=h_vector,
+            h=h,
         )
 
     basis = np.eye(instrument_count)

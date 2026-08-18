@@ -38,7 +38,7 @@ class IntermediateMoments:
     """
 
     c_scalar: float
-    h_vector: FloatArray
-    q_vector: FloatArray
-    h_matrix: FloatArray
-    e_matrix: FloatArray
+    h: FloatArray
+    q: FloatArray
+    hmatrix: FloatArray
+    e: FloatArray

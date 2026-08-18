@@ -16,8 +16,8 @@ def test_c_matches_theorem2_formula() -> None:
 def test_h_has_expected_shape() -> None:
     covariance = np.eye(3)
     skewness = np.array([0.3, -0.2, 0.1])
-    h_vector = linear(covariance, skewness)
-    assert h_vector.shape == (3,)
+    h = linear(covariance, skewness)
+    assert h.shape == (3,)
 
 
 def test_reconstructed_q_matches_direct_variance_formula() -> None:
@@ -33,14 +33,14 @@ def test_reconstructed_q_matches_direct_variance_formula() -> None:
 
     delta_matrix = rng.normal(size=(payoff_dimension, instrument_count))
     price_drift = rng.normal(size=instrument_count)
-    third_derivative_tensor = np.array(
+    third_derivative = np.array(
         [(g + g.T) / 2.0 for g in rng.normal(size=(instrument_count, payoff_dimension, payoff_dimension))]
     )
 
     precision_matrix = reconstruct(
         price_drift=price_drift,
         delta_matrix=delta_matrix,
-        third_derivative_tensor=third_derivative_tensor,
+        third_derivative=third_derivative,
         expected_payoff=expected_payoff,
         covariance=covariance,
         degrees_of_freedom=degrees_of_freedom,
@@ -48,7 +48,7 @@ def test_reconstructed_q_matches_direct_variance_formula() -> None:
     )
 
     c_coefficient = compute(degrees_of_freedom)
-    h_vector = linear(covariance, skewness)
+    h = linear(covariance, skewness)
 
     for _ in range(25):
         x = rng.normal(size=instrument_count)
@@ -56,7 +56,7 @@ def test_reconstructed_q_matches_direct_variance_formula() -> None:
             weights=x,
             price_drift=price_drift,
             delta_matrix=delta_matrix,
-            third_derivative_tensor=third_derivative_tensor,
+            third_derivative=third_derivative,
         )
         direct_var = portfolio_variance(
             gamma_matrix=gamma_matrix,
@@ -65,7 +65,7 @@ def test_reconstructed_q_matches_direct_variance_formula() -> None:
             covariance=covariance,
             degrees_of_freedom=degrees_of_freedom,
             c_coefficient=c_coefficient,
-            h_vector=h_vector,
+            h=h,
         )
         matrix_var = 0.5 * float(x.T @ precision_matrix @ x)
         assert np.isclose(direct_var, matrix_var, atol=1e-7)

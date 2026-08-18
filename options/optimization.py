@@ -125,7 +125,7 @@ def solve_cfvar3_numerical(
     return np.asarray(result.x, dtype=float)
 
 
-def build_cfvar3_objective(
+def cfvar3_objective(
     alpha: float, u: FloatArray, q_matrix: FloatArray, kappa3_fn
 ):
     """Factory for numerical P3 objective."""

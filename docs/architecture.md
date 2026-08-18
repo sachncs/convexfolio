@@ -39,7 +39,7 @@ Core solvers:
 - `solve_variance_minimization` — Minimum variance portfolio under budget constraint
 - `solve_cfvar2_closed_form` — Analytical CFVaR2 solution
 - `solve_cfvar3_numerical` — Numerical CFVaR3 optimization
-- `build_cfvar3_objective` — Build CFVaR3 objective function
+- `cfvar3_objective` — CFVaR3 objective function
 
 ### Risk (`risk.py`)
 

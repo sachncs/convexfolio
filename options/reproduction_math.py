@@ -23,7 +23,7 @@ def portfolio_greeks_from_shares(
     return theta_value, delta_vector, gamma_matrix
 
 
-def variance_direct_formula(
+def portfolio_variance(
     gamma_matrix: FloatArray,
     delta_vector: FloatArray,
     expected_payoff: FloatArray,
@@ -188,7 +188,7 @@ def reconstruct_q_matrix_from_direct_variance(
             delta_matrix=delta_matrix,
             third_derivative_tensor=third_derivative_tensor,
         )
-        return variance_direct_formula(
+        return portfolio_variance(
             gamma_matrix=gamma_mat,
             delta_vector=delta_vec,
             expected_payoff=expected_payoff,

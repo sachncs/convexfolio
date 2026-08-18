@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 
 from options.config import ExperimentConfig
-from options.optimization import build_cfvar3_objective
+from options.optimization import cfvar3_objective
 from options.optimization import solve_cfvar2_closed_form
 from options.optimization import solve_cfvar3_numerical
 from options.optimization import solve_variance_minimization
@@ -38,7 +38,7 @@ def run_reproduction(experiment: ExperimentConfig) -> dict[str, object]:
     )
 
     kappa3_callback = lambda x: 0.0
-    objective = build_cfvar3_objective(
+    objective = cfvar3_objective(
         alpha=experiment.optimization.alpha,
         u=expected_payoff_vector,
         q_matrix=precision_matrix,

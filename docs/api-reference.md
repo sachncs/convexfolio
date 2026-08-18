@@ -11,7 +11,7 @@ from options import (
     solve_variance_minimization,
     solve_cfvar2_closed_form,
     solve_cfvar3_numerical,
-    build_cfvar3_objective,
+    cfvar3_objective,
     cfvar2,
     cfvar3,
 )
@@ -107,10 +107,10 @@ Solve CFVaR3 portfolio optimization using numerical methods.
 
 ---
 
-#### `build_cfvar3_objective`
+#### `cfvar3_objective`
 
 ```python
-def build_cfvar3_objective(
+def cfvar3_objective(
     alpha: float,
     u: FloatArray,
     q_matrix: FloatArray,
@@ -118,7 +118,7 @@ def build_cfvar3_objective(
 ) -> Callable[[np.ndarray], float]:
 ```
 
-Build CFVaR3 objective function for numerical optimization.
+CFVaR3 objective function for numerical optimization.
 
 **Parameters:**
 - `alpha` (float): Risk parameter

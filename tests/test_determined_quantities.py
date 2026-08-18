@@ -4,7 +4,7 @@ from options.moments import compute_c_scalar
 from options.moments import compute_h_vector
 from options.reproduction_math import portfolio_greeks_from_shares
 from options.reproduction_math import reconstruct_q_matrix_from_direct_variance
-from options.reproduction_math import variance_direct_formula
+from options.reproduction_math import portfolio_variance
 
 
 def test_c_matches_theorem2_formula() -> None:
@@ -58,7 +58,7 @@ def test_reconstructed_q_matches_direct_variance_formula() -> None:
             delta_matrix=delta_matrix,
             third_derivative_tensor=third_derivative_tensor,
         )
-        direct_var = variance_direct_formula(
+        direct_var = portfolio_variance(
             gamma_matrix=gamma_matrix,
             delta_vector=delta_vector,
             expected_payoff=expected_payoff,

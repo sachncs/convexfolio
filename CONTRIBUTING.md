@@ -1,4 +1,4 @@
-# Contributing to Optimal Option Portfolios
+# Contributing to Convexfolio
 
 Thank you for your interest in contributing! This document provides guidelines and instructions for contributing to this project.
 
@@ -23,12 +23,12 @@ This project adheres to our [Code of Conduct](CODE_OF_CONDUCT.md). By participat
 1. **Fork the repository** on GitHub
 2. **Clone your fork** locally:
    ```bash
-   git clone https://github.com/your-username/optimal-option-portfolios.git
-   cd optimal-option-portfolios
+   git clone https://github.com/your-username/convexfolio.git
+   cd convexfolio
    ```
 3. **Add upstream remote**:
    ```bash
-   git remote add upstream https://github.com/sachncs/optimal-option-portfolios.git
+   git remote add upstream https://github.com/sachncs/convexfolio.git
    ```
 4. **Create a feature branch** from `main`
 
@@ -44,14 +44,14 @@ This project adheres to our [Code of Conduct](CODE_OF_CONDUCT.md). By participat
 
 2. **Install dependencies**:
    ```bash
-   pip install -e .[dev]
+   pip install -e '.[dev]'
    ```
 
 3. **Verify setup**:
    ```bash
-   ruff check src tests scripts
-   mypy options
-   PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
+   ruff check convexfolio tests scripts benchmarks
+   mypy convexfolio
+   PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
    ```
 
 ## Branch Naming
@@ -126,9 +126,9 @@ chore(deps): update scipy to 1.12
 
 4. **Run quality checks**:
    ```bash
-   ruff check src tests scripts
-   mypy options
-   PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
+   ruff check convexfolio tests scripts benchmarks
+   mypy convexfolio
+   PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
    ```
 
 5. **Commit with conventional message**:
@@ -179,10 +179,10 @@ line-length = 88
 
 ```toml
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.12"
 strict = false
 warn_unused_ignores = true
-warn_return_any = true
+warn_return_any = false
 ```
 
 ### Import Order
@@ -197,8 +197,8 @@ import numpy as np
 from scipy import optimize
 
 # Local
-from options.config import ExperimentConfig
-from options.risk import cfvar2
+from convexfolio.config import Experiment
+from convexfolio.math import CFVaR2Closed
 ```
 
 ## Running Tests
@@ -206,19 +206,19 @@ from options.risk import cfvar2
 ### Full Test Suite
 
 ```bash
-PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 ```
 
 ### Specific Test File
 
 ```bash
-PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest tests/test_optimization.py
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest tests/test_optimization.py
 ```
 
 ### With Coverage
 
 ```bash
-PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest --cov=options --cov-report=html
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest --cov=convexfolio --cov-report=html
 ```
 
 ## Documentation
@@ -228,19 +228,15 @@ PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest --cov=options --cov-repor
 Use Google-style docstrings:
 
 ```python
-def solve_variance_minimization(v: FloatArray, qmatrix: FloatArray) -> FloatArray:
-    """Solve minimum variance portfolio optimization.
+class Variance:
+    """Callable portfolio variance objective.
 
     Args:
-        v: Option prices vector.
-        qmatrix: Covariance matrix.
-
-    Returns:
-        Optimal portfolio weights.
-
-    Raises:
-        ValueError: If inputs have incompatible dimensions.
+        precision_matrix: 2-D precision matrix ``Q``.
     """
+
+    def __call__(self, weights: FloatArray) -> float:
+        """Return ``0.5 x^T Q x`` at the given weights."""
 ```
 
 ### Updating Documentation

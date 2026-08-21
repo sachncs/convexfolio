@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from options.config import load, validate
+from convexfolio.config import load, validate
 
 
 def test_load_defaults() -> None:

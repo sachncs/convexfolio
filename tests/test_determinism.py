@@ -1,5 +1,5 @@
-from options.config import Experiment
-from options.determinism import check
+from convexfolio.config import Experiment
+from convexfolio.determinism import check
 
 
 def test_pipeline_is_deterministic_given_same_seed() -> None:

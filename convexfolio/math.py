@@ -13,7 +13,7 @@ import numpy as np
 from scipy.optimize import minimize, minimize_scalar
 from scipy.stats import norm
 
-from options.types import FloatArray
+from convexfolio.types import FloatArray
 
 
 def shapes(
@@ -641,32 +641,6 @@ class CFVaR3Objective:
             self.precision_matrix,
             np.asarray(weights, dtype=float),
             float(self.kappa3_callback(weights)),
-        ).value
-
-
-class Risk:
-    """Risk measure facade, removed in favour of direct class composition."""
-
-    def __init__(self, alpha, expected_payoff, precision_matrix):
-        self.alpha = alpha
-        self.expected_payoff = expected_payoff
-        self.precision_matrix = precision_matrix
-
-    def second(self, weights: FloatArray) -> float:
-        return CFVaR2nd(
-            self.alpha,
-            self.expected_payoff,
-            self.precision_matrix,
-            weights,
-        ).value
-
-    def third(self, weights: FloatArray, kappa3_callback) -> float:
-        return CFVaR3rd(
-            self.alpha,
-            self.expected_payoff,
-            self.precision_matrix,
-            weights,
-            float(kappa3_callback(weights)),
         ).value
 
 

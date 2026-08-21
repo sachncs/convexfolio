@@ -5,8 +5,8 @@ from __future__ import annotations
 import os
 from concurrent.futures import ProcessPoolExecutor
 
-from options.config import Experiment
-from options.utils import Report, reproduce
+from convexfolio.config import Experiment
+from convexfolio.utils import Report, reproduce
 
 
 def _parallel_threshold() -> int:

@@ -46,7 +46,7 @@ Create `/etc/systemd/system/options.service`:
 
 ```ini
 [Unit]
-Description=Optimal Option Portfolios Service
+Description=Convexfolio Service
 After=network.target
 
 [Service]
@@ -117,7 +117,7 @@ Configure logging level via config or environment:
 
 ```bash
 export OOP_LOG_LEVEL=DEBUG
-options --command reproduce-report
+convexfolio --command reproduce-report
 ```
 
 ### Output Monitoring

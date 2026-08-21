@@ -1,10 +1,10 @@
 # Getting Started
 
-This guide will help you get started with the Optimal Option Portfolios package.
+This guide will help you get started with the Convexfolio package.
 
 ## Prerequisites
 
-- Python 3.10 or higher
+- Python 3.12 or higher
 - pip package manager
 
 ## Installation
@@ -12,17 +12,17 @@ This guide will help you get started with the Optimal Option Portfolios package.
 ### From Source (Recommended)
 
 ```bash
-git clone https://github.com/sachncs/optimal-option-portfolios.git
-cd optimal-option-portfolios
+git clone https://github.com/sachncs/convexfolio.git
+cd convexfolio
 python -m venv .venv
 source .venv/bin/activate
-pip install -e .[dev]
+pip install -e '.[dev]'
 ```
 
 ### Verify Installation
 
 ```bash
-python -c "import options; print(oop.__all__)"
+python -c "import convexfolio; print(convexfolio.__all__)"
 ```
 
 ## Quick Start
@@ -31,29 +31,29 @@ python -c "import options; print(oop.__all__)"
 
 ```python
 import numpy as np
-from options import solve_variance_minimization
+from convexfolio import Variance, Minimize
 
 # Define problem inputs
-qmatrix = np.array([[2.0, 0.1], [0.1, 1.5]])
-v = np.array([1.2, 0.8])
+precision_matrix = np.array([[2.0, 0.1], [0.1, 1.5]])
+cost_vector = np.array([1.2, 0.8])
 
 # Solve
-weights = solve_variance_minimization(v=v, qmatrix=qmatrix)
+weights = Minimize(Variance(precision_matrix), cost_vector).value
 print(f"Optimal weights: {weights}")
-print(f"Budget constraint: {weights.T @ v:.6f} (should be 1.0)")
+print(f"Budget constraint: {weights.T @ cost_vector:.6f} (should be 1.0)")
 ```
 
 ### Command Line
 
 ```bash
 # Generate a reproduction report
-options --command reproduce-report
+convexfolio --command reproduce-report
 
 # Print report to stdout
-options --command print-report
+convexfolio --command print-report
 
 # Validate deterministic behavior
-options --command validate-determinism
+convexfolio --command validate-determinism
 ```
 
 ## Configuration
@@ -65,7 +65,7 @@ Create a `config.json` file:
   "runtime": {
     "seed": 42,
     "log_level": "DEBUG",
-    "output_dir": "results"
+    "output_directory": "results"
   },
   "optimization": {
     "alpha": 0.10,
@@ -78,7 +78,7 @@ Create a `config.json` file:
 Use it with:
 
 ```bash
-options --config config.json --command reproduce-report
+convexfolio --config config.json --command reproduce-report
 ```
 
 ## Next Steps

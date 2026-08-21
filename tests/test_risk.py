@@ -1,6 +1,6 @@
 import numpy as np
 
-from options.math import CFVaR2nd, CFVaR3rd, Quadratic, shapes
+from convexfolio.math import CFVaR2nd, CFVaR3rd, Quadratic, shapes
 
 
 def test_shapes_raises_on_incompatible_dims() -> None:

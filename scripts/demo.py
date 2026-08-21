@@ -1,7 +1,7 @@
 """Minimal end-to-end usage demo for optimization objectives."""
 
-from options.config import ExperimentConfig
-from options.pipeline import run_reproduction
+from convexfolio.config import ExperimentConfig
+from convexfolio.pipeline import run_reproduction
 
 
 def main() -> None:

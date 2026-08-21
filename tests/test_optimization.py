@@ -1,6 +1,6 @@
 import numpy as np
 
-from options.math import CFVaR2Closed, CFVaR3Numerical, Minimize, Variance
+from convexfolio.math import CFVaR2Closed, CFVaR3Numerical, Minimize, Variance
 
 
 def test_variance_solution_satisfies_budget_constraint() -> None:

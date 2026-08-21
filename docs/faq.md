@@ -2,13 +2,13 @@
 
 ## General
 
-### What is Optimal Option Portfolios?
+### What is Convexfolio?
 
-Optimal Option Portfolios (options) is a Python package for portfolio optimization based on the paper [arXiv:2601.07991v2](https://arxiv.org/abs/2601.07991v2). It implements variance minimization and risk-aware optimization using conditional fractional Value-at-Risk (CFVaR).
+Convexfolio is a Python package for portfolio optimization based on the paper [arXiv:2601.07991v2](https://arxiv.org/abs/2601.07991v2). It implements variance minimization and risk-aware optimization using conditional fractional Value-at-Risk (CFVaR).
 
 ### What Python versions are supported?
 
-Python 3.10 and higher. We recommend using the latest stable version.
+Python 3.12 and higher. We recommend using the latest stable version.
 
 ### Is this package production-ready?
 
@@ -24,23 +24,27 @@ Yes. The package includes:
 ### How do I install the package?
 
 ```bash
-git clone https://github.com/sachncs/optimal-option-portfolios.git
-cd optimal-option-portfolios
+git clone https://github.com/sachncs/convexfolio.git
+cd convexfolio
 python -m venv .venv
 source .venv/bin/activate
-pip install -e .[dev]
+pip install -e '.[dev]'
 ```
 
 ### What are the dependencies?
 
-Core:
-- numpy >= 1.26
-- scipy >= 1.11
+Core (exact pins):
+- numpy == 2.5.2
+- scipy == 1.18.0
 
-Development:
-- pytest >= 8.0
-- mypy >= 1.10
-- ruff >= 0.6
+Development (exact pins):
+- pytest == 9.1.1
+- mypy == 2.3.1
+- ruff == 0.16.4
+
+Optional:
+- pyyaml == 6.0.3 (YAML config support)
+- pytest-benchmark == 5.2.3, py-cpuinfo == 9.0.0 (benchmarking)
 
 ## Usage
 
@@ -48,12 +52,12 @@ Development:
 
 ```python
 import numpy as np
-from options import solve_variance_minimization
+from convexfolio import Variance, Minimize
 
-qmatrix = np.array([[2.0, 0.1], [0.1, 1.5]])
-v = np.array([1.2, 0.8])
+precision_matrix = np.array([[2.0, 0.1], [0.1, 1.5]])
+cost_vector = np.array([1.2, 0.8])
 
-weights = solve_variance_minimization(v=v, qmatrix=qmatrix)
+weights = Minimize(Variance(precision_matrix), cost_vector).value
 ```
 
 ### What is the budget constraint?
@@ -75,7 +79,7 @@ This is automatically enforced by all solvers.
 
 2. Validate determinism:
    ```bash
-   options --command validate-determinism --repetitions 3
+   convexfolio --command validate-determinism --repetitions 3
    ```
 
 ### What is CFVaR?
@@ -91,7 +95,7 @@ CFVaR (Conditional Fractional Value-at-Risk) is a risk measure that captures tai
 Create a `config.json` file and pass it to the CLI:
 
 ```bash
-options --config config.json --command reproduce-report
+convexfolio --config config.json --command reproduce-report
 ```
 
 ### What is the alpha parameter?
@@ -100,26 +104,26 @@ Alpha (α) is the risk parameter controlling the confidence level for CFVaR calc
 
 ### Can I use YAML configuration?
 
-Currently, only JSON configuration is supported. YAML support is on the roadmap.
+Yes — files with a `.yaml` or `.yml` suffix are parsed by PyYAML. JSON (`.json`) is also supported. Install the `yaml` extra: `pip install '.[yaml]'`.
 
 ## Development
 
 ### How do I run tests?
 
 ```bash
-PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 ```
 
 ### How do I run the linter?
 
 ```bash
-ruff check src tests scripts
+ruff check convexfolio tests scripts benchmarks
 ```
 
 ### How do I run the type checker?
 
 ```bash
-mypy options
+mypy convexfolio
 ```
 
 ### How do I contribute?
@@ -155,6 +159,6 @@ source .venv/bin/activate
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/sachncs/optimal-option-portfolios/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/sachncs/optimal-option-portfolios/discussions)
+- **Issues**: [GitHub Issues](https://github.com/sachncs/convexfolio/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/sachncs/convexfolio/discussions)
 - **Security**: See [SECURITY.md](../SECURITY.md)

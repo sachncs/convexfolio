@@ -2,62 +2,57 @@
 
 ## Overview
 
-The Optimal Option Portfolios package implements portfolio optimization algorithms based on the paper [arXiv:2601.07991v2](https://arxiv.org/abs/2601.07991v2). It provides both a Python API and CLI for solving variance minimization and risk-aware portfolio allocation problems.
+The Convexfolio package implements portfolio optimization algorithms based on the paper [arXiv:2601.07991v2](https://arxiv.org/abs/2601.07991v2). It provides both a Python API and CLI for solving variance minimization and risk-aware portfolio allocation problems.
 
 ## Package Structure
 
 ```
-options/
+convexfolio/
 ├── __init__.py          # Public API exports
 ├── cli.py               # Command-line interface
-├── config.py            # Configuration management
-├── determinism.py       # Deterministic validation
-├── logging_utils.py     # Logging utilities
-├── moments.py           # Moment calculations
-├── optimization.py      # Core solvers
-├── pipeline.py          # Execution pipeline
-├── pricing.py           # Pricing functions
-├── reproduction_math.py # Reproduction math
-├── risk.py              # Risk measures (CFVaR)
-└── types.py             # Type definitions
+├── config.py            # Configuration dataclasses + loader
+├── determinism.py       # Determinism validation
+├── math.py              # Risk, optimisation, section-2.4 primitives
+├── pipeline.py          # Run + persist report
+├── types.py             # Type aliases (FloatArray)
+└── utils.py             # Logger, Report, reproduce()
 ```
 
 ## Core Components
 
 ### Types (`types.py`)
 
-Defines typed data containers:
+Defines typed aliases:
 
-- `PortfolioState` — State variables in Setting 2.1
-- `DistributionParameters` — Distributional objects from Section 2 and 4
-- `IntermediateMoments` — Intermediate vectors/matrices from Eq. (3)
+- `FloatArray` — `numpy.typing.NDArray[np.float64]`
 
-### Optimization (`optimization.py`)
+### Math primitives (`math.py`)
 
-Core solvers:
+Core numerical classes, instantiated with deterministic inputs:
 
-- `solve_variance_minimization` — Minimum variance portfolio under budget constraint
-- `solve_cfvar2_closed_form` — Analytical CFVaR2 solution
-- `solve_cfvar3_numerical` — Numerical CFVaR3 optimization
-- `cfvar3_objective` — CFVaR3 objective function
-
-### Risk (`risk.py`)
-
-Risk measures:
-
-- `cfvar2` — Conditional fractional Value-at-Risk (2nd order)
-- `cfvar3` — Conditional fractional Value-at-Risk (3rd order)
+- `Compute`, `Linear`, `Curvature` — Skew-t coefficients `c`, `h`, `q`.
+- `Bilinear`, `Cross` — Section-2.4 expansion matrices.
+- `Expect`, `Quadratic`, `Variance` — Linear and quadratic forms.
+- `Cumulant` — Third central moment.
+- `Minimize` — Closed-form variance minimisation.
+- `Loss`, `Score`, `OptimalEpsilon` — Epsilon-star helpers.
+- `CFVaR2Closed` — Closed-form CFVaR2 weight solver.
+- `CFVaR3Numerical`, `CFVaR3Objective` — Numerical CFVaR3 solver.
+- `CFVaR2nd`, `CFVaR3rd` — Risk evaluators at a weight vector.
+- `Greeks`, `PortfolioVariance`, `Linearize`, `Reconstruct` — Section 2.4.
+- `QualityScore` — Sanity check on CFVaR2 closed-form.
 
 ### Configuration (`config.py`)
 
-- `RuntimeConfig` — Execution settings (seed, log level, output dir)
-- `OptimizationConfig` — Optimization parameters (alpha, method)
-- `ExperimentConfig` — Top-level configuration container
+- `Runtime` — Execution settings (seed, log level, output directory)
+- `Optimization` — Optimization parameters (alpha, method, enforce nu > 6)
+- `Experiment` — Top-level configuration container
+- `load(path)` — JSON/YAML loader
+- `validate(config)` — Semantic constraint enforcement
 
 ### Pipeline (`pipeline.py`)
 
-- `run_reproduction` — Execute end-to-end optimization
-- `save_report` — Persist JSON reports
+- `run_and_save(experiment, output_dir)` — Execute determinism check and persist report
 
 ### CLI (`cli.py`)
 

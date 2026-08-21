@@ -16,9 +16,9 @@ from collections.abc import Callable
 import numpy as np
 import pytest
 
-from options.config import Experiment
-from options.math import CFVaR2Closed, Minimize, Variance
-from options.utils import reproduce
+from convexfolio.config import Experiment
+from convexfolio.math import CFVaR2Closed, Minimize, Variance
+from convexfolio.utils import reproduce
 
 try:
     import pytest_benchmark  # noqa: F401

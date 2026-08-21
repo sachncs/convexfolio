@@ -53,8 +53,8 @@ When using this package:
 
 This security policy applies to:
 
-- The `options` Python package
-- Official GitHub repository: `sachncs/optimal-option-portfolios`
+- The `convexfolio` Python package
+- Official GitHub repository: `sachncs/convexfolio`
 - Documentation and examples in this repository
 
 ## Recognition

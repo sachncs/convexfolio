@@ -1,13 +1,13 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools==84.0.0", "wheel==0.48.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "options"
+name = "convexfolio"
 version = "0.2.1"
-description = "Production-ready optimal option portfolio optimizer (paper-faithful baseline + extensible package API)."
+description = "Convexfolio — production-ready option portfolio optimizer (paper-faithful baseline + extensible package API)."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 license = "MIT"
 authors = [
   {name = "Sachin <sachncs@gmail.com>"}
@@ -26,47 +26,44 @@ classifiers = [
   "Intended Audience :: Science/Research",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Office/Business :: Financial",
   "Topic :: Scientific/Engineering :: Mathematics",
   "Typing :: Typed",
 ]
 dependencies = [
-  "numpy>=1.26",
-  "scipy>=1.11",
+  "numpy==2.5.2",
+  "scipy==1.18.0",
 ]
 
 [project.urls]
-Homepage = "https://github.com/sachncs/optimal-option-portfolios"
-Repository = "https://github.com/sachncs/optimal-option-portfolios"
-Issues = "https://github.com/sachncs/optimal-option-portfolios/issues"
-Changelog = "https://github.com/sachncs/optimal-option-portfolios/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/sachncs/convexfolio"
+Repository = "https://github.com/sachncs/convexfolio"
+Issues = "https://github.com/sachncs/convexfolio/issues"
+Changelog = "https://github.com/sachncs/convexfolio/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 yaml = [
-  "pyyaml>=6.0",
+  "pyyaml==6.0.3",
 ]
 dev = [
-  "pytest>=8.0",
-  "mypy>=1.10",
-  "ruff>=0.6",
+  "pytest==9.1.1",
+  "mypy==2.3.1",
+  "ruff==0.16.4",
 ]
 bench = [
-  "pytest-benchmark>=4.0",
-]
-docs = [
-  "sphinx>=7.0",
-  "sphinx-rtd-theme>=2.0",
+  "pytest-benchmark==5.2.3",
+  "py-cpuinfo==9.0.0",
 ]
 
 [project.scripts]
-options = "options.cli:main"
+convexfolio = "convexfolio.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["options*"]
+include = ["convexfolio*"]
 exclude = ["tests*", "scripts*", "build*", "dist*", "*.egg-info*"]
 
 [tool.ruff]
@@ -76,9 +73,8 @@ line-length = 88
 select = ["E", "F", "W", "I", "B", "UP", "C4", "SIM"]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.12"
 strict = false
 warn_unused_ignores = true
 warn_return_any = false
 ignore_missing_imports = true
-follow_imports = "silent"

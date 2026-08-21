@@ -12,13 +12,13 @@ from pathlib import Path
 
 import numpy as np
 
-from options.config import Experiment
-from options.math import (
+from convexfolio.config import Experiment
+from convexfolio.math import (
     CFVaR2Closed,
+    CFVaR2nd,
     CFVaR3Numerical,
     CFVaR3Objective,
     Minimize,
-    Risk,
     Variance,
 )
 
@@ -32,7 +32,7 @@ class Logger:
         logger: The wrapped stdlib logger.
     """
 
-    def __init__(self, level: str, name: str = "options") -> None:
+    def __init__(self, level: str, name: str = "convexfolio") -> None:
         """Initialise the wrapped stdlib logger with the given level.
 
         Args:
@@ -91,11 +91,6 @@ def reproduce(experiment: Experiment) -> dict[str, object]:
         alpha=experiment.optimization.alpha,
     ).value
 
-    risk = Risk(
-        alpha=experiment.optimization.alpha,
-        expected_payoff=expected_payoff_vector,
-        precision_matrix=precision_matrix,
-    )
     objective = CFVaR3Objective(
         alpha=experiment.optimization.alpha,
         expected_payoff=expected_payoff_vector,
@@ -120,7 +115,12 @@ def reproduce(experiment: Experiment) -> dict[str, object]:
             "variance_weights": variance_weights.tolist(),
             "cfvar2_weights": cfvar2_weights.tolist(),
             "cfvar3_weights": cfvar3_weights.tolist(),
-            "cfvar2_at_variance_weights": risk.second(variance_weights),
+            "cfvar2_at_variance_weights": CFVaR2nd(
+                alpha=experiment.optimization.alpha,
+                expected_payoff=expected_payoff_vector,
+                precision_matrix=precision_matrix,
+                weights=variance_weights,
+            ).value,
         },
         "uncertainty": {
             "status": "ASSUMPTION",

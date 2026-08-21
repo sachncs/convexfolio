@@ -1,8 +1,8 @@
-"""Public package API for the options package."""
+"""Public package API for the Convexfolio package."""
 
-from options.config import Experiment, Optimization, Runtime, load, validate
-from options.determinism import check
-from options.math import (
+from convexfolio.config import Experiment, Optimization, Runtime, load, validate
+from convexfolio.determinism import check
+from convexfolio.math import (
     Bilinear,
     CFVaR2Closed,
     CFVaR2nd,
@@ -27,8 +27,8 @@ from options.math import (
     Score,
     Variance,
 )
-from options.pipeline import run_and_save
-from options.utils import Logger, Report, reproduce
+from convexfolio.pipeline import run_and_save
+from convexfolio.utils import Logger, Report, reproduce
 
 __all__ = [
     "Bilinear",

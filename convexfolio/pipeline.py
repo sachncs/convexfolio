@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from options.config import Experiment
-from options.determinism import check
+from convexfolio.config import Experiment
+from convexfolio.determinism import check
 
 
 def run_and_save(experiment: Experiment, output_dir: str) -> Path:

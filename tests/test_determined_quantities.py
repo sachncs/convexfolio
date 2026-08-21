@@ -1,6 +1,6 @@
 import numpy as np
 
-from options.math import Compute, Greeks, Linear, PortfolioVariance, Reconstruct
+from convexfolio.math import Compute, Greeks, Linear, PortfolioVariance, Reconstruct
 
 
 def test_c_matches_theorem2_formula() -> None:

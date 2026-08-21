@@ -1,6 +1,6 @@
-# Production-Readiness Plan — `optimal-option-portfolios`
+# Production-Readiness Plan — `convexfolio`
 
-**Repository:** `/Users/sachin/repo/optimal-option-portfolios`
+**Repository:** `/Users/sachin/repo/convexfolio`
 **Target version:** `0.3.0` (classifier `5 - Production/Stable`)
 **Mode:** atomic commits, one identifier (or one logical unit) per commit
 **Status:** locked; 53 commits across 6 phases
@@ -100,8 +100,8 @@ Plus 1 dedicated doc-fix commit listed in Phase F for index/api-reference sync =
 
 ### Acceptance criteria
 
-- [ ] `rg -nw 'g1|g2|q|eps_star|nu|sigma|omega|theta|psi|tau|m|x|z' options/` returns only false positives (`nu` inside a docstring, `m` inside a regex, etc.) — no identifier hits.
-- [ ] `python -c "from options.optimization import loss_gradient, optimal_epsilon"` works (renames don't shadow module globals).
+- [ ] `rg -nw 'g1|g2|q|eps_star|nu|sigma|omega|theta|psi|tau|m|x|z' convexfolio/` returns only false positives (`nu` inside a docstring, `m` inside a regex, etc.) — no identifier hits.
+- [ ] `python -c "from convexfolio.math import OptimalEpsilon"` works (renames don't shadow module globals).
 - [ ] All tests still pass.
 
 ---
@@ -172,11 +172,11 @@ Raises:
 
 ### Acceptance criteria
 
-- [ ] Every public function in `options/` has a `"""..."""` docstring.
-- [ ] Every public function with parameters has an `Args:` block.
-- [ ] Every public function with a non-`None` return has a `Returns:` block.
-- [ ] Every public function that raises a named exception has a `Raises:` block.
-- [ ] `python -c "from options import solve_variance_minimization; help(solve_variance_minimization)"` renders the docstring cleanly.
+- [ ] Every public class in `convexfolio/` has a `"""..."""` docstring.
+- [ ] Every public class with `__init__` parameters has an `Args:` block.
+- [ ] Every public class with a `.value` or named attribute has an `Attributes:` block.
+- [ ] Every public class that raises a named exception has a `Raises:` block.
+- [ ] `python -c "from convexfolio import Minimize, Variance; help(Minimize)"` renders the docstring cleanly.
 - [ ] `interrogate options/` (interrogate-style count) reports coverage ≥ 100% of public symbols.
 
 ---
@@ -311,7 +311,7 @@ Raises:
 - **Closure hoist correctness.** `solve_cfvar3_numerical` calls its objective in an inner loop. The hoisted `objective(x, alpha, u, precision, kappa3_callback)` is passed scalars on each iteration — verify solver performance doesn't regress (it shouldn't; the closure captured the same scalars).
 - **`Experiment` field name collisions.** `output_dir` previously a local in `pipeline.py` and `save_report(report, output_dir)` is a parameter — once we flatten to `experiment.output_directory`, every `config.output_dir` becomes `experiment.output_directory`. Phase V catches this.
 - **Tolerant JSON or hard break.** The user picked hard break at 0.3.0. `load(path)` raises `ValueError` with a one-line message. Users upgrading from 0.2.x will see the error and re-write their config.
-- **Pricing deletion.** No callers in src/ or tests/. Safe deletion. Verify with `rg "from options.pricing|import pricing|truncated_density|compute_z_normalizer|skew_gosset_call_price|skew_gosset_put_price" .` returns zero before commit 7.
+- **Pricing deletion.** No callers in src/ or tests/. Safe deletion. Verify with `rg "from options.pricing|import pricing|truncated_density|compute_z_normalizer|skew_gosset_call_price|skew_gosset_put_price" .` returns zero before commit 7. *(Historical note — these modules never existed in the production branch; the plan referenced them as placeholders.)*
 
 ---
 

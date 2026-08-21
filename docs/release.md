@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document describes the release process for the Optimal Option Portfolios package.
+This document describes the release process for the Convexfolio package.
 
 ## Version Numbering
 
@@ -16,9 +16,9 @@ This project follows [Semantic Versioning](https://semver.org/):
 
 ### Code Quality
 
-- [ ] All tests passing: `PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q`
-- [ ] No type errors: `mypy options`
-- [ ] No lint errors: `ruff check src tests scripts`
+- [ ] All tests passing: `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q`
+- [ ] No type errors: `mypy convexfolio`
+- [ ] No lint errors: `ruff check convexfolio tests scripts benchmarks`
 - [ ] Code coverage acceptable
 
 ### Documentation
@@ -80,9 +80,9 @@ git tag vX.Y.Z
 ### 5. Run Quality Checks
 
 ```bash
-ruff check src tests scripts
-mypy options
-PYTHONPATH=src PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
+ruff check convexfolio tests scripts benchmarks
+mypy convexfolio
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 python -m build
 ```
 

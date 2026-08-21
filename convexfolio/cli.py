@@ -3,10 +3,10 @@
 import argparse
 import json
 
-from options.config import load
-from options.determinism import check
-from options.pipeline import run_and_save
-from options.utils import Logger, reproduce
+from convexfolio.config import load
+from convexfolio.determinism import check
+from convexfolio.pipeline import run_and_save
+from convexfolio.utils import Logger, reproduce
 
 
 def parser() -> argparse.ArgumentParser:

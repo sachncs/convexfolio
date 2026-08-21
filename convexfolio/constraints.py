@@ -173,3 +173,50 @@ def position_limits_bounds(
         List of ``(-max, +max)`` tuples.
     """
     return bounds(-max_abs_weight, max_abs_weight, n)
+
+
+def sector_caps_inequalities(
+    sector_map: Sequence[int], max_per_sector: float
+) -> ConstraintSpec:
+    """Build inequality constraints enforcing per-sector exposure caps.
+
+    For each unique sector, emits ``sum_{i in sector} x[i] <= max``.
+    Assumes long-only weights (negative weights would net against
+    the cap; if you allow shorting, use absolute-value caps).
+
+    Args:
+        sector_map: Integer sector id per instrument (length ``n``).
+        max_per_sector: Maximum sum of weights in any single sector.
+
+    Returns:
+        Tuple of inequality constraints, one per unique sector.
+    """
+    out: list[SLSQPConstraint] = []
+    n = len(sector_map)
+    unique_sectors = sorted(set(sector_map))
+    for sector in unique_sectors:
+        a = np.zeros(n, dtype=float)
+        for i, s in enumerate(sector_map):
+            if s == sector:
+                a[i] = 1.0
+        out.append(inequality(a, max_per_sector))
+    return tuple(out)
+
+
+def leverage_cap_inequality(n: int, max_leverage: float) -> SLSQPConstraint:
+    """Build the inequality constraint ``sum |x[i]| <= max_leverage``.
+
+    SLSQP supports only smooth constraints; |x[i]| is not smooth at 0.
+    For practical portfolios the smooth approximation is fine, but
+    if your portfolio has many zero-weight instruments, prefer
+    long_only + position limits instead.
+
+    Args:
+        n: Number of instruments.
+        max_leverage: Maximum sum of absolute weights.
+
+    Returns:
+        A single SLSQP inequality constraint.
+    """
+    a = np.ones(n, dtype=float)
+    return inequality(a, max_leverage)

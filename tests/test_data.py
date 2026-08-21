@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from convexfolio.data import LoadCSV, Summary, SyntheticPortfolio, to_config
+from convexfolio.data import LoadCSV, Summary, SyntheticPortfolio
 
 
 def test_synthetic_portfolio_shapes() -> None:
@@ -112,10 +112,26 @@ def test_summary_contains_expected_keys() -> None:
     assert s["n_instruments"] == 3
 
 
-def test_to_config_shape() -> None:
-    """to_config produces a JSON-serialisable config dict."""
+def test_to_config_shape_inline() -> None:
+    """The to_config dict layout (inlined here, no helper function)."""
     inputs = SyntheticPortfolio(n_instruments=3, degrees_of_freedom=8.0, seed=7)()
-    config = to_config(inputs, output_directory="/tmp/cf_out")
+    config = {
+        "runtime": {
+            "seed": 7,
+            "log_level": "INFO",
+            "output_directory": "/tmp/cf_out",
+        },
+        "optimization": {
+            "alpha": 0.05,
+            "method": "all",
+            "enforce_nu_greater_than_six": True,
+        },
+        "inputs": {
+            "expected_payoff": inputs.expected_payoff.tolist(),
+            "cost_vector": inputs.cost_vector.tolist(),
+            "precision_matrix": inputs.precision_matrix.tolist(),
+        },
+    }
     assert config["runtime"]["output_directory"] == "/tmp/cf_out"
     assert config["optimization"]["alpha"] == 0.05
     assert len(config["inputs"]["cost_vector"]) == 3

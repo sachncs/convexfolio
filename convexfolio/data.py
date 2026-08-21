@@ -1,6 +1,6 @@
 """Data ingestion and synthetic-data generation for Convexfolio.
 
-Four composition classes cover the public surface:
+Three composition classes cover the public surface:
 
 * :class:`LoadCSV` — read a portfolio CSV file and return a
   :class:`~convexfolio.config.PortfolioInputs`. Callable as
@@ -10,8 +10,6 @@ Four composition classes cover the public surface:
   Callable as ``SyntheticPortfolio(n, dof, seed)()``.
 * :class:`Summary` — return a JSON-serialisable shape summary of a
   portfolio. Callable as ``Summary(inputs)``.
-* :func:`to_config` — convert a loaded ``PortfolioInputs`` into the
-  JSON shape that :func:`convexfolio.config.LoadConfig` accepts.
 
 All routines are deterministic given a seed. No external dependencies
 beyond numpy.
@@ -189,47 +187,9 @@ class Summary:
         }
 
 
-def to_config(
-    inputs: PortfolioInputs, output_directory: str = "artifacts"
-) -> dict[str, Any]:
-    """Convert a ``PortfolioInputs`` into a config dict.
-
-    The returned dict is the shape that
-    :class:`~convexfolio.config.LoadConfig` accepts — serialise it
-    with :func:`json.dump` and pass via ``--config`` to the CLI.
-
-    Args:
-        inputs: The portfolio inputs to encode.
-        output_directory: Directory for saved reports. Defaults to
-            ``"artifacts"``.
-
-    Returns:
-        A JSON-serialisable config dict with the canonical
-        ``runtime``, ``optimization``, and ``inputs`` sections.
-    """
-    return {
-        "runtime": {
-            "seed": 7,
-            "log_level": "INFO",
-            "output_directory": output_directory,
-        },
-        "optimization": {
-            "alpha": 0.05,
-            "method": "all",
-            "enforce_nu_greater_than_six": True,
-        },
-        "inputs": {
-            "expected_payoff": inputs.expected_payoff.tolist(),
-            "cost_vector": inputs.cost_vector.tolist(),
-            "precision_matrix": inputs.precision_matrix.tolist(),
-        },
-    }
-
-
 __all__ = [
     "LoadCSV",
     "PortfolioInputs",
     "Summary",
     "SyntheticPortfolio",
-    "to_config",
 ]

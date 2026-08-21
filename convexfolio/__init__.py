@@ -6,8 +6,7 @@ The API is grouped by responsibility:
   :class:`Optimization`, :class:`PortfolioInputs`, :func:`load`,
   :func:`validate`.
 * **Data ingestion** — :func:`load_csv`, :func:`synthetic_portfolio`,
-  :func:`to_config`, :func:`summary` (re-exported as
-  ``inputs_summary`` to avoid shadowing ``data.summary``).
+  :func:`to_config`, :func:`summary`.
 * **SP500 options-IV HuggingFace integration** —
   :class:`OptionsRow`, :class:`CrossSectionResult`,
   :class:`BucketWeightStat`, :class:`HFDatasetSource`,
@@ -32,8 +31,7 @@ from convexfolio.config import (
     load,
     validate,
 )
-from convexfolio.data import load_csv, synthetic_portfolio, to_config
-from convexfolio.data import summary as inputs_summary
+from convexfolio.data import load_csv, summary, synthetic_portfolio, to_config
 from convexfolio.determinism import check
 from convexfolio.hf_data import (
     DATASET_REPO_ID,
@@ -125,12 +123,12 @@ __all__ = [
     "SummariseResults",
     "Variance",
     "check",
-    "inputs_summary",
     "load",
     "load_csv",
     "parse_options_row",
     "reproduce",
     "run_and_save",
+    "summary",
     "synthetic_portfolio",
     "to_config",
     "validate",

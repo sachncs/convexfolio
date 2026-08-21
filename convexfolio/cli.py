@@ -1,4 +1,24 @@
-"""Command line interface for the Convexfolio package."""
+"""Command-line interface for the Convexfolio package.
+
+Single entrypoint (:func:`main`) dispatching on ``--command``. The
+supported commands are:
+
+* ``reproduce-report`` — load a config, run the pipeline, save the
+  report to ``runtime.output_directory``.
+* ``print-report`` — load a config, run the pipeline, print the
+  report JSON to stdout.
+* ``validate-determinism`` — run the pipeline ``--repetitions``
+  times and assert the report is byte-identical.
+* ``ingest`` — read a portfolio CSV (``--path``) and print a shape
+  summary.
+* ``plot`` — render one or more charts of the loaded experiment.
+* ``backtest`` — run a multi-period rebalance backtest against a
+  price-history CSV.
+
+Helper functions :func:`ingest_command`, :func:`plot_command`, and
+:func:`backtest_command` carry the per-command logic and are also
+importable for programmatic use.
+"""
 
 import argparse
 import json
@@ -19,14 +39,19 @@ def parser() -> argparse.ArgumentParser:
     """Build the CLI argument parser.
 
     Returns:
-        The configured ``ArgumentParser``.
+        The configured :class:`argparse.ArgumentParser`. Reusable by
+        embedders that want the same flag surface without invoking
+        :func:`main`.
     """
     argument_parser = argparse.ArgumentParser(
         prog="convexfolio",
         description="Convexfolio — option portfolio optimizer",
     )
     argument_parser.add_argument(
-        "--config", type=str, default=None, help="Path to JSON or YAML config file"
+        "--config",
+        type=str,
+        default=None,
+        help="Path to a JSON or YAML config file",
     )
     argument_parser.add_argument(
         "--command",
@@ -40,10 +65,13 @@ def parser() -> argparse.ArgumentParser:
             "plot",
             "backtest",
         ],
-        help="Execution command",
+        help="Which pipeline command to run",
     )
     argument_parser.add_argument(
-        "--repetitions", type=int, default=3, help="Determinism repetitions"
+        "--repetitions",
+        type=int,
+        default=3,
+        help="Determinism repetitions (used by 'validate-determinism')",
     )
     argument_parser.add_argument(
         "--path",
@@ -68,19 +96,23 @@ def parser() -> argparse.ArgumentParser:
         "--transaction-cost-bps",
         type=float,
         default=5.0,
-        help="Transaction cost in basis points (used by 'backtest')",
+        help="Round-trip transaction cost in basis points (used by 'backtest')",
     )
     return argument_parser
 
 
-def _ingest_command(parsed_args: argparse.Namespace) -> PortfolioInputs:
-    """Load a CSV file and print a JSON summary of the portfolio.
+def ingest_command(parsed_args: argparse.Namespace) -> PortfolioInputs:
+    """Run the ``ingest`` command: load a CSV and print its summary.
 
     Args:
-        parsed_args: Parsed CLI arguments; uses ``--path``.
+        parsed_args: Parsed CLI arguments. Must include ``--path``
+            pointing to a portfolio CSV.
 
     Returns:
-        The loaded ``PortfolioInputs``.
+        The loaded :class:`~convexfolio.config.PortfolioInputs`.
+
+    Raises:
+        SystemExit: If ``--path`` was not provided.
     """
     if not parsed_args.path:
         raise SystemExit("--path is required for the ingest command")
@@ -89,15 +121,21 @@ def _ingest_command(parsed_args: argparse.Namespace) -> PortfolioInputs:
     return inputs
 
 
-def _plot_command(parsed_args: argparse.Namespace, experiment: Experiment) -> list[str]:
-    """Render chart(s) for the loaded experiment.
+def plot_command(
+    parsed_args: argparse.Namespace, experiment: Experiment
+) -> list[str]:
+    """Run the ``plot`` command: render chart(s) of an experiment.
 
     Args:
-        parsed_args: Parsed CLI arguments; uses ``--chart``.
-        experiment: Loaded ``Experiment`` config.
+        parsed_args: Parsed CLI arguments. Uses ``--chart`` to pick
+            which chart(s) to render (``all``, ``weights``,
+            ``frontier``, ``sensitivity``).
+        experiment: A loaded :class:`~convexfolio.config.Experiment`
+            whose ``precision_matrix``, ``cost_vector``, and
+            ``expected_payoff`` are needed by the chart primitives.
 
     Returns:
-        List of output paths written.
+        A list of output paths written, one entry per chart rendered.
     """
     from convexfolio.plot import (
         cfvar_sensitivity,
@@ -139,51 +177,19 @@ def _plot_command(parsed_args: argparse.Namespace, experiment: Experiment) -> li
     return outputs
 
 
-def main() -> None:
-    """CLI entrypoint. Dispatches on ``--command`` and logs results."""
-    parsed_args = parser().parse_args()
-
-    if parsed_args.command == "ingest":
-        _ingest_command(parsed_args)
-        return
-
-    if parsed_args.command == "backtest":
-        _backtest_command(parsed_args)
-        return
-
-    experiment = load(parsed_args.config)
-    log = Logger(level=experiment.runtime.log_level)
-
-    if parsed_args.command == "plot":
-        outputs = _plot_command(parsed_args, experiment)
-        for path in outputs:
-            log.info(path)
-        return
-
-    if parsed_args.command == "validate-determinism":
-        report = check(experiment, repetitions=parsed_args.repetitions)
-        log.info(json.dumps(report.summary, indent=2))
-        if not report.deterministic:
-            raise SystemExit(2)
-        return
-
-    if parsed_args.command == "reproduce-report":
-        output_path = run_and_save(experiment, experiment.runtime.output_directory)
-        log.info(str(output_path))
-        return
-
-    result = reproduce(experiment)
-    log.info(json.dumps(result, indent=2))
-
-
-def _backtest_command(parsed_args: argparse.Namespace) -> None:
-    """Run a multi-period backtest from a price-history CSV.
+def backtest_command(parsed_args: argparse.Namespace) -> None:
+    """Run the ``backtest`` command: multi-period rebalance backtest.
 
     Args:
-        parsed_args: Parsed CLI arguments; uses ``--path``,
-            ``--rebalance-frequency``, ``--transaction-cost-bps``.
-            Reads portfolio inputs from ``--config`` if provided;
-            otherwise uses synthetic defaults.
+        parsed_args: Parsed CLI arguments. Uses ``--path`` (price
+            history CSV), ``--rebalance-frequency``,
+            ``--transaction-cost-bps``, and optionally ``--config``
+            (which must include an ``inputs`` section).
+
+    Raises:
+        SystemExit: If ``--path`` was not provided.
+        AssertionError: If ``--config`` is given but the loaded
+            experiment has no ``inputs`` section.
     """
     from convexfolio.backtest import (
         BacktestConfig,
@@ -214,6 +220,59 @@ def _backtest_command(parsed_args: argparse.Namespace) -> None:
     )
     result = run_backtest(history, config)
     print(json.dumps(result.summary, indent=2))
+
+
+def main() -> None:
+    """CLI entrypoint: parse args, dispatch on ``--command``, log results.
+
+    Dispatch table:
+
+    * ``ingest`` → :func:`ingest_command`
+    * ``backtest`` → :func:`backtest_command`
+    * ``plot`` → :func:`plot_command`
+    * ``validate-determinism`` → :func:`~convexfolio.determinism.check`
+    * ``reproduce-report`` → :func:`~convexfolio.pipeline.run_and_save`
+    * default (no match) → :func:`~convexfolio.utils.reproduce`
+
+    Raises:
+        SystemExit: With code ``2`` if ``validate-determinism`` finds
+            the pipeline output is non-deterministic. Other
+            ``SystemExit`` values propagate from the helper commands
+            (``--path`` missing, etc.).
+    """
+    parsed_args = parser().parse_args()
+
+    if parsed_args.command == "ingest":
+        ingest_command(parsed_args)
+        return
+
+    if parsed_args.command == "backtest":
+        backtest_command(parsed_args)
+        return
+
+    experiment = load(parsed_args.config)
+    log = Logger(level=experiment.runtime.log_level)
+
+    if parsed_args.command == "plot":
+        outputs = plot_command(parsed_args, experiment)
+        for path in outputs:
+            log.info(path)
+        return
+
+    if parsed_args.command == "validate-determinism":
+        report = check(experiment, repetitions=parsed_args.repetitions)
+        log.info(json.dumps(report.summary, indent=2))
+        if not report.deterministic:
+            raise SystemExit(2)
+        return
+
+    if parsed_args.command == "reproduce-report":
+        output_path = run_and_save(experiment, experiment.runtime.output_directory)
+        log.info(str(output_path))
+        return
+
+    result = reproduce(experiment)
+    log.info(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":

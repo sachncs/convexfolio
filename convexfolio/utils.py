@@ -1,12 +1,20 @@
-"""Cross-cutting helpers for the options package.
+"""Cross-cutting helpers for Convexfolio.
 
-Holds the deterministic primitives that are shared by ``determinism`` and
-``pipeline``: ``Logger`` for output, ``Report`` for determinism results, and
-``reproduce`` for the single-run pipeline execution.
+Holds the deterministic primitives shared by the pipeline:
+
+* :class:`Logger` — stdlib ``logging`` facade with project conventions.
+* :class:`Reproduce` — runs the end-to-end optimisation once on an
+  :class:`~convexfolio.config.Experiment` and returns a structured
+  result dict.
+* :class:`Report` — determinism result over repeated
+  :class:`Reproduce` runs; the primary constructor is
+  :meth:`Report.from_reproduce`.
 """
 
 import json
 import logging
+import os
+from concurrent.futures import ProcessPoolExecutor
 from dataclasses import asdict
 from pathlib import Path
 
@@ -160,9 +168,11 @@ class Reproduce:
 class Report:
     """Determinism result over repeated pipeline runs.
 
-    Holds the repeated run results, the JSON serialised forms, and exposes
-    ``.save(path)`` to persist the summary. Used by both ``determinism`` and
-    ``pipeline``.
+    Holds the repeated run results, the JSON serialised forms, and
+    exposes ``.save(path)`` to persist the summary. The primary
+    constructor is :meth:`from_reproduce`, which runs
+    :class:`Reproduce` N times (serially or via
+    :class:`ProcessPoolExecutor`) and packages the outputs.
 
     Attributes:
         config: The configuration used for the run.
@@ -187,7 +197,8 @@ class Report:
         Args:
             config: The configuration used for the run.
             repetitions: Number of repetitions (must be ``>= 2``).
-            results: The per-run result dicts (length must equal ``repetitions``).
+            results: The per-run result dicts (length must equal
+                ``repetitions``).
 
         Raises:
             ValueError: If ``repetitions < 2`` or length mismatch.
@@ -208,6 +219,47 @@ class Report:
             "seed": config.runtime.seed,
             "reference": results[0],
         }
+
+    @classmethod
+    def from_reproduce(
+        cls,
+        config: Experiment,
+        repetitions: int = 2,
+    ) -> "Report":
+        """Build a :class:`Report` by running :class:`Reproduce` N times.
+
+        Runs :class:`Reproduce` ``repetitions`` times and compares the
+        serialised outputs to detect nondeterminism. Above a configurable
+        threshold (env var ``OPTIONS_PARALLEL_THRESHOLD``, default
+        ``4``), switches to a :class:`ProcessPoolExecutor` for
+        parallelism; otherwise runs serially in-process.
+
+        Args:
+            config: The configuration to run through the pipeline.
+            repetitions: Number of repetitions. Must be ``>= 2``.
+
+        Returns:
+            A :class:`Report` describing whether the runs were
+            byte-equivalent.
+
+        Raises:
+            ValueError: If ``repetitions < 2``.
+        """
+        if repetitions < 2:
+            raise ValueError("repetitions must be >= 2")
+        parallel_threshold = int(
+            os.environ.get("OPTIONS_PARALLEL_THRESHOLD", "4")
+        )
+        if repetitions >= parallel_threshold:
+            with ProcessPoolExecutor() as executor:
+                results = list(
+                    executor.map(
+                        lambda c: Reproduce(c)(), [config] * repetitions
+                    )
+                )
+        else:
+            results = [Reproduce(config)() for _ in range(repetitions)]
+        return cls(config=config, repetitions=repetitions, results=results)
 
     @property
     def deterministic(self) -> bool:

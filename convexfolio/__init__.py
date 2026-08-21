@@ -20,7 +20,7 @@ The API is grouped by responsibility:
   blocks (:class:`Compute`, :class:`Linear`, :class:`Curvature`,
   :class:`Bilinear`, :class:`Cross`).
 * **Pipeline** — :class:`Logger`, :class:`Report`,
-  :class:`Reproduce`, :func:`check` (determinism check).
+  :class:`Reproduce`.
 """
 
 from convexfolio.config import (
@@ -32,7 +32,6 @@ from convexfolio.config import (
     Validate,
 )
 from convexfolio.data import LoadCSV, Summary, SyntheticPortfolio
-from convexfolio.determinism import check
 from convexfolio.hf_data import (
     DATASET_REPO_ID,
     DATASET_SPLIT,
@@ -128,5 +127,4 @@ __all__ = [
     "SyntheticPortfolio",
     "Validate",
     "Variance",
-    "check",
 ]

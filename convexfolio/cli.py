@@ -37,9 +37,8 @@ from convexfolio.data import (
     Summary,
     SyntheticPortfolio,
 )
-from convexfolio.determinism import check
 from convexfolio.plot import cfvar_sensitivity, efficient_frontier, weights
-from convexfolio.utils import Logger, Reproduce
+from convexfolio.utils import Logger, Report, Reproduce
 
 
 def parser() -> argparse.ArgumentParser:
@@ -225,8 +224,10 @@ def main() -> None:
     * ``ingest`` → :func:`ingest_command`
     * ``backtest`` → :func:`backtest_command`
     * ``plot`` → :func:`plot_command`
-    * ``validate-determinism`` → :func:`~convexfolio.determinism.check`
-    * ``reproduce-report`` → :func:`~convexfolio.determinism.check` plus
+    * ``validate-determinism`` →
+      :meth:`~convexfolio.utils.Report.from_reproduce`
+    * ``reproduce-report`` →
+      :meth:`~convexfolio.utils.Report.from_reproduce` plus
       :meth:`~convexfolio.utils.Report.save`
     * default (no match) → :class:`~convexfolio.utils.Reproduce`
 
@@ -256,14 +257,16 @@ def main() -> None:
         return
 
     if parsed_args.command == "validate-determinism":
-        report = check(experiment, repetitions=parsed_args.repetitions)
+        report = Report.from_reproduce(
+            experiment, repetitions=parsed_args.repetitions
+        )
         log.info(json.dumps(report.summary, indent=2))
         if not report.deterministic:
             raise SystemExit(2)
         return
 
     if parsed_args.command == "reproduce-report":
-        report = check(experiment, repetitions=3)
+        report = Report.from_reproduce(experiment, repetitions=3)
         output_path = Path(experiment.runtime.output_directory) / "report.json"
         report.save(str(output_path))
         log.info(str(output_path))

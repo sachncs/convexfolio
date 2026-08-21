@@ -32,10 +32,10 @@ from convexfolio.backtest import (
 )
 from convexfolio.config import Experiment, LoadConfig
 from convexfolio.data import (
+    LoadCSV,
     PortfolioInputs,
-    load_csv,
-    summary,
-    synthetic_portfolio,
+    Summary,
+    SyntheticPortfolio,
 )
 from convexfolio.determinism import check
 from convexfolio.plot import cfvar_sensitivity, efficient_frontier, weights
@@ -124,8 +124,8 @@ def ingest_command(parsed_args: argparse.Namespace) -> PortfolioInputs:
     log = Logger(level="INFO")
     if not parsed_args.path:
         raise SystemExit("--path is required for the ingest command")
-    inputs = load_csv(parsed_args.path)
-    log.info(json.dumps(summary(inputs), indent=2))
+    inputs = LoadCSV(parsed_args.path)()
+    log.info(json.dumps(Summary(inputs), indent=2))
     return inputs
 
 
@@ -203,9 +203,9 @@ def backtest_command(parsed_args: argparse.Namespace) -> None:
         )
         portfolio_inputs = experiment.inputs
     else:
-        portfolio_inputs = synthetic_portfolio(
+        portfolio_inputs = SyntheticPortfolio(
             n_instruments=history.n_instruments, degrees_of_freedom=8.0, seed=7
-        )
+        )()
 
     config = BacktestConfig(
         portfolio_inputs=portfolio_inputs,

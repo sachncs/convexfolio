@@ -16,7 +16,7 @@ from convexfolio.backtest import (
     run_backtest,
 )
 from convexfolio.constraints import long_only_inequalities
-from convexfolio.data import synthetic_portfolio
+from convexfolio.data import SyntheticPortfolio
 
 
 @pytest.fixture()
@@ -84,7 +84,7 @@ def test_load_price_history_csv_missing_file() -> None:
 
 
 def test_run_backtest_short_history_raises() -> None:
-    inputs = synthetic_portfolio(3, 8.0, 7)
+    inputs = SyntheticPortfolio(3, 8.0, 7)()
     prices = np.ones((1, 3))
     h = PriceHistory(timestamps=np.array(["t0"]), prices=prices)
     cfg = BacktestConfig(portfolio_inputs=inputs, rebalance_frequency=1)
@@ -93,7 +93,7 @@ def test_run_backtest_short_history_raises() -> None:
 
 
 def test_run_backtest_basic_shape(history: PriceHistory) -> None:
-    inputs = synthetic_portfolio(5, 8.0, 7)
+    inputs = SyntheticPortfolio(5, 8.0, 7)()
     cfg = BacktestConfig(
         portfolio_inputs=inputs, rebalance_frequency=2, transaction_cost_bps=5.0
     )
@@ -107,7 +107,7 @@ def test_run_backtest_basic_shape(history: PriceHistory) -> None:
 
 
 def test_run_backtest_summary_keys(history: PriceHistory) -> None:
-    inputs = synthetic_portfolio(5, 8.0, 7)
+    inputs = SyntheticPortfolio(5, 8.0, 7)()
     cfg = BacktestConfig(portfolio_inputs=inputs, rebalance_frequency=2)
     result = run_backtest(history, cfg)
     expected_keys = {
@@ -128,7 +128,7 @@ def test_run_backtest_zero_costs_when_rebalance_frequency_exceeds_history(
     history: PriceHistory,
 ) -> None:
     """If rebalance_frequency > n_timestamps, only the initial rebalance fires."""
-    inputs = synthetic_portfolio(5, 8.0, 7)
+    inputs = SyntheticPortfolio(5, 8.0, 7)()
     cfg = BacktestConfig(
         portfolio_inputs=inputs,
         rebalance_frequency=history.n_timestamps + 1,
@@ -140,7 +140,7 @@ def test_run_backtest_zero_costs_when_rebalance_frequency_exceeds_history(
 
 def test_run_backtest_with_long_only_constraints(history: PriceHistory) -> None:
     """Long-only should keep all weights non-negative."""
-    inputs = synthetic_portfolio(5, 8.0, 7)
+    inputs = SyntheticPortfolio(5, 8.0, 7)()
     cfg = BacktestConfig(
         portfolio_inputs=inputs,
         rebalance_frequency=1,
@@ -152,7 +152,7 @@ def test_run_backtest_with_long_only_constraints(history: PriceHistory) -> None:
 
 
 def test_run_backtest_rejects_zero_rebalance_frequency(history: PriceHistory) -> None:
-    inputs = synthetic_portfolio(5, 8.0, 7)
+    inputs = SyntheticPortfolio(5, 8.0, 7)()
     cfg = BacktestConfig(portfolio_inputs=inputs, rebalance_frequency=0)
     with pytest.raises(ValueError, match="rebalance_frequency must be >= 1"):
         run_backtest(history, cfg)
@@ -161,7 +161,7 @@ def test_run_backtest_rejects_zero_rebalance_frequency(history: PriceHistory) ->
 def test_run_backtest_json_safe_summary(history: PriceHistory) -> None:
     import json
 
-    inputs = synthetic_portfolio(5, 8.0, 7)
+    inputs = SyntheticPortfolio(5, 8.0, 7)()
     cfg = BacktestConfig(portfolio_inputs=inputs, rebalance_frequency=2)
     result = run_backtest(history, cfg)
     json.dumps(result.summary)  # must not raise
@@ -169,7 +169,7 @@ def test_run_backtest_json_safe_summary(history: PriceHistory) -> None:
 
 def test_run_backtest_first_value_is_one(history: PriceHistory) -> None:
     """Initial portfolio value is always 1.0 (normalised)."""
-    inputs = synthetic_portfolio(5, 8.0, 7)
+    inputs = SyntheticPortfolio(5, 8.0, 7)()
     cfg = BacktestConfig(portfolio_inputs=inputs, rebalance_frequency=1)
     result = run_backtest(history, cfg)
     assert result.portfolio_value[0] == pytest.approx(1.0, abs=1e-9)

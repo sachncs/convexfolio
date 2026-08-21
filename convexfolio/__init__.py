@@ -31,7 +31,7 @@ from convexfolio.config import (
     Runtime,
     Validate,
 )
-from convexfolio.data import load_csv, summary, synthetic_portfolio, to_config
+from convexfolio.data import LoadCSV, Summary, SyntheticPortfolio, to_config
 from convexfolio.determinism import check
 from convexfolio.hf_data import (
     DATASET_REPO_ID,
@@ -104,6 +104,7 @@ __all__ = [
     "IV_BUCKETS",
     "Linear",
     "Linearize",
+    "LoadCSV",
     "LoadConfig",
     "LoadOptionsIV",
     "Logger",
@@ -122,6 +123,8 @@ __all__ = [
     "Runtime",
     "Score",
     "SummariseResults",
+    "Summary",
+    "SyntheticPortfolio",
     "Validate",
     "Variance",
     "check",

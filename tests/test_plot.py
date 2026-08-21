@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from convexfolio.data import synthetic_portfolio
+from convexfolio.data import SyntheticPortfolio
 
 
 @pytest.fixture()
@@ -20,7 +20,7 @@ def tmp_dir() -> Generator[Path]:
 
 @pytest.fixture()
 def portfolio() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    inputs = synthetic_portfolio(5, 8.0, 7)
+    inputs = SyntheticPortfolio(5, 8.0, 7)()
     return inputs.precision_matrix, inputs.cost_vector, inputs.expected_payoff
 
 

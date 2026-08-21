@@ -57,6 +57,9 @@ bench = [
   "pytest-benchmark==5.2.3",
   "py-cpuinfo==9.0.0",
 ]
+viz = [
+  "matplotlib==3.11.1",
+]
 
 [project.scripts]
 convexfolio = "convexfolio.cli:main"

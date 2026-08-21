@@ -1,18 +1,22 @@
 """Data ingestion and synthetic-data generation for Convexfolio.
 
-Three responsibilities:
+Three responsibilities, exposed as plain functions because they are
+stateless and read-from-disk or pure-numpy:
 
-* ``load_csv`` — read a CSV file of portfolio inputs into numpy arrays.
-* ``synthetic_portfolio`` — generate a sample portfolio with realistic
-  option Greeks derived from a skew-t distribution.
-* ``to_config`` — convert a loaded ``PortfolioInputs`` into the JSON
-  shape that ``convexfolio.config.load`` expects.
+* :func:`load_csv` — read a CSV file of portfolio inputs into numpy
+  arrays and return a :class:`~convexfolio.config.PortfolioInputs`.
+* :func:`synthetic_portfolio` — generate a sample portfolio with
+  realistic option Greeks derived from a skew-t distribution.
+* :func:`to_config` — convert a loaded ``PortfolioInputs`` into the
+  JSON shape that :func:`~convexfolio.config.load` accepts.
+* :func:`summary` — return a JSON-serialisable shape summary of a
+  ``PortfolioInputs``.
 
 All routines are deterministic given a seed. No external dependencies
 beyond numpy.
 
-``PortfolioInputs`` is re-exported from ``convexfolio.config`` so the
-public API has a single canonical class.
+``PortfolioInputs`` is re-exported from :mod:`convexfolio.config` so
+the public API has a single canonical class.
 """
 
 from __future__ import annotations
@@ -26,21 +30,6 @@ import numpy as np
 from convexfolio.config import PortfolioInputs
 
 
-def _summary(inputs: PortfolioInputs) -> dict[str, Any]:
-    return {
-        "n_instruments": inputs.n_instruments,
-        "expected_payoff_range": [
-            float(inputs.expected_payoff.min()),
-            float(inputs.expected_payoff.max()),
-        ],
-        "cost_range": [
-            float(inputs.cost_vector.min()),
-            float(inputs.cost_vector.max()),
-        ],
-        "precision_trace": float(np.trace(inputs.precision_matrix)),
-    }
-
-
 def load_csv(path: str | Path) -> PortfolioInputs:
     """Load portfolio inputs from a CSV file.
 
@@ -49,17 +38,21 @@ def load_csv(path: str | Path) -> PortfolioInputs:
     entries of the precision matrix are derived as
     ``0.1 * sqrt(precision_diag[i] * precision_diag[j])`` — a
     conservative correlation proxy. For full covariance control, build
-    the matrix in Python and call ``PortfolioInputs(...)`` directly.
+    the matrix in Python and instantiate ``PortfolioInputs(...)``
+    directly.
 
     Args:
-        path: Path to a CSV file.
+        path: Path to a CSV file on disk.
 
     Returns:
-        A ``PortfolioInputs`` instance.
+        A :class:`~convexfolio.config.PortfolioInputs` instance with
+        ``expected_payoff``, ``cost_vector``, and ``precision_matrix``
+        arrays derived from the CSV rows.
 
     Raises:
-        FileNotFoundError: If the file does not exist.
-        ValueError: If the header is missing required columns.
+        FileNotFoundError: If ``path`` does not exist.
+        ValueError: If the CSV has no header row, is missing required
+            columns, or has no data rows.
     """
     input_path = Path(path)
     with input_path.open(newline="", encoding="utf-8") as handle:
@@ -82,15 +75,21 @@ def load_csv(path: str | Path) -> PortfolioInputs:
         ]
     if not rows:
         raise ValueError("CSV file has no data rows")
-    u = np.array([r["expected_payoff"] for r in rows], dtype=float)
-    v = np.array([r["cost"] for r in rows], dtype=float)
+    expected_payoff = np.array(
+        [r["expected_payoff"] for r in rows], dtype=float
+    )
+    cost_vector = np.array([r["cost"] for r in rows], dtype=float)
     diag = np.array([r["precision_diag"] for r in rows], dtype=float)
-    q = np.outer(diag, diag) ** 0.5
-    q = q + np.diag(diag - q.diagonal())
+    precision_matrix = np.outer(diag, diag) ** 0.5
+    precision_matrix = precision_matrix + np.diag(diag - precision_matrix.diagonal())
     correlation = 0.1
-    q = correlation * q + (1.0 - correlation) * np.diag(diag)
+    precision_matrix = (
+        correlation * precision_matrix + (1.0 - correlation) * np.diag(diag)
+    )
     return PortfolioInputs(
-        expected_payoff=u, cost_vector=v, precision_matrix=q
+        expected_payoff=expected_payoff,
+        cost_vector=cost_vector,
+        precision_matrix=precision_matrix,
     )
 
 
@@ -102,12 +101,17 @@ def synthetic_portfolio(
     """Generate a sample portfolio with skew-t-derived precision.
 
     Args:
-        n_instruments: Number of options in the portfolio.
-        degrees_of_freedom: Skew-t degrees of freedom. Must be > 1.
+        n_instruments: Number of options in the portfolio. Must be
+            positive.
+        degrees_of_freedom: Skew-t degrees of freedom. Must be
+            strictly greater than ``1.0`` for the distribution to
+            have finite variance.
         seed: Random seed for reproducibility.
 
     Returns:
-        A ``PortfolioInputs`` instance.
+        A :class:`~convexfolio.config.PortfolioInputs` instance whose
+        ``precision_matrix`` is positive-definite (an inverted random
+        sample plus a small ridge).
 
     Raises:
         ValueError: If ``degrees_of_freedom <= 1``.
@@ -129,8 +133,32 @@ def synthetic_portfolio(
 
 
 def summary(inputs: PortfolioInputs) -> dict[str, Any]:
-    """Return a JSON-serialisable summary of the portfolio shape."""
-    return _summary(inputs)
+    """Return a JSON-serialisable shape summary of a portfolio.
+
+    Args:
+        inputs: A :class:`~convexfolio.config.PortfolioInputs`
+            instance.
+
+    Returns:
+        A dict with keys ``n_instruments``,
+        ``expected_payoff_range`` (``[min, max]`` of the expected
+        payoff vector), ``cost_range`` (``[min, max]`` of the cost
+        vector), and ``precision_trace`` (sum of the diagonal entries
+        of the precision matrix). Safe to serialise with
+        :func:`json.dumps`.
+    """
+    return {
+        "n_instruments": inputs.n_instruments,
+        "expected_payoff_range": [
+            float(inputs.expected_payoff.min()),
+            float(inputs.expected_payoff.max()),
+        ],
+        "cost_range": [
+            float(inputs.cost_vector.min()),
+            float(inputs.cost_vector.max()),
+        ],
+        "precision_trace": float(np.trace(inputs.precision_matrix)),
+    }
 
 
 def to_config(
@@ -138,15 +166,18 @@ def to_config(
 ) -> dict[str, Any]:
     """Convert a ``PortfolioInputs`` into a config dict.
 
-    The returned dict is the shape that ``convexfolio.config.load``
-    accepts — feed it via ``json.dump`` and pass ``--config`` to the CLI.
+    The returned dict is the shape that
+    :func:`~convexfolio.config.load` accepts — serialise it with
+    :func:`json.dump` and pass via ``--config`` to the CLI.
 
     Args:
-        inputs: The portfolio inputs.
-        output_directory: Directory for saved reports.
+        inputs: The portfolio inputs to encode.
+        output_directory: Directory for saved reports. Defaults to
+            ``"artifacts"``.
 
     Returns:
-        A JSON-serialisable config dict.
+        A JSON-serialisable config dict with the canonical
+        ``runtime``, ``optimization``, and ``inputs`` sections.
     """
     return {
         "runtime": {

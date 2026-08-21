@@ -49,7 +49,7 @@ yaml = [
   "pyyaml>=6.0",
 ]
 dev = [
-  "pytest>=8.0",
+  "pytest>=9.1.1",
   "mypy>=1.10",
   "ruff>=0.6",
 ]

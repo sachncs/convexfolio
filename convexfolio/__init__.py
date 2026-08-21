@@ -19,7 +19,7 @@ The API is grouped by responsibility:
   :class:`CFVaR3Numerical`, and friends) plus the skew-t building
   blocks (:class:`Compute`, :class:`Linear`, :class:`Curvature`,
   :class:`Bilinear`, :class:`Cross`).
-* **Pipeline** — :func:`run_and_save`, :class:`Logger`, :class:`Report`,
+* **Pipeline** — :class:`Logger`, :class:`Report`,
   :func:`reproduce`, :func:`check` (determinism check).
 """
 
@@ -75,7 +75,6 @@ from convexfolio.math import (
     Score,
     Variance,
 )
-from convexfolio.pipeline import run_and_save
 from convexfolio.utils import Logger, Report, reproduce
 
 __all__ = [
@@ -127,7 +126,6 @@ __all__ = [
     "load_csv",
     "parse_options_row",
     "reproduce",
-    "run_and_save",
     "summary",
     "synthetic_portfolio",
     "to_config",

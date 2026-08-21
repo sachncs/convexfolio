@@ -22,6 +22,7 @@ importable for programmatic use.
 
 import argparse
 import json
+from pathlib import Path
 
 from convexfolio.config import Experiment, load
 from convexfolio.data import (
@@ -31,7 +32,6 @@ from convexfolio.data import (
     synthetic_portfolio,
 )
 from convexfolio.determinism import check
-from convexfolio.pipeline import run_and_save
 from convexfolio.utils import Logger, reproduce
 
 
@@ -231,7 +231,8 @@ def main() -> None:
     * ``backtest`` → :func:`backtest_command`
     * ``plot`` → :func:`plot_command`
     * ``validate-determinism`` → :func:`~convexfolio.determinism.check`
-    * ``reproduce-report`` → :func:`~convexfolio.pipeline.run_and_save`
+    * ``reproduce-report`` → :func:`~convexfolio.determinism.check` plus
+      :meth:`~convexfolio.utils.Report.save`
     * default (no match) → :func:`~convexfolio.utils.reproduce`
 
     Raises:
@@ -267,7 +268,9 @@ def main() -> None:
         return
 
     if parsed_args.command == "reproduce-report":
-        output_path = run_and_save(experiment, experiment.runtime.output_directory)
+        report = check(experiment, repetitions=3)
+        output_path = Path(experiment.runtime.output_directory) / "report.json"
+        report.save(str(output_path))
         log.info(str(output_path))
         return
 

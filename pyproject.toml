@@ -46,7 +46,7 @@ Changelog = "https://github.com/sachncs/optimal-option-portfolios/blob/main/CHAN
 
 [project.optional-dependencies]
 yaml = [
-  "pyyaml>=6.0",
+  "pyyaml>=6.0.3",
 ]
 dev = [
   "pytest>=9.1.1",

@@ -60,6 +60,9 @@ bench = [
 viz = [
   "matplotlib==3.11.1",
 ]
+hf-data = [
+  "datasets>=3.0,<5.0",
+]
 
 [project.scripts]
 convexfolio = "convexfolio.cli:main"

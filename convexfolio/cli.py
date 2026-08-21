@@ -4,7 +4,12 @@ import argparse
 import json
 
 from convexfolio.config import Experiment, load
-from convexfolio.data import PortfolioInputs, load_csv, summary
+from convexfolio.data import (
+    PortfolioInputs,
+    load_csv,
+    summary,
+    synthetic_portfolio,
+)
 from convexfolio.determinism import check
 from convexfolio.pipeline import run_and_save
 from convexfolio.utils import Logger, reproduce
@@ -33,6 +38,7 @@ def parser() -> argparse.ArgumentParser:
             "validate-determinism",
             "ingest",
             "plot",
+            "backtest",
         ],
         help="Execution command",
     )
@@ -43,7 +49,7 @@ def parser() -> argparse.ArgumentParser:
         "--path",
         type=str,
         default=None,
-        help="Path to a CSV file (used by the 'ingest' command)",
+        help="Path to a CSV file (used by 'ingest' and 'backtest' commands)",
     )
     argument_parser.add_argument(
         "--chart",
@@ -51,6 +57,18 @@ def parser() -> argparse.ArgumentParser:
         default="all",
         choices=["all", "weights", "frontier", "sensitivity"],
         help="Which chart(s) to render (used by the 'plot' command)",
+    )
+    argument_parser.add_argument(
+        "--rebalance-frequency",
+        type=int,
+        default=1,
+        help="Rebalance every Nth timestamp (used by 'backtest')",
+    )
+    argument_parser.add_argument(
+        "--transaction-cost-bps",
+        type=float,
+        default=5.0,
+        help="Transaction cost in basis points (used by 'backtest')",
     )
     return argument_parser
 
@@ -129,6 +147,10 @@ def main() -> None:
         _ingest_command(parsed_args)
         return
 
+    if parsed_args.command == "backtest":
+        _backtest_command(parsed_args)
+        return
+
     experiment = load(parsed_args.config)
     log = Logger(level=experiment.runtime.log_level)
 
@@ -152,6 +174,46 @@ def main() -> None:
 
     result = reproduce(experiment)
     log.info(json.dumps(result, indent=2))
+
+
+def _backtest_command(parsed_args: argparse.Namespace) -> None:
+    """Run a multi-period backtest from a price-history CSV.
+
+    Args:
+        parsed_args: Parsed CLI arguments; uses ``--path``,
+            ``--rebalance-frequency``, ``--transaction-cost-bps``.
+            Reads portfolio inputs from ``--config`` if provided;
+            otherwise uses synthetic defaults.
+    """
+    from convexfolio.backtest import (
+        BacktestConfig,
+        load_price_history_csv,
+        run_backtest,
+    )
+
+    if not parsed_args.path:
+        raise SystemExit("--path is required for the backtest command")
+    history = load_price_history_csv(parsed_args.path)
+
+    if parsed_args.config:
+        experiment = load(parsed_args.config)
+        assert experiment.inputs is not None, (
+            "config file must include an 'inputs' section for backtest"
+        )
+        portfolio_inputs = experiment.inputs
+    else:
+        portfolio_inputs = synthetic_portfolio(
+            n_instruments=history.n_instruments, degrees_of_freedom=8.0, seed=7
+        )
+
+    config = BacktestConfig(
+        portfolio_inputs=portfolio_inputs,
+        rebalance_frequency=parsed_args.rebalance_frequency,
+        transaction_cost_bps=parsed_args.transaction_cost_bps,
+        alpha=0.05,
+    )
+    result = run_backtest(history, config)
+    print(json.dumps(result.summary, indent=2))
 
 
 if __name__ == "__main__":

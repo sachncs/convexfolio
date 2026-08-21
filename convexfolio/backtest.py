@@ -22,6 +22,7 @@ from typing import Any
 import numpy as np
 
 from convexfolio.config import PortfolioInputs
+from convexfolio.constraints import SLSQPLambda
 
 
 @dataclass(frozen=True)
@@ -105,7 +106,9 @@ class BacktestConfig:
     rebalance_frequency: int = 1
     transaction_cost_bps: float = 5.0
     alpha: float = 0.05
-    extra_constraints: tuple[dict[str, object], ...] = field(default_factory=tuple)
+    extra_constraints: tuple[dict[str, str | SLSQPLambda], ...] = field(
+        default_factory=tuple
+    )
 
 
 @dataclass(frozen=True)
@@ -129,9 +132,166 @@ class BacktestResult:
     summary: dict[str, Any]
 
 
+def run_backtest(
+    history: PriceHistory, config: BacktestConfig
+) -> BacktestResult:
+    """Run a multi-period rebalance backtest.
+
+    At every ``rebalance_frequency``-th timestamp, the portfolio is
+    re-solved using ``CFVaR3Numerical`` with the latest price-implied
+    inputs. Between rebalance timestamps, weights are held constant
+    and portfolio value evolves with prices. Transaction costs are
+    applied at each rebalance as ``cost_bps * sum |delta_w| / 10000``
+    of the portfolio value.
+
+    Args:
+        history: Price history (must have ``n_timestamps >= 2``).
+        config: Backtest configuration.
+
+    Returns:
+        A ``BacktestResult`` capturing the time-series and aggregates.
+
+    Raises:
+        ValueError: If the price history is too short or has zero
+            variance in any instrument.
+    """
+    from convexfolio import CFVaR3Numerical, CFVaR3Objective
+
+    if history.n_timestamps < 2:
+        raise ValueError("price history must have at least 2 timestamps")
+    n_timestamps = history.n_timestamps
+    n_instruments = history.n_instruments
+    if config.rebalance_frequency < 1:
+        raise ValueError("rebalance_frequency must be >= 1")
+
+    weights_matrix = np.zeros((n_timestamps, n_instruments), dtype=float)
+    portfolio_value = np.ones(n_timestamps, dtype=float)
+    turnover = np.zeros(n_timestamps, dtype=float)
+    cumulative_costs = np.zeros(n_timestamps, dtype=float)
+
+    previous_weights = np.zeros(n_instruments, dtype=float)
+    initial_inputs = config.portfolio_inputs
+
+    cost_per_unit = float(config.transaction_cost_bps) / 10_000.0
+
+    for t in range(n_timestamps):
+        rebalance_now = (
+            t == 0
+            or t % int(config.rebalance_frequency) == 0
+        )
+        if rebalance_now:
+            if t == 0:
+                initial_prices = history.prices[0]
+                implied_inputs = initial_inputs
+            else:
+                implied_inputs = _scale_inputs_for_prices(
+                    initial_inputs, initial_prices, history.prices[t]
+                )
+            try:
+                objective = CFVaR3Objective(
+                    alpha=config.alpha,
+                    expected_payoff=implied_inputs.expected_payoff,
+                    precision_matrix=implied_inputs.precision_matrix,
+                    kappa3_callback=lambda x: 0.0,
+                )
+                w = CFVaR3Numerical(
+                    cost_vector=implied_inputs.cost_vector,
+                    initial_weights=(
+                        implied_inputs.cost_vector
+                        / float(
+                            implied_inputs.cost_vector @ implied_inputs.cost_vector
+                        )
+                    ),
+                    objective_callable=objective,
+                    extra_constraints=config.extra_constraints,
+                ).value
+            except (ValueError, RuntimeError):
+                w = previous_weights if previous_weights.any() else (
+                    implied_inputs.cost_vector
+                    / float(implied_inputs.cost_vector @ implied_inputs.cost_vector)
+                )
+            delta = w - previous_weights
+            cost = cost_per_unit * float(np.sum(np.abs(delta)))
+            if t > 0:
+                portfolio_value[t] = portfolio_value[t - 1] * (1.0 - cost)
+                turnover[t] = float(np.sum(np.abs(delta)))
+                cumulative_costs[t] = cumulative_costs[t - 1] + cost
+            weights_matrix[t] = w
+            previous_weights = w
+        else:
+            weights_matrix[t] = previous_weights
+            if t > 0:
+                portfolio_value[t] = portfolio_value[t - 1]
+
+    summary = {
+        "n_timestamps": n_timestamps,
+        "n_instruments": n_instruments,
+        "rebalance_frequency": int(config.rebalance_frequency),
+        "transaction_cost_bps": float(config.transaction_cost_bps),
+        "alpha": float(config.alpha),
+        "final_portfolio_value": float(portfolio_value[-1]),
+        "total_turnover": float(np.sum(turnover)),
+        "total_costs": float(cumulative_costs[-1]),
+        "max_drawdown": _max_drawdown(portfolio_value),
+    }
+    return BacktestResult(
+        timestamps=history.timestamps,
+        portfolio_value=portfolio_value,
+        weights=weights_matrix,
+        turnover=turnover,
+        cumulative_costs=cumulative_costs,
+        summary=summary,
+    )
+
+
+def _scale_inputs_for_prices(
+    base: PortfolioInputs,
+    base_prices: np.ndarray,
+    current_prices: np.ndarray,
+) -> PortfolioInputs:
+    """Rescale base inputs by the ratio current/base prices.
+
+    The expected-payoff vector scales linearly with prices; the cost
+    vector is the current price; the precision matrix scales
+    quadratically.
+
+    Args:
+        base: Base portfolio inputs.
+        base_prices: The base price level (one per instrument).
+        current_prices: The current price level.
+
+    Returns:
+        A new ``PortfolioInputs`` rescaled for the current prices.
+    """
+    base_prices = np.asarray(base_prices, dtype=float)
+    current_prices = np.asarray(current_prices, dtype=float)
+    ratio = current_prices / base_prices
+    return PortfolioInputs(
+        expected_payoff=base.expected_payoff * ratio,
+        cost_vector=current_prices.copy(),
+        precision_matrix=base.precision_matrix
+        / np.outer(ratio, ratio),
+    )
+
+
+def _max_drawdown(values: np.ndarray) -> float:
+    """Maximum peak-to-trough drawdown as a fraction.
+
+    Args:
+        values: 1-D series of portfolio values.
+
+    Returns:
+        Maximum drawdown (positive number, e.g. 0.10 = 10% drawdown).
+    """
+    running_max = np.maximum.accumulate(values)
+    drawdowns = (running_max - values) / np.where(running_max > 0, running_max, 1.0)
+    return float(np.max(drawdowns))
+
+
 __all__ = [
     "BacktestConfig",
     "BacktestResult",
     "PriceHistory",
     "load_price_history_csv",
+    "run_backtest",
 ]

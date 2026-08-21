@@ -101,3 +101,37 @@ def budget_with_extras(
         Tuple including the budget constraint and all extras.
     """
     return (budget(cost_vector), *extras)
+
+
+def long_only_inequalities(n: int) -> ConstraintSpec:
+    """Build inequality constraints enforcing ``x[i] >= 0`` for all i.
+
+    SLSQP does not accept bounds directly with arbitrary other
+    constraints; emitting ``-x[i] <= 0`` inequalities keeps the
+    constraint representation uniform with the rest of this module.
+
+    Args:
+        n: Number of instruments.
+
+    Returns:
+        Tuple of ``n`` inequality constraints.
+    """
+    eyes = [np.eye(n, dtype=float)[i] for i in range(n)]
+    return tuple(
+        inequality(-eye, 0.0) for eye in eyes
+    )
+
+
+def long_only_bounds(n: int) -> Sequence[tuple[float, float]]:
+    """Bounds tuple for ``long_only``-style closed-form solvers.
+
+    Use this with solvers that accept SciPy's ``bounds`` parameter
+    rather than SLSQP constraints.
+
+    Args:
+        n: Number of instruments.
+
+    Returns:
+        List of ``(0.0, inf)`` tuples.
+    """
+    return bounds(0.0, np.inf, n)

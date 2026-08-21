@@ -10,52 +10,35 @@ Three responsibilities:
 
 All routines are deterministic given a seed. No external dependencies
 beyond numpy.
+
+``PortfolioInputs`` is re-exported from ``convexfolio.config`` so the
+public API has a single canonical class.
 """
 
 from __future__ import annotations
 
 import csv
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
-from convexfolio.types import FloatArray
+from convexfolio.config import PortfolioInputs
 
 
-@dataclass(frozen=True)
-class PortfolioInputs:
-    """Bundle of inputs required to solve an optimisation problem.
-
-    Attributes:
-        expected_payoff: 1-D expected-payoff vector ``u``.
-        cost_vector: 1-D cost vector ``v``.
-        precision_matrix: 2-D precision matrix ``Q``.
-    """
-
-    expected_payoff: FloatArray
-    cost_vector: FloatArray
-    precision_matrix: FloatArray
-
-    @property
-    def n_instruments(self) -> int:
-        return int(self.cost_vector.shape[0])
-
-    def summary(self) -> dict[str, Any]:
-        """Return a JSON-serialisable summary of the portfolio shape."""
-        return {
-            "n_instruments": self.n_instruments,
-            "expected_payoff_range": [
-                float(self.expected_payoff.min()),
-                float(self.expected_payoff.max()),
-            ],
-            "cost_range": [
-                float(self.cost_vector.min()),
-                float(self.cost_vector.max()),
-            ],
-            "precision_trace": float(np.trace(self.precision_matrix)),
-        }
+def _summary(inputs: PortfolioInputs) -> dict[str, Any]:
+    return {
+        "n_instruments": inputs.n_instruments,
+        "expected_payoff_range": [
+            float(inputs.expected_payoff.min()),
+            float(inputs.expected_payoff.max()),
+        ],
+        "cost_range": [
+            float(inputs.cost_vector.min()),
+            float(inputs.cost_vector.max()),
+        ],
+        "precision_trace": float(np.trace(inputs.precision_matrix)),
+    }
 
 
 def load_csv(path: str | Path) -> PortfolioInputs:
@@ -145,6 +128,11 @@ def synthetic_portfolio(
     )
 
 
+def summary(inputs: PortfolioInputs) -> dict[str, Any]:
+    """Return a JSON-serialisable summary of the portfolio shape."""
+    return _summary(inputs)
+
+
 def to_config(
     inputs: PortfolioInputs, output_directory: str = "artifacts"
 ) -> dict[str, Any]:
@@ -177,3 +165,12 @@ def to_config(
             "precision_matrix": inputs.precision_matrix.tolist(),
         },
     }
+
+
+__all__ = [
+    "PortfolioInputs",
+    "load_csv",
+    "synthetic_portfolio",
+    "summary",
+    "to_config",
+]

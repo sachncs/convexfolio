@@ -1,6 +1,15 @@
 """Public package API for the Convexfolio package."""
 
-from convexfolio.config import Experiment, Optimization, Runtime, load, validate
+from convexfolio.config import (
+    Experiment,
+    Optimization,
+    PortfolioInputs,
+    Runtime,
+    load,
+    validate,
+)
+from convexfolio.data import load_csv, synthetic_portfolio, to_config
+from convexfolio.data import summary as inputs_summary
 from convexfolio.determinism import check
 from convexfolio.math import (
     Bilinear,
@@ -51,6 +60,7 @@ __all__ = [
     "Minimize",
     "OptimalEpsilon",
     "Optimization",
+    "PortfolioInputs",
     "PortfolioVariance",
     "QualityScore",
     "Quadratic",
@@ -60,8 +70,12 @@ __all__ = [
     "Score",
     "Variance",
     "check",
+    "inputs_summary",
     "load",
+    "load_csv",
     "reproduce",
     "run_and_save",
+    "synthetic_portfolio",
+    "to_config",
     "validate",
 ]

@@ -20,9 +20,11 @@ def test_portfolio_inputs_n_instruments() -> None:
 def test_portfolio_inputs_summary_is_json_safe() -> None:
     import json
 
+    from convexfolio.data import summary
+
     inputs = synthetic_portfolio(n_instruments=3, degrees_of_freedom=8.0, seed=2)
-    summary = inputs.summary()
-    json.dumps(summary)  # must not raise
+    s = summary(inputs)
+    json.dumps(s)  # must not raise
 
 
 def test_synthetic_portfolio_is_deterministic() -> None:

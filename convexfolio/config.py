@@ -1,11 +1,11 @@
 """Configuration data classes, JSON/YAML loader, and alpha validator.
 
-Three frozen dataclasses form the runtime configuration object graph:
+Four frozen dataclasses form the runtime configuration object graph:
 
 * ``Runtime`` — random seed, log level, output directory.
 * ``Optimization`` — alpha, method, enforce-nu-greater-than-six flag.
-* ``Experiment`` — top-level config that nests both via ``Runtime`` /
-  ``Optimization`` fields.
+* ``PortfolioInputs`` — expected payoff, cost vector, precision matrix.
+* ``Experiment`` — top-level config that nests the others.
 
 Use ``load(path)`` to read a JSON or YAML file (or ``load(None)`` for
 defaults), and ``validate(config)`` to enforce semantic bounds.
@@ -15,6 +15,10 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
+
+import numpy as np
+
+from convexfolio.types import FloatArray
 
 
 @dataclass(frozen=True)
@@ -48,16 +52,63 @@ class Optimization:
 
 
 @dataclass(frozen=True)
+class PortfolioInputs:
+    """Bundle of inputs required to solve an optimisation problem.
+
+    Attributes:
+        expected_payoff: 1-D expected-payoff vector ``u``.
+        cost_vector: 1-D cost vector ``v``.
+        precision_matrix: 2-D precision matrix ``Q``.
+    """
+
+    expected_payoff: FloatArray
+    cost_vector: FloatArray
+    precision_matrix: FloatArray
+
+    @property
+    def n_instruments(self) -> int:
+        return int(self.cost_vector.shape[0])
+
+
+@dataclass(frozen=True)
 class Experiment:
     """Top-level package configuration.
 
     Attributes:
         runtime: Runtime knobs (seed, log level, output directory).
         optimization: Optimization inputs (alpha, method, ...).
+        inputs: Portfolio inputs (expected_payoff, cost_vector,
+            precision_matrix). Default is ``None``; populated when
+            the config carries them.
     """
 
     runtime: Runtime = field(default_factory=Runtime)
     optimization: Optimization = field(default_factory=Optimization)
+    inputs: PortfolioInputs | None = None
+
+    @property
+    def expected_payoff(self) -> FloatArray:
+        assert self.inputs is not None, (
+            "experiment has no portfolio inputs; "
+            "provide 'inputs' in the config file"
+        )
+        return self.inputs.expected_payoff
+
+    @property
+    def cost_vector(self) -> FloatArray:
+        assert self.inputs is not None, (
+            "experiment has no portfolio inputs; "
+            "provide 'inputs' in the config file"
+        )
+        return self.inputs.cost_vector
+
+    @property
+    def precision_matrix(self) -> FloatArray:
+        assert self.inputs is not None, (
+            "experiment has no portfolio inputs; "
+            "provide 'inputs' in the config file"
+        )
+        return self.inputs.precision_matrix
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -97,7 +148,19 @@ def load(path: str | None) -> Experiment:
         raw_runtime["output_directory"] = raw_runtime.pop("output_dir")
     runtime = Runtime(**raw_runtime)
     optimization = Optimization(**raw_optimization)
-    config = Experiment(runtime=runtime, optimization=optimization)
+    raw_inputs = raw_config.get("inputs")
+    portfolio_inputs: PortfolioInputs | None = None
+    if raw_inputs is not None:
+        portfolio_inputs = PortfolioInputs(
+            expected_payoff=np.asarray(raw_inputs["expected_payoff"], dtype=float),
+            cost_vector=np.asarray(raw_inputs["cost_vector"], dtype=float),
+            precision_matrix=np.asarray(raw_inputs["precision_matrix"], dtype=float),
+        )
+    config = Experiment(
+        runtime=runtime,
+        optimization=optimization,
+        inputs=portfolio_inputs,
+    )
     validate(config)
     return config
 

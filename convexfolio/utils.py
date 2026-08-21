@@ -90,6 +90,14 @@ def reproduce(experiment: Experiment) -> dict[str, object]:
         cost_vector=cost_vector,
         alpha=experiment.optimization.alpha,
     ).value
+    # Persist the synthetic inputs on the returned config dict so the
+    # `inputs` round-trips correctly through JSON.
+    experiment_dict = asdict(experiment)
+    experiment_dict["inputs"] = {
+        "expected_payoff": expected_payoff_vector.tolist(),
+        "cost_vector": cost_vector.tolist(),
+        "precision_matrix": precision_matrix.tolist(),
+    }
 
     objective = CFVaR3Objective(
         alpha=experiment.optimization.alpha,
@@ -105,7 +113,7 @@ def reproduce(experiment: Experiment) -> dict[str, object]:
     ).value
 
     return {
-        "config": asdict(experiment),
+        "config": experiment_dict,
         "inputs": {
             "u": expected_payoff_vector.tolist(),
             "v": cost_vector.tolist(),

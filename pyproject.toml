@@ -36,6 +36,9 @@ classifiers = [
 dependencies = [
   "numpy==2.5.2",
   "scipy==1.18.0",
+  "pyyaml==6.0.3",
+  "datasets>=3.0,<5.0",
+  "matplotlib==3.11.1",
 ]
 
 [project.urls]
@@ -45,9 +48,6 @@ Issues = "https://github.com/sachncs/convexfolio/issues"
 Changelog = "https://github.com/sachncs/convexfolio/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
-yaml = [
-  "pyyaml==6.0.3",
-]
 dev = [
   "pytest==9.1.1",
   "mypy==2.3.1",
@@ -56,12 +56,6 @@ dev = [
 bench = [
   "pytest-benchmark==5.2.3",
   "py-cpuinfo==9.0.0",
-]
-viz = [
-  "matplotlib==3.11.1",
-]
-hf-data = [
-  "datasets>=3.0,<5.0",
 ]
 
 [project.scripts]

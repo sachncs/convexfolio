@@ -153,15 +153,18 @@ def require_numeric(row: dict[str, Any], key: str) -> float:
 class Parse:
     """Parse one raw dataset row dict into an :class:`OptionsRow`.
 
-    Callable: ``Parse(row)`` returns the parsed :class:`OptionsRow`
-    directly (no state, no instance needed).
+    The constructor validates the row, converts IV/HV columns to numpy
+    arrays, and stores the result on :attr:`value`. Follows the
+    math.py ``.value`` convention so the call shape is uniform across
+    the codebase.
 
     Args:
         row: A single row from the dataset, with string keys and
             scalar values.
 
-    Returns:
-        The parsed :class:`OptionsRow`.
+    Attributes:
+        value: The parsed :class:`OptionsRow`, available after
+            construction.
 
     Raises:
         ValueError: If ``symbol`` or ``date`` is missing/empty, or if
@@ -169,9 +172,7 @@ class Parse:
             ``VIX`` is missing or non-finite.
     """
 
-    def __new__(  # type: ignore[misc]
-        cls, row: dict[str, Any]
-    ) -> OptionsRow:
+    def __init__(self, row: dict[str, Any]) -> None:
         symbol = str(row.get("symbol", "")).strip()
         date = str(row.get("date", "")).strip()
         if not symbol:
@@ -185,7 +186,7 @@ class Parse:
             [require_numeric(row, key) for key in HV_COLUMNS], dtype=float
         )
         vix = require_numeric(row, "VIX")
-        return OptionsRow(
+        self.value = OptionsRow(
             symbol=symbol,
             date=date,
             iv_values=iv_values,
@@ -324,10 +325,13 @@ class LoadOptionsIV:
         """Yield parsed :class:`OptionsRow` instances.
 
         Yields:
-            :class:`OptionsRow` for each source element.
+            :class:`OptionsRow` for each source element. The parser
+            is invoked as ``self.parser(raw)`` and its ``.value``
+            attribute is yielded, matching the math.py convention
+            for ``Parse(row).value``.
         """
         for raw in self.source:
-            yield self.parser(raw)
+            yield self.parser(raw).value
 
 
 class BuildPortfolioInputs:

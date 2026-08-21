@@ -64,7 +64,7 @@ def test_parse_extracts_arrays() -> None:
         "hv_200": 30.27,
         "VIX": 14.57,
     }
-    row = Parse(raw)
+    row = Parse(raw).value
     assert isinstance(row, OptionsRow)
     assert row.symbol == "AAPL"
     assert row.date == "2019-10-14"

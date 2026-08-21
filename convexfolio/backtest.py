@@ -184,7 +184,7 @@ def run_backtest(
                 initial_prices = history.prices[0]
                 implied_inputs = initial_inputs
             else:
-                implied_inputs = _scale_inputs_for_prices(
+                implied_inputs = scale_inputs_for_prices(
                     initial_inputs, initial_prices, history.prices[t]
                 )
             try:
@@ -232,7 +232,7 @@ def run_backtest(
         "final_portfolio_value": float(portfolio_value[-1]),
         "total_turnover": float(np.sum(turnover)),
         "total_costs": float(cumulative_costs[-1]),
-        "max_drawdown": _max_drawdown(portfolio_value),
+        "max_drawdown": max_drawdown(portfolio_value),
     }
     return BacktestResult(
         timestamps=history.timestamps,
@@ -244,16 +244,18 @@ def run_backtest(
     )
 
 
-def _scale_inputs_for_prices(
+def scale_inputs_for_prices(
     base: PortfolioInputs,
     base_prices: np.ndarray,
     current_prices: np.ndarray,
 ) -> PortfolioInputs:
-    """Rescale base inputs by the ratio current/base prices.
+    """Rescale base portfolio inputs by the ratio current/base prices.
 
     The expected-payoff vector scales linearly with prices; the cost
-    vector is the current price; the precision matrix scales
-    quadratically.
+    vector becomes the current price; the precision matrix scales
+    quadratically (i.e. divided by the outer product of the ratio
+    vector, matching the inverse-vol interpretation of the precision
+    matrix).
 
     Args:
         base: Base portfolio inputs.
@@ -261,7 +263,8 @@ def _scale_inputs_for_prices(
         current_prices: The current price level.
 
     Returns:
-        A new ``PortfolioInputs`` rescaled for the current prices.
+        A new :class:`~convexfolio.config.PortfolioInputs` rescaled
+        for the current prices.
     """
     base_prices = np.asarray(base_prices, dtype=float)
     current_prices = np.asarray(current_prices, dtype=float)
@@ -274,14 +277,15 @@ def _scale_inputs_for_prices(
     )
 
 
-def _max_drawdown(values: np.ndarray) -> float:
+def max_drawdown(values: np.ndarray) -> float:
     """Maximum peak-to-trough drawdown as a fraction.
 
     Args:
         values: 1-D series of portfolio values.
 
     Returns:
-        Maximum drawdown (positive number, e.g. 0.10 = 10% drawdown).
+        Maximum drawdown (positive number, e.g. ``0.10`` means a 10%
+        peak-to-trough loss).
     """
     running_max = np.maximum.accumulate(values)
     drawdowns = (running_max - values) / np.where(running_max > 0, running_max, 1.0)

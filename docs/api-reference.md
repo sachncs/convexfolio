@@ -1,9 +1,101 @@
-# Convexfolio API Reference
+# API Reference
 
-The Convexfolio package exports a class-based API for option-portfolio
-optimization. Each numerical routine lives in a concrete class;
-instantiation captures deterministic inputs and `.value` (or a named
-attribute) holds the result.
+Every public symbol in Convexfolio, with examples.
+
+> 📖 **New to Python or finance?** Start with
+> [Getting Started](getting-started.md) and the
+> [Glossary](glossary.md). Come back here once you can read a
+> simple Python script.
+>
+> **Looking for the 30-second version?** Jump to
+> [The five classes you actually need](#the-five-classes-you-actually-need).
+
+---
+
+## Table of contents
+
+- [The five classes you actually need](#the-five-classes-you-actually-need)
+- [Common recipes](#common-recipes)
+- [Module layout](#module-layout)
+- [Configuration](#configuration)
+- [Math primitives (low-level)](#math-primitives-low-level)
+- [Risk evaluation](#risk-evaluation)
+- [Optimisation](#optimisation)
+- [Section 2.4 — determined quantities](#section-24--determined-quantities)
+- [Determinism & pipeline](#determinism--pipeline)
+- [CLI Reference](#cli-reference)
+
+---
+
+## The five classes you actually need
+
+If you only ever use five things from this package, use these:
+
+| Class | One-liner |
+|---|---|
+| `Minimize(Variance(Q), v)` | Closed-form variance minimisation. The most common call. |
+| `CFVaR2Closed(Q, u, v, alpha)` | Closed-form CFVaR2 weight solver. Sharper risk measure. |
+| `CFVaR2nd(alpha, u, Q, x)` | Evaluate the CFVaR2 risk number at a given weight vector. |
+| `Experiment` / `load(path)` | The configuration object and how to load it. |
+| `reproduce(experiment)` | End-to-end pipeline that runs everything and returns a JSON-serialisable dict. |
+
+The rest of this page covers every other public symbol.
+
+---
+
+## Common recipes
+
+### Recipe 1: minimise variance
+
+```python
+import numpy as np
+from convexfolio import Variance, Minimize
+
+Q = np.array([[2.0, 0.1], [0.1, 1.5]])   # precision matrix
+v = np.array([0.60, 0.40])                 # option prices
+
+weights = Minimize(Variance(Q), v).value
+```
+
+### Recipe 2: minimise CFVaR2
+
+```python
+from convexfolio import CFVaR2Closed
+
+u = np.array([0.05, 0.10])                  # expected payoffs
+alpha = 0.05                                # cautiousness
+
+weights = CFVaR2Closed(Q, u, v, alpha).value
+```
+
+### Recipe 3: evaluate risk at a given weight vector
+
+```python
+from convexfolio import CFVaR2nd
+
+risk = CFVaR2nd(alpha, u, Q, weights).value
+```
+
+### Recipe 4: full pipeline (run everything, get a dict)
+
+```python
+from convexfolio import Experiment, reproduce
+
+report = reproduce(Experiment())
+# report["outputs"]["variance_weights"] is a list of floats
+# report["outputs"]["cfvar2_weights"] is a list of floats
+# report["outputs"]["cfvar3_weights"] is a list of floats
+```
+
+### Recipe 5: load a config file
+
+```python
+from convexfolio import load
+
+config = load("config.json")      # or config.yaml, or load(None) for defaults
+```
+
+---
 
 ## Module layout
 
@@ -21,7 +113,8 @@ attribute) holds the result.
 
 ### `Experiment` (frozen dataclass)
 
-Top-level configuration that nests `runtime` and `optimization`.
+**What it is:** The top-level configuration object. Holds everything
+the pipeline needs to run.
 
 ```python
 @dataclass(frozen=True)
@@ -30,51 +123,68 @@ class Experiment:
     optimization: Optimization = field(default_factory=Optimization)
 ```
 
+A *frozen* dataclass means it can't be changed after creation — so a
+config you pass in can't quietly mutate mid-run.
+
 ### `Runtime` (frozen dataclass)
 
-| Field | Type | Default | Description |
+| Field | Type | Default | Plain English |
 |---|---|---|---|
-| `seed` | `int` | `7` | Random seed passed to numpy. |
-| `log_level` | `str` | `"INFO"` | stdlib `logging` level name. |
-| `output_directory` | `str` | `"artifacts"` | Directory for saved reports. |
+| `seed` | `int` | `7` | Starting number for the random number generator. |
+| `log_level` | `str` | `"INFO"` | How chatty to be: `DEBUG`, `INFO`, `WARNING`, `ERROR`. |
+| `output_directory` | `str` | `"artifacts"` | Folder where reports are saved. |
 
 ### `Optimization` (frozen dataclass)
 
-| Field | Type | Default | Description |
+| Field | Type | Default | Plain English |
 |---|---|---|---|
-| `alpha` | `float` | `0.05` | Confidence level in `(0, 0.5)`. |
-| `method` | `str` | `"all"` | Optimization method selector. |
-| `enforce_nu_greater_than_six` | `bool` | `True` | Whether to enforce `nu > 6`. |
+| `alpha` | `float` | `0.05` | How cautious the optimiser is. Between 0 and 0.5. |
+| `method` | `str` | `"all"` | Which solver to run. |
+| `enforce_nu_greater_than_six` | `bool` | `True` | Refuse to run if math parameters are weird. |
 
 ### `load(path: str | None) -> Experiment`
 
-Load an `Experiment` from a JSON (`.json`) or YAML (`.yaml`, `.yml`)
-file. Pass `None` for defaults.
+**What it does:** Reads a config file and returns an `Experiment`.
+
+**Parameters:**
+
+- `path` — Path to a `.json`, `.yaml`, or `.yml` file. Pass `None`
+  for defaults.
+
+**Returns:** The loaded `Experiment` (already validated).
+
+**Raises:** `FileNotFoundError`, `json.JSONDecodeError`,
+`yaml.YAMLError`, or `ValueError` (alpha out of range).
 
 ```python
 from convexfolio.config import load
-config = load("config.json")      # or load(None) for defaults
+config = load("config.json")
+config = load(None)                  # use defaults
 ```
-
-Raises `FileNotFoundError`, `json.JSONDecodeError`, `yaml.YAMLError`, or
-`ValueError` (invalid alpha).
 
 ### `validate(config: Experiment) -> None`
 
-Enforce semantic constraints. Raises `ValueError` if
-`config.optimization.alpha` is outside `(0, 0.5)`.
+**What it does:** Enforces semantic constraints on a config. Raises
+`ValueError` if alpha is outside `(0, 0.5)`. Called automatically by
+`load`.
 
 ---
 
-## Math primitives (low-level building blocks)
+## Math primitives (low-level)
 
-### `Compute(degrees_of_freedom: float)`
+These are small reusable pieces. Most users won't touch them
+directly — they're the building blocks the optimisers use.
 
-Skew-t coefficient `c` (Eq. for the `nu`-degrees-of-freedom skew-t).
+### `Compute(degrees_of_freedom)`
 
-| Attribute | Type | Description |
-|---|---|---|
-| `.value` | `float` | The numeric coefficient. |
+**What it is:** Computes the skew-t coefficient `c`.
+
+**Parameters:**
+
+- `degrees_of_freedom` (`float`) — `ν > 1` for the coefficient to
+  exist.
+
+**Attribute:** `.value` — the numeric coefficient.
 
 ```python
 from convexfolio import Compute
@@ -83,57 +193,55 @@ c = Compute(degrees_of_freedom=8.0).value
 
 ### `Linear(covariance, skewness)`
 
-Linear bias vector `h = Σω / sqrt(1 + ωᵀΣω)`.
+**What it is:** Computes the linear bias vector `h`.
 
-| Attribute | Type | Description |
-|---|---|---|
-| `.value` | `FloatArray` | The 1-D bias vector. |
+**Parameters:**
+
+- `covariance` — 2-D covariance matrix `Σ`.
+- `skewness` — 1-D skewness vector `ω`.
+
+**Attribute:** `.value` — the 1-D bias vector.
 
 ### `Curvature(third_derivative, h)`
 
-Curvature vector `q_m = hᵀ Γ^[m] h` for each instrument `m`.
+**What it is:** Computes the curvature vector `q`.
 
-| Attribute | Type | Description |
-|---|---|---|
-| `.values` | `FloatArray` | 1-D vector of length `m`. |
+**Parameters:**
+
+- `third_derivative` — 3-D tensor `Γ` of shape `(m, n, n)`.
+- `h` — 1-D bias vector.
+
+**Attribute:** `.values` — 1-D vector of length `m`.
 
 ### `Bilinear(delta_matrix, budget_matrix, covariance, third_derivative, h)`
 
-Bilinear expansion matrix `(D + Bᵀ)ᵀ Σ [Γ^[1]h, …, Γ^[M]h]`.
+**What it is:** Computes the bilinear expansion matrix.
 
-| Attribute | Type | Description |
-|---|---|---|
-| `.matrix` | `FloatArray` | The 2-D bilinear expansion matrix. |
+**Attribute:** `.matrix` — 2-D matrix.
 
 ### `Cross(...)`
 
-Cross-term matrix — transpose of `Bilinear(...).matrix`. Same constructor.
+**What it is:** Same constructor as `Bilinear`; returns the transpose.
 
-| Attribute | Type | Description |
-|---|---|---|
-| `.matrix` | `FloatArray` | The 2-D cross-term matrix. |
+**Attribute:** `.matrix` — 2-D cross-term matrix.
 
 ### `Expect(expected_payoff, weights)`
 
-Portfolio expected payoff `uᵀ x`.
+**What it is:** Computes the expected payoff `uᵀx`.
 
-| Attribute | Type | Description |
-|---|---|---|
-| `.value` | `float` | The scalar expected payoff. |
+**Attribute:** `.value` — scalar expected payoff.
 
 ### `Quadratic(precision_matrix, weights)`
 
-Portfolio variance `0.5 xᵀ Q x`.
+**What it is:** Computes the variance `0.5 x�Qx`.
 
-| Attribute | Type | Description |
-|---|---|---|
-| `.value` | `float` | The scalar variance. |
+**Attribute:** `.value` — scalar variance.
 
 ### `Variance(precision_matrix)`
 
-Callable variance objective. Stores the precision matrix `Q`; calling
-`variance(weights)` returns `0.5 xᵀ Q x`. Compose with
-`Minimize(Variance(Q), c)` to obtain the closed-form minimum-variance
+**What it is:** A callable variance objective. Stores `Q`; calling
+`variance(weights)` returns `0.5 xᵀQx`. Compose with
+`Minimize(Variance(Q), c)` to get the closed-form minimum-variance
 weights.
 
 ```python
@@ -142,13 +250,12 @@ variance = Variance(precision_matrix=np.eye(3))
 val = variance(np.array([1.0, -2.0, 0.5]))
 ```
 
-### `Cumulant(weights, degrees_of_freedom, pricing_vector, residual_matrix, delta_matrix, budget_matrix, covariance, tau)`
+### `Cumulant(...)`
 
-Third central moment (Eq. S2.Ex24–S2.Ex26).
+**What it is:** Computes the third central moment (skewness
+correction).
 
-| Attribute | Type | Description |
-|---|---|---|
-| `.value` | `float` | The scalar third cumulance. |
+**Attribute:** `.value` — scalar third cumulance.
 
 ---
 
@@ -156,30 +263,32 @@ Third central moment (Eq. S2.Ex24–S2.Ex26).
 
 ### `CFVaR2nd(alpha, expected_payoff, precision_matrix, weights)`
 
-Second-order conditional fractional Value-at-Risk (Eq. S2.Ex22).
+**What it is:** Evaluates the **second-order** CFVaR risk number at a
+given weight vector. Pure function — no optimisation, just evaluation.
 
-| Attribute | Type | Description |
-|---|---|---|
-| `.value` | `float` | The scalar CFVaR2 risk number. |
+**Parameters:**
+
+- `alpha` (`float`) — confidence level in `(0, 0.5)`.
+- `expected_payoff` (`FloatArray`) — vector `u`.
+- `precision_matrix` (`FloatArray`) — matrix `Q`.
+- `weights` (`FloatArray`) — vector `x`.
+
+**Attribute:** `.value` — scalar CFVaR2 risk number.
 
 ```python
 from convexfolio import CFVaR2nd
-risk = CFVaR2nd(
-    alpha=0.05,
-    expected_payoff=u,
-    precision_matrix=Q,
-    weights=x,
-).value
+risk = CFVaR2nd(alpha=0.05, expected_payoff=u, precision_matrix=Q, weights=x).value
 ```
 
 ### `CFVaR3rd(alpha, expected_payoff, precision_matrix, weights, cumulant)`
 
-Third-order CFVaR (Eq. S2.Ex23) including the third-cumulance skewness
-correction.
+**What it is:** Evaluates the **third-order** CFVaR (with skewness
+correction) at a given weight vector.
 
-| Attribute | Type | Description |
-|---|---|---|
-| `.value` | `float` | The scalar CFVaR3 risk number. |
+**Parameters:** Same as `CFVaR2nd` plus `cumulant` (`float`) — the
+third cumulance, from `Cumulant(...).value`.
+
+**Attribute:** `.value` — scalar CFVaR3 risk number.
 
 ---
 
@@ -187,64 +296,76 @@ correction.
 
 ### `Minimize(variance: Variance, cost_vector)`
 
-Closed-form variance minimisation under budget `cᵀ x = 1`.
+**What it is:** Closed-form variance minimisation under the budget
+constraint. The most common call in this package.
 
-| Attribute | Type | Description |
-|---|---|---|
-| `.value` | `FloatArray` | The optimal weights `x*`. |
+**Parameters:**
+
+- `variance` — a `Variance(Q)` instance.
+- `cost_vector` — 1-D cost vector `v`.
+
+**Attribute:** `.value` — the optimal weights `x*` such that
+`x*ᵀ v = 1` and variance is minimised.
 
 ```python
 from convexfolio import Variance, Minimize
-weights = Minimize(Variance(Q), c).value
-assert np.isclose(weights.T @ c, 1.0, atol=1e-8)
+weights = Minimize(Variance(Q), v).value
+assert abs(weights.T @ v - 1.0) < 1e-8     # budget holds
 ```
 
 ### `Loss(coeff_a, coeff_b, coeff_c)`
 
-Quadratic variance term. Callable: `loss(ε) = aε² + bε + c`.
+**What it is:** A quadratic function `aε² + bε + c`. Internal helper
+for the epsilon-star solver.
+
+**Callable:** `loss(epsilon) -> float`.
 
 ### `Score(coeff_a, coeff_b, coeff_c, z_score)`
 
-CFVaR2 upper-bound score at `ε`. Callable; returns `+inf` when the loss
-is non-positive (constraint violation).
+**What it is:** CFVaR2 upper-bound score at `ε`. Returns `+inf` when
+the loss becomes non-positive (constraint violation).
 
 ### `OptimalEpsilon(alpha, expected_payoff, cost_vector, precision_matrix)`
 
-Compute the optimal Lagrange multiplier. Closed-form roots from Appendix
-B; bounded numerical fallback if root conditions fail.
+**What it is:** Computes the optimal Lagrange multiplier `ε*`. Uses
+closed-form roots from Appendix B; falls back to bounded numerical
+search if roots fail.
 
-| Attribute | Type | Description |
-|---|---|---|
-| `.value` | `float` | The optimal `ε*`. |
+**Attribute:** `.value` — the optimal `ε*`.
 
 ### `CFVaR2Closed(precision_matrix, expected_payoff, cost_vector, alpha)`
 
-Closed-form CFVaR2 weight solver (Eq. 5–6 for P2 with the determined
-`ε*`).
+**What it is:** Closed-form CFVaR2 weight solver. Computes the
+weights that minimise CFVaR2 using a formula (no iteration).
 
-| Attribute | Type | Description |
-|---|---|---|
-| `.value` | `FloatArray` | The closed-form optimal weights `x*`. |
+**Parameters:**
+
+- `precision_matrix` (`FloatArray`) — `Q`.
+- `expected_payoff` (`FloatArray`) — `u`.
+- `cost_vector` (`FloatArray`) — `v`.
+- `alpha` (`float`) — confidence level in `(0, 0.5)`.
+
+**Attribute:** `.value` — closed-form optimal weights `x*`.
 
 ```python
 from convexfolio import CFVaR2Closed
-weights = CFVaR2Closed(
-    precision_matrix=Q,
-    expected_payoff=u,
-    cost_vector=v,
-    alpha=0.05,
-).value
-assert np.isclose(weights.T @ v, 1.0, atol=1e-8)
+weights = CFVaR2Closed(precision_matrix=Q, expected_payoff=u,
+                       cost_vector=v, alpha=0.05).value
 ```
 
 ### `CFVaR3Numerical(cost_vector, initial_weights, objective_callable)`
 
-Numerical CFVaR3 weight solver. Solves `min cfvar3(x) s.t. xᵀ v = 1` via
-`scipy.optimize.minimize` (SLSQP).
+**What it is:** Numerical CFVaR3 weight solver. Uses SciPy's SLSQP
+under the hood. Slower than closed-form but more accurate.
 
-| Attribute | Type | Description |
-|---|---|---|
-| `.value` | `FloatArray` | The numerical optimal weights `x*`. |
+**Parameters:**
+
+- `cost_vector` (`FloatArray`) — `v`.
+- `initial_weights` (`FloatArray`) — starting point for the solver.
+- `objective_callable` — a callable `f(x) -> float` returning the
+  CFVaR3 value (typically a `CFVaR3Objective` instance).
+
+**Attribute:** `.value` — the numerical optimal weights `x*`.
 
 ```python
 from convexfolio import CFVaR3Numerical, CFVaR3Objective
@@ -254,65 +375,70 @@ objective = CFVaR3Objective(
 )
 weights = CFVaR3Numerical(
     cost_vector=v,
-    initial_weights=np.ones_like(v) / v.sum(),
+    initial_weights=v / float(v @ v),          # feasible starting point
     objective_callable=objective,
 ).value
 ```
 
 ### `CFVaR3Objective(alpha, expected_payoff, precision_matrix, kappa3_callback)`
 
-Callable CFVaR3 objective for `scipy.optimize` solvers. Wraps
-`CFVaR3rd(...)` so that `objective(x) -> float` returns the third-order
-CFVaR at `x` with the third cumulance supplied by `kappa3_callback`.
+**What it is:** A callable that returns the CFVaR3 objective value at
+any weight vector. Wraps `CFVaR3rd` so you can pass it to
+`CFVaR3Numerical` (or any SciPy optimiser).
+
+**Parameters:**
+
+- `alpha` (`float`).
+- `expected_payoff` (`FloatArray`).
+- `precision_matrix` (`FloatArray`).
+- `kappa3_callback` — a callable `f(weights) -> float` returning
+  the third cumulance.
+
+**Callable:** `objective(weights) -> float`.
 
 ### `QualityScore(alpha, expected_payoff, cost_vector, precision_matrix)`
 
-Sanity-check the CFVaR2 closed-form solver by returning the CFVaR2 risk
-number at the closed-form weights.
+**What it is:** Sanity-checks the CFVaR2 closed-form solver by
+returning the CFVaR2 risk number at the closed-form optimum. Useful
+for testing.
 
-| Attribute | Type | Description |
-|---|---|---|
-| `.value` | `float` | The CFVaR2 risk number at the closed-form optimum. |
+**Attribute:** `.value` — float.
 
 ---
 
 ## Section 2.4 — determined quantities
 
+These build the precision matrix `Q` from raw option Greeks data.
+
 ### `Greeks(weights, price_drift, delta_matrix, third_derivative)`
 
-First-, second-, and third-order portfolio Greeks.
+**What it is:** Computes first-, second-, and third-order portfolio
+Greeks (`theta`, `delta`, `gamma`).
 
-| Attribute | Type | Description |
-|---|---|---|
-| `.theta` | `float` | Scalar `θ`. |
-| `.delta` | `FloatArray` | 1-D `δ` vector. |
-| `.gamma` | `FloatArray` | 2-D `Γ` matrix. |
+**Attributes:** `.theta` (float), `.delta` (vector), `.gamma`
+(matrix).
 
 ### `PortfolioVariance(gamma_matrix, delta_vector, expected_payoff, covariance, degrees_of_freedom, c_coefficient, h)`
 
-Direct scalar portfolio-variance formula (Section 2.4).
+**What it is:** Direct scalar portfolio-variance formula (section 2.4
+of the paper).
 
-| Attribute | Type | Description |
-|---|---|---|
-| `.value` | `float` | The scalar variance. |
+**Attribute:** `.value` — scalar variance.
 
 ### `Linearize(price_drift, delta_matrix, third_derivative, expected_payoff, covariance, degrees_of_freedom, skewness, time_increment)`
 
-Builds linearised `u` and `Q` for the section-2.4 problem.
+**What it is:** Builds the linearised expected-return vector `u` and
+precision matrix `Q` for the section-2.4 problem.
 
-| Attribute | Type | Description |
-|---|---|---|
-| `.dual_residual` | `FloatArray` | Linearised expected return `u`. |
-| `.precision_matrix` | `FloatArray` | Linearised precision matrix `Q`. |
+**Attributes:** `.dual_residual` (vector `u`), `.precision_matrix`
+(matrix `Q`).
 
 ### `Reconstruct(price_drift, delta_matrix, third_derivative, expected_payoff, covariance, degrees_of_freedom, skewness)`
 
-Recovers symmetric `Q` by evaluating portfolio variance at basis vectors
-and pairwise sums.
+**What it is:** Recovers symmetric `Q` by evaluating portfolio
+variance at basis vectors and pairwise sums.
 
-| Attribute | Type | Description |
-|---|---|---|
-| `.value` | `FloatArray` | The 2-D reconstructed precision matrix `Q`. |
+**Attribute:** `.value` — 2-D precision matrix `Q`.
 
 ---
 
@@ -320,8 +446,10 @@ and pairwise sums.
 
 ### `check(config: Experiment, repetitions: int = 2) -> Report`
 
-Run `reproduce(config)` repeatedly (process pool when `repetitions ≥
-OPTIONS_PARALLEL_THRESHOLD`, default 4) and return a `Report`.
+**What it does:** Runs `reproduce(config)` repeatedly and returns a
+`Report` describing whether the runs were byte-identical. Uses a
+process pool when `repetitions ≥ OPTIONS_PARALLEL_THRESHOLD` (default
+4).
 
 ```python
 from convexfolio import check
@@ -331,57 +459,69 @@ assert report.deterministic is True
 
 ### `run_and_save(experiment: Experiment, output_dir: str) -> Path`
 
-Run a determinism check (3 repetitions) and persist the resulting
-`Report` to `output_dir/report.json`. Returns the written path.
+**What it does:** Runs a determinism check (3 repetitions) and
+persists the resulting `Report` to `output_dir/report.json`. Returns
+the written path.
 
 ### `reproduce(experiment: Experiment) -> dict`
 
-Run the end-to-end optimisation once and return the structured report
-(`config`, `inputs`, `outputs`, `uncertainty` keys). Uses synthetic
-matrices as a self-contained smoke pipeline.
+**What it does:** End-to-end pipeline — runs variance minimisation,
+CFVaR2, and CFVaR3 once on a synthetic 5-instrument portfolio and
+returns a JSON-serialisable dict. The `dict` has keys: `config`,
+`inputs`, `outputs`, `uncertainty`.
+
+```python
+from convexfolio import Experiment, reproduce
+report = reproduce(Experiment())
+# report["outputs"]["variance_weights"] -> list[float]
+# report["outputs"]["cfvar2_weights"]   -> list[float]
+# report["outputs"]["cfvar3_weights"]   -> list[float]
+# report["outputs"]["cfvar2_at_variance_weights"] -> float
+```
 
 ### `Report`
 
 Determinism result over repeated pipeline runs.
 
-| Attribute / Property | Type | Description |
+| Attribute / Property | Type | Plain English |
 |---|---|---|
-| `.config` | `Experiment` | The configuration used. |
+| `.config` | `Experiment` | The config used. |
 | `.repetitions` | `int` | Number of repetitions performed. |
 | `.results` | `list[dict]` | Per-run result dicts. |
-| `.serialized` | `list[str]` | JSON-serialised forms of `results`. |
+| `.serialized` | `list[str]` | JSON forms of `results`. |
 | `.all_match` | `bool` | Whether every run was byte-equivalent to the first. |
-| `.summary` | `dict` | Public summary dict (safe to `json.dumps`). |
+| `.summary` | `dict` | Public summary (safe to `json.dumps`). |
 | `.deterministic` | `bool` | View of `summary["deterministic"]`. |
 | `.seed` | `int` | View of `summary["seed"]`. |
-| `.reference` | `dict` | Reference report (the first run). |
+| `.reference` | `dict` | Reference run (the first one). |
 | `.save(path)` | `Path` | Persist `summary` as JSON. |
 
 ### `Logger(level: str, name: str = "convexfolio")`
 
-Logging facade over the stdlib `logging` module. Methods: `.debug()`,
+Logging facade over Python's `logging` module. Methods: `.debug()`,
 `.info()`, `.warning()`, `.error()`.
 
 ---
 
 ## CLI Reference
 
-The CLI entry point is installed as the `convexfolio` command when the
-package is installed.
+The CLI is installed as the `convexfolio` command.
 
 ### Commands
 
 #### `reproduce-report`
 
-Generate and save a reproduction report.
+Run the pipeline and save a JSON report to disk.
 
 ```bash
 convexfolio --command reproduce-report [--config CONFIG]
 ```
 
+Default output: `artifacts/report.json`.
+
 #### `print-report`
 
-Print the reproduction report to stdout.
+Run the pipeline and print the report to the terminal.
 
 ```bash
 convexfolio --command print-report [--config CONFIG]
@@ -389,16 +529,18 @@ convexfolio --command print-report [--config CONFIG]
 
 #### `validate-determinism`
 
-Validate that the package produces deterministic results.
+Run the pipeline N times and verify the runs are byte-identical.
 
 ```bash
 convexfolio --command validate-determinism [--repetitions N] [--config CONFIG]
 ```
 
+Exits with code `2` if the runs don't match.
+
 ### Options
 
 | Option | Default | Description |
 |---|---|---|
-| `--config` | None | Path to JSON or YAML config file. |
-| `--command` | `reproduce-report` | Command to execute. |
-| `--repetitions` | `3` | Number of repetitions for determinism validation. |
+| `--config` | `None` | Path to a JSON or YAML config file. |
+| `--command` | `reproduce-report` | Which command to run. |
+| `--repetitions` | `3` | Repetitions for `validate-determinism`. |

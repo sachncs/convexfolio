@@ -580,6 +580,9 @@ class CFVaR3Numerical:
         initial_weights: 1-D starting point.
         objective_callable: Callable ``f(x) -> float`` returning the
             CFVaR3 objective value.
+        extra_constraints: Optional iterable of additional SLSQP
+            constraint dicts (e.g. long-only, sector caps). Defaults
+            to no extras — only the budget constraint is applied.
 
     Attributes:
         value: The numerical optimal weights ``x*``.
@@ -590,13 +593,15 @@ class CFVaR3Numerical:
         cost_vector: FloatArray,
         initial_weights: FloatArray,
         objective_callable,
+        extra_constraints: tuple[dict[str, object], ...] = (),
     ) -> None:
         self.cost_vector = cost_vector
         self.initial_weights = initial_weights
         self.objective_callable = objective_callable
-        constraints = [
+        constraints: list[dict[str, object]] = [
             {"type": "eq", "fun": lambda x: float(np.dot(x, cost_vector) - 1.0)}
         ]
+        constraints.extend(extra_constraints)
         result = minimize(
             objective_callable,
             x0=initial_weights,

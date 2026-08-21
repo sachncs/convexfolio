@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "convexfolio"
-version = "0.2.1"
+version = "0.3.0"
 description = "Convexfolio — production-ready option portfolio optimizer (paper-faithful baseline + extensible package API)."
 readme = "README.md"
 requires-python = ">=3.12"

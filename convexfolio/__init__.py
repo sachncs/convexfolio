@@ -25,11 +25,11 @@ The API is grouped by responsibility:
 
 from convexfolio.config import (
     Experiment,
+    LoadConfig,
     Optimization,
     PortfolioInputs,
     Runtime,
-    load,
-    validate,
+    Validate,
 )
 from convexfolio.data import load_csv, summary, synthetic_portfolio, to_config
 from convexfolio.determinism import check
@@ -104,6 +104,7 @@ __all__ = [
     "IV_BUCKETS",
     "Linear",
     "Linearize",
+    "LoadConfig",
     "LoadOptionsIV",
     "Logger",
     "Loss",
@@ -121,6 +122,7 @@ __all__ = [
     "Runtime",
     "Score",
     "SummariseResults",
+    "Validate",
     "Variance",
     "check",
     "load",

@@ -1,14 +1,18 @@
-"""Configuration data classes, JSON/YAML loader, and alpha validator.
+"""Configuration data classes, loader class, and alpha validator class.
 
 Four frozen dataclasses form the runtime configuration object graph:
 
-* ``Runtime`` — random seed, log level, output directory.
-* ``Optimization`` — alpha, method, enforce-nu-greater-than-six flag.
-* ``PortfolioInputs`` — expected payoff, cost vector, precision matrix.
-* ``Experiment`` — top-level config that nests the others.
+* :class:`Runtime` — random seed, log level, output directory.
+* :class:`Optimization` — alpha, method, enforce-nu-greater-than-six flag.
+* :class:`PortfolioInputs` — expected payoff, cost vector, precision matrix.
+* :class:`Experiment` — top-level config that nests the others.
 
-Use ``load(path)`` to read a JSON or YAML file (or ``load(None)`` for
-defaults), and ``validate(config)`` to enforce semantic bounds.
+Two composable classes drive the load + validate cycle:
+
+* :class:`LoadConfig` — reads a JSON or YAML file and returns a
+  fully-built :class:`Experiment`; validation is run on the result.
+* :class:`Validate` — alpha-bounds checker; callable as
+  ``Validate()(config)``.
 """
 
 import json
@@ -111,64 +115,85 @@ class Experiment:
         return self.inputs.precision_matrix
 
 
-def load(path: str | None) -> Experiment:
-    """Load an ``Experiment`` from a JSON or YAML file.
+class LoadConfig:
+    """Load an :class:`Experiment` from a JSON or YAML file.
+
+    Callable: ``LoadConfig(path)()`` returns the loaded
+    :class:`Experiment`. ``Validate`` is run on the result.
 
     Args:
         path: Path to a ``.json`` or ``.yaml`` / ``.yml`` file,
-            or ``None`` for default values.
+            or ``None`` to construct a default :class:`Experiment`.
 
-    Returns:
-        The loaded ``Experiment``. ``validate`` is run on the result.
+    Attributes:
+        path: See Args.
 
     Raises:
         FileNotFoundError: If ``path`` does not exist.
         json.JSONDecodeError: If the file is not valid JSON.
-        ImportError: If the YAML extra is requested but PyYAML is not
-            installed.
-        yaml.YAMLError: If the file is not valid YAML (and PyYAML is
-            installed).
+        yaml.YAMLError: If the file is not valid YAML.
         ValueError: If the alpha bound is invalid.
     """
-    if path is None:
-        return Experiment()
-    input_path = Path(path)
-    suffix = input_path.suffix.lower()
-    if suffix in {".yaml", ".yml"}:
-        raw_config = yaml.safe_load(input_path.read_text(encoding="utf-8"))
-    else:
-        raw_config = json.loads(input_path.read_text(encoding="utf-8"))
-    raw_runtime = raw_config.get("runtime", {})
-    raw_optimization = raw_config.get("optimization", {})
-    if "output_dir" in raw_runtime and "output_directory" not in raw_runtime:
-        raw_runtime["output_directory"] = raw_runtime.pop("output_dir")
-    runtime = Runtime(**raw_runtime)
-    optimization = Optimization(**raw_optimization)
-    raw_inputs = raw_config.get("inputs")
-    portfolio_inputs: PortfolioInputs | None = None
-    if raw_inputs is not None:
-        portfolio_inputs = PortfolioInputs(
-            expected_payoff=np.asarray(raw_inputs["expected_payoff"], dtype=float),
-            cost_vector=np.asarray(raw_inputs["cost_vector"], dtype=float),
-            precision_matrix=np.asarray(raw_inputs["precision_matrix"], dtype=float),
+
+    def __init__(self, path: str | None) -> None:
+        self.path = path
+
+    def __call__(self) -> Experiment:
+        config = Experiment() if self.path is None else self._from_file()
+        Validate(config)
+        return config
+
+    def _from_file(self) -> Experiment:
+        assert self.path is not None
+        input_path = Path(self.path)
+        suffix = input_path.suffix.lower()
+        if suffix in {".yaml", ".yml"}:
+            raw_config = yaml.safe_load(input_path.read_text(encoding="utf-8"))
+        else:
+            raw_config = json.loads(input_path.read_text(encoding="utf-8"))
+        raw_runtime = raw_config.get("runtime", {})
+        raw_optimization = raw_config.get("optimization", {})
+        if "output_dir" in raw_runtime and "output_directory" not in raw_runtime:
+            raw_runtime["output_directory"] = raw_runtime.pop("output_dir")
+        runtime = Runtime(**raw_runtime)
+        optimization = Optimization(**raw_optimization)
+        raw_inputs = raw_config.get("inputs")
+        portfolio_inputs: PortfolioInputs | None = None
+        if raw_inputs is not None:
+            portfolio_inputs = PortfolioInputs(
+                expected_payoff=np.asarray(
+                    raw_inputs["expected_payoff"], dtype=float
+                ),
+                cost_vector=np.asarray(raw_inputs["cost_vector"], dtype=float),
+                precision_matrix=np.asarray(
+                    raw_inputs["precision_matrix"], dtype=float
+                ),
+            )
+        return Experiment(
+            runtime=runtime,
+            optimization=optimization,
+            inputs=portfolio_inputs,
         )
-    config = Experiment(
-        runtime=runtime,
-        optimization=optimization,
-        inputs=portfolio_inputs,
-    )
-    validate(config)
-    return config
 
 
-def validate(config: Experiment) -> None:
-    """Validate semantic constraints for safe operation.
+class Validate:
+    """Validate semantic constraints on an :class:`Experiment`.
+
+    The constructor raises ``ValueError`` if any constraint is violated.
+    Currently enforces ``0 < config.optimization.alpha < 0.5``.
 
     Args:
         config: The configuration to validate.
 
+    Attributes:
+        config: See Args.
+
     Raises:
-        ValueError: If ``config.optimization.alpha`` falls outside ``(0, 0.5)``.
+        ValueError: If ``config.optimization.alpha`` falls outside
+            ``(0, 0.5)``.
     """
-    if not (0.0 < config.optimization.alpha < 0.5):
-        raise ValueError("alpha must satisfy 0 < alpha < 0.5")
+
+    def __init__(self, config: Experiment) -> None:
+        if not (0.0 < config.optimization.alpha < 0.5):
+            raise ValueError("alpha must satisfy 0 < alpha < 0.5")
+        self.config = config

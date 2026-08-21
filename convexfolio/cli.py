@@ -30,7 +30,7 @@ from convexfolio.backtest import (
     load_price_history_csv,
     run_backtest,
 )
-from convexfolio.config import Experiment, load
+from convexfolio.config import Experiment, LoadConfig
 from convexfolio.data import (
     PortfolioInputs,
     load_csv,
@@ -197,7 +197,7 @@ def backtest_command(parsed_args: argparse.Namespace) -> None:
     history = load_price_history_csv(parsed_args.path)
 
     if parsed_args.config:
-        experiment = load(parsed_args.config)
+        experiment = LoadConfig(parsed_args.config)()
         assert experiment.inputs is not None, (
             "config file must include an 'inputs' section for backtest"
         )
@@ -246,7 +246,7 @@ def main() -> None:
         backtest_command(parsed_args)
         return
 
-    experiment = load(parsed_args.config)
+    experiment = LoadConfig(parsed_args.config)()
     log = Logger(level=experiment.runtime.log_level)
 
     if parsed_args.command == "plot":

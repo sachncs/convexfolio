@@ -135,3 +135,41 @@ def long_only_bounds(n: int) -> Sequence[tuple[float, float]]:
         List of ``(0.0, inf)`` tuples.
     """
     return bounds(0.0, np.inf, n)
+
+
+def position_limits_inequalities(
+    n: int, max_abs_weight: float
+) -> ConstraintSpec:
+    """Build inequality constraints enforcing ``|x[i]| <= max_abs_weight``.
+
+    Two inequalities per instrument: ``x[i] <= max_abs_weight`` and
+    ``-x[i] <= max_abs_weight``.
+
+    Args:
+        n: Number of instruments.
+        max_abs_weight: Maximum absolute weight per instrument.
+
+    Returns:
+        Tuple of ``2n`` inequality constraints.
+    """
+    eyes = [np.eye(n, dtype=float)[i] for i in range(n)]
+    out: list[SLSQPConstraint] = []
+    for eye in eyes:
+        out.append(inequality(eye, max_abs_weight))
+        out.append(inequality(-eye, max_abs_weight))
+    return tuple(out)
+
+
+def position_limits_bounds(
+    n: int, max_abs_weight: float
+) -> Sequence[tuple[float, float]]:
+    """Bounds tuple enforcing ``|x[i]| <= max_abs_weight``.
+
+    Args:
+        n: Number of instruments.
+        max_abs_weight: Maximum absolute weight per instrument.
+
+    Returns:
+        List of ``(-max, +max)`` tuples.
+    """
+    return bounds(-max_abs_weight, max_abs_weight, n)

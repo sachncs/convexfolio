@@ -21,16 +21,35 @@ import numpy as np
 from convexfolio.types import FloatArray
 
 
-def _matplotlib() -> tuple[Any, Any]:
-    """Lazy-load matplotlib with the Agg backend (headless-safe)."""
+def load_matplotlib() -> tuple[Any, Any]:
+    """Lazy-load matplotlib with the Agg backend (headless-safe).
+
+    Selects the Agg backend (no display required) so plot generation
+    works in headless environments. Idempotent across calls; the
+    ``matplotlib.use("Agg")`` call is a no-op after the first import.
+
+    Returns:
+        A ``(matplotlib, pyplot)`` tuple of module references.
+    """
     matplotlib_mod = importlib.import_module("matplotlib")
     matplotlib_mod.use("Agg")
     pyplot_mod = importlib.import_module("matplotlib.pyplot")
     return matplotlib_mod, pyplot_mod
 
 
-def _save(fig: Any, output_path: str | Path) -> Path:
-    """Save a figure to disk and close it. Returns the resolved path."""
+def save_figure(fig: Any, output_path: str | Path) -> Path:
+    """Persist a matplotlib figure to disk and close it.
+
+    Creates parent directories as needed and resolves to an absolute
+    path before saving.
+
+    Args:
+        fig: The matplotlib ``Figure`` to save.
+        output_path: Destination path (relative or absolute).
+
+    Returns:
+        The resolved :class:`pathlib.Path` the figure was written to.
+    """
     target = Path(output_path)
     target.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(target, bbox_inches="tight")
@@ -55,7 +74,7 @@ def weights(
     Returns:
         The resolved output path.
     """
-    _, pyplot = _matplotlib()
+    _, pyplot = load_matplotlib()
     w = np.asarray(weight_vector, dtype=float)
     n = w.shape[0]
     if labels is None:
@@ -70,7 +89,7 @@ def weights(
     ax.set_title(title)
     ax.axvline(0.0, color="#666666", linewidth=0.5)
     ax.grid(True, axis="x", linestyle=":", alpha=0.5)
-    return _save(fig, output_path)
+    return save_figure(fig, output_path)
 
 
 def efficient_frontier(
@@ -103,7 +122,7 @@ def efficient_frontier(
     if alphas is None:
         alphas = [0.01 * (1.5**i) for i in range(20) if 0.01 * (1.5**i) < 0.49]
 
-    _, pyplot = _matplotlib()
+    _, pyplot = load_matplotlib()
     returns: list[float] = []
     risks: list[float] = []
     for alpha in alphas:
@@ -132,7 +151,7 @@ def efficient_frontier(
     ax.set_ylabel("Expected portfolio return")
     ax.set_title(title)
     ax.grid(True, linestyle=":", alpha=0.5)
-    return _save(fig, output_path)
+    return save_figure(fig, output_path)
 
 
 def cfvar_sensitivity(
@@ -162,7 +181,7 @@ def cfvar_sensitivity(
     if alphas is None:
         alphas = list(np.linspace(0.01, 0.49, 30))
 
-    _, pyplot = _matplotlib()
+    _, pyplot = load_matplotlib()
     risks: list[float] = []
     valid: list[float] = []
     for alpha in alphas:
@@ -190,4 +209,4 @@ def cfvar_sensitivity(
     ax.set_ylabel("-CFVaR2 (risk)")
     ax.set_title(title)
     ax.grid(True, linestyle=":", alpha=0.5)
-    return _save(fig, output_path)
+    return save_figure(fig, output_path)

@@ -28,8 +28,8 @@ from convexfolio import (
     HFDatasetSource,
     LoadOptionsIV,
     OptionsRow,
+    Parse,
     SummariseResults,
-    parse_options_row,
 )
 from convexfolio.math import Minimize, Variance
 
@@ -42,7 +42,7 @@ def test_iv_buckets_and_hv_columns_lengths() -> None:
     assert len(HV_COLUMNS) == 8
 
 
-def test_parse_options_row_extracts_arrays() -> None:
+def test_parse_extracts_arrays() -> None:
     """Raw dict → OptionsRow preserves all columns."""
     raw = {
         "symbol": "AAPL",
@@ -64,7 +64,7 @@ def test_parse_options_row_extracts_arrays() -> None:
         "hv_200": 30.27,
         "VIX": 14.57,
     }
-    row = parse_options_row(raw)
+    row = Parse(raw)
     assert isinstance(row, OptionsRow)
     assert row.symbol == "AAPL"
     assert row.date == "2019-10-14"
@@ -73,14 +73,14 @@ def test_parse_options_row_extracts_arrays() -> None:
     assert row.vix == 14.57
 
 
-def test_parse_options_row_rejects_missing_symbol() -> None:
+def test_parse_rejects_missing_symbol() -> None:
     """Missing 'symbol' raises a typed ValueError."""
     raw = {"date": "2019-10-14", "VIX": 14.57}
     with pytest.raises(ValueError, match="missing 'symbol'"):
-        parse_options_row(raw)
+        Parse(raw)
 
 
-def test_parse_options_row_rejects_non_finite() -> None:
+def test_parse_rejects_non_finite() -> None:
     """NaN IV raises a typed ValueError."""
     raw = {
         "symbol": "X",
@@ -103,7 +103,7 @@ def test_parse_options_row_rejects_non_finite() -> None:
         "VIX": 1.0,
     }
     with pytest.raises(ValueError, match="non-finite"):
-        parse_options_row(raw)
+        Parse(raw)
 
 
 def test_csv_file_source_yields_raw_dicts() -> None:

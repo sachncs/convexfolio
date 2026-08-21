@@ -34,7 +34,7 @@ from convexfolio.hf_data import (
     CSVFileSource,
     HFDatasetSource,
     LoadOptionsIV,
-    parse_options_row,
+    Parse,
 )
 
 
@@ -95,7 +95,7 @@ def build_runner(arguments: argparse.Namespace) -> CrossSectionRunner:
             symbols=arguments.symbols,
             max_rows=arguments.max_rows,
         )
-    loader = LoadOptionsIV(source, parse_options_row)
+    loader = LoadOptionsIV(source, Parse)
     return CrossSectionRunner(loader, BuildPortfolioInputs())
 
 

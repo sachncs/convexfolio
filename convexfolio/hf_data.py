@@ -10,8 +10,9 @@ Public surface:
 
 * **Extract** — :class:`HFDatasetSource` and :class:`CSVFileSource`,
   two duck-typed sources that yield raw row dicts.
-* **Parse** — :func:`parse_options_row`, a pure function that turns
-  one raw dict into a validated :class:`OptionsRow`.
+* **Parse** — :class:`Parse`, a stateless class that turns
+  one raw dict into a validated :class:`OptionsRow`. Called as
+  ``Parse(row) -> OptionsRow``.
 * **Transform** — :class:`BuildPortfolioInputs`, a configurable
   composition class with two state parameters
   (``off_diagonal_correlation`` and ``realised_vol_window``).
@@ -149,8 +150,11 @@ def require_numeric(row: dict[str, Any], key: str) -> float:
     return value_float
 
 
-def parse_options_row(row: dict[str, Any]) -> OptionsRow:
+class Parse:
     """Parse one raw dataset row dict into an :class:`OptionsRow`.
+
+    Callable: ``Parse(row)`` returns the parsed :class:`OptionsRow`
+    directly (no state, no instance needed).
 
     Args:
         row: A single row from the dataset, with string keys and
@@ -164,26 +168,30 @@ def parse_options_row(row: dict[str, Any]) -> OptionsRow:
             any column in :data:`IV_BUCKETS`, :data:`HV_COLUMNS`, or
             ``VIX`` is missing or non-finite.
     """
-    symbol = str(row.get("symbol", "")).strip()
-    date = str(row.get("date", "")).strip()
-    if not symbol:
-        raise ValueError("row missing 'symbol'")
-    if not date:
-        raise ValueError("row missing 'date'")
-    iv_values = np.array(
-        [require_numeric(row, key) for key in IV_BUCKETS], dtype=float
-    )
-    hv_values = np.array(
-        [require_numeric(row, key) for key in HV_COLUMNS], dtype=float
-    )
-    vix = require_numeric(row, "VIX")
-    return OptionsRow(
-        symbol=symbol,
-        date=date,
-        iv_values=iv_values,
-        hv_values=hv_values,
-        vix=vix,
-    )
+
+    def __new__(  # type: ignore[misc]
+        cls, row: dict[str, Any]
+    ) -> OptionsRow:
+        symbol = str(row.get("symbol", "")).strip()
+        date = str(row.get("date", "")).strip()
+        if not symbol:
+            raise ValueError("row missing 'symbol'")
+        if not date:
+            raise ValueError("row missing 'date'")
+        iv_values = np.array(
+            [require_numeric(row, key) for key in IV_BUCKETS], dtype=float
+        )
+        hv_values = np.array(
+            [require_numeric(row, key) for key in HV_COLUMNS], dtype=float
+        )
+        vix = require_numeric(row, "VIX")
+        return OptionsRow(
+            symbol=symbol,
+            date=date,
+            iv_values=iv_values,
+            hv_values=hv_values,
+            vix=vix,
+        )
 
 
 class HFDatasetSource:
@@ -297,7 +305,7 @@ class LoadOptionsIV:
             Both :class:`HFDatasetSource` and :class:`CSVFileSource`
             satisfy this protocol via duck typing.
         parser: Callable turning one raw dict into an
-            :class:`OptionsRow`. Defaults to :func:`parse_options_row`.
+            :class:`OptionsRow`. Defaults to :class:`Parse`.
 
     Attributes:
         source: See Args.
@@ -307,7 +315,7 @@ class LoadOptionsIV:
     def __init__(
         self,
         source: Iterable[dict[str, Any]],
-        parser: Any = parse_options_row,
+        parser: Any = Parse,
     ) -> None:
         self.source = source
         self.parser = parser
@@ -637,6 +645,6 @@ __all__ = [
     "IV_BUCKETS",
     "LoadOptionsIV",
     "OptionsRow",
+    "Parse",
     "SummariseResults",
-    "parse_options_row",
 ]

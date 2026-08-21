@@ -12,7 +12,7 @@ The API is grouped by responsibility:
   :class:`BucketWeightStat`, :class:`HFDatasetSource`,
   :class:`CSVFileSource`, :class:`LoadOptionsIV`,
   :class:`BuildPortfolioInputs`, :class:`SummariseResults`,
-  :class:`CrossSectionRunner`, :func:`parse_options_row`, plus the
+  :class:`CrossSectionRunner`, :class:`Parse`, plus the
   :data:`IV_BUCKETS`, :data:`HV_COLUMNS`, and ``DATASET_*`` constants.
 * **Math** — the closed-form portfolio primitives
   (:class:`Variance`, :class:`Minimize`, :class:`CFVaR2Closed`,
@@ -47,8 +47,8 @@ from convexfolio.hf_data import (
     HFDatasetSource,
     LoadOptionsIV,
     OptionsRow,
+    Parse,
     SummariseResults,
-    parse_options_row,
 )
 from convexfolio.math import (
     Bilinear,
@@ -111,6 +111,7 @@ __all__ = [
     "OptimalEpsilon",
     "Optimization",
     "OptionsRow",
+    "Parse",
     "PortfolioInputs",
     "PortfolioVariance",
     "QualityScore",
@@ -124,7 +125,6 @@ __all__ = [
     "check",
     "load",
     "load_csv",
-    "parse_options_row",
     "reproduce",
     "summary",
     "synthetic_portfolio",

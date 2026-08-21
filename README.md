@@ -1,6 +1,6 @@
 <p align="center">
   <h1 align="center">Convexfolio</h1>
-  <p align="center">Production-ready option portfolio optimization with variance minimization and CFVaR2 closed-form solutions.</p>
+  <p align="center">A Python package that figures out how to spread your money across options to minimise risk.</p>
   <p align="center">
     <a href="#installation"><img src="https://img.shields.io/badge/python-3.12%20%7C%203.13-blue" alt="Python"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License"></a>
@@ -11,99 +11,171 @@
   </p>
 </p>
 
-Production-ready Python package for optimal option portfolio optimization,
-based on [arXiv:2601.07991v2](https://arxiv.org/abs/2601.07991v2).
+---
+
+## What is this?
+
+Convexfolio is a small Python tool that answers one question:
+
+> *"Given a handful of options to choose from, how should I split my
+> money between them so my risk is as small as possible?"*
+
+You feed it the prices, the expected payoffs, and a "how risky is each
+option" matrix. It hands you back the **weights** — the percentage of
+your money that should go into each option.
+
+It implements the math from a research paper
+([arXiv:2601.07991v2](https://arxiv.org/abs/2601.07991v2)). You don't
+need to read the paper to use the package.
 
 ---
 
-## Features
+## Who is this for?
 
-- **Variance Minimization** — Solve minimum-variance portfolio allocation under budget constraints
-- **CFVaR2 Closed-Form** — Analytical solution for conditional fractional Value-at-Risk (2nd order)
-- **CFVaR3 Numerical** — Numerical optimization for higher-order risk measures
-- **Deterministic Execution** — Seed-controlled reproducibility for auditing and validation
-- **Production CLI** — Command-line interface for reproducible report generation
-- **Typed API** — Full type annotations for integration into external systems
-- **Structured Outputs** — JSON reports for downstream orchestration and analysis
+You, even if:
+
+- You've never written Python before.
+- You don't know what an "option" is in finance.
+- You've never heard the word "portfolio".
+
+If you can install Python and type commands into a terminal, you can
+use Convexfolio. When the docs use a word you don't know, look it up
+in the [Glossary](docs/glossary.md).
+
+If you've used Python before, you'll be productive in five minutes.
+
+---
+
+## What can it do?
+
+- **Variance minimisation** — Finds weights that minimise how wildly
+  your portfolio value bounces around. ([Glossary: variance](docs/glossary.md))
+- **CFVaR2 (closed-form)** — A faster, smarter risk measure with an
+  exact formula. ([Glossary: CFVaR](docs/glossary.md))
+- **CFVaR3 (numerical)** — A more accurate risk measure, solved
+  numerically. ([Glossary: SLSQP](docs/glossary.md))
+- **Deterministic execution** — Same inputs always give same
+  outputs. ([Glossary: determinism](docs/glossary.md))
+- **Command-line tool** — Run reports from the terminal without
+  writing Python. ([Glossary: CLI](docs/glossary.md))
+- **JSON / YAML configuration** — Tweak settings in a plain text
+  file. ([Glossary: JSON](docs/glossary.md))
+
+---
+
+## Before you start
+
+You'll need Python **3.12 or newer** installed on your computer.
+
+If you don't know what Python is or whether you have it:
+
+1. Open a terminal (on macOS: `Cmd + Space`, type "Terminal"; on
+   Windows: open "PowerShell"; on Linux: open your usual terminal).
+2. Type `python3 --version` and press Enter.
+3. If you see a version number starting with `3.12` or `3.13`, you're
+   set.
+4. If you see "command not found" or an older version, follow the
+   [official Python installer guide](https://realpython.com/installing-python/).
+
+You'll also need **git** (a tool for downloading code). Same drill:
+type `git --version` in your terminal.
 
 ---
 
 ## Installation
 
-### From source
+A "virtual environment" is an isolated Python sandbox that keeps this
+package's stuff from interfering with your other Python projects.
+([Glossary: virtual environment](docs/glossary.md))
 
 ```bash
+# 1. Download the code
 git clone https://github.com/sachncs/convexfolio.git
 cd convexfolio
-python -m venv .venv
-source .venv/bin/activate
+
+# 2. Make a sandbox for it
+python3 -m venv .venv
+source .venv/bin/activate       # macOS / Linux
+# .venv\Scripts\activate        # Windows (PowerShell)
+
+# 3. Install Convexfolio and its dev tools
 pip install -e '.[dev]'
+```
+
+> 💡 **The dot in `.[dev]` is intentional.** It means "install this
+> package and also the dev extras." The square brackets are part of
+> the command, not punctuation.
+
+After this, your terminal prompt will probably have `(.venv)` at the
+front. That tells you the sandbox is active. To leave the sandbox
+later, type `deactivate`.
+
+---
+
+## Your first run — the command line
+
+The fastest way to see Convexfolio work. No Python required:
+
+```bash
+convexfolio --command print-report
+```
+
+You'll see a long JSON blob print to your terminal. That JSON is a
+**report** describing a sample portfolio that Convexfolio analysed.
+Don't worry about understanding it yet — we'll walk through it in the
+[Getting Started guide](docs/getting-started.md).
+
+You can also generate a JSON file instead of printing to the screen:
+
+```bash
+convexfolio --command reproduce-report
+ls artifacts/
+cat artifacts/report.json
 ```
 
 ---
 
-## Quick Start
+## Your first run — Python
 
-### CLI
-
-```bash
-# Generate reproduction report
-convexfolio --command reproduce-report
-
-# Print report to stdout
-convexfolio --command print-report
-
-# Validate deterministic behavior
-convexfolio --command validate-determinism --repetitions 3
-
-# Use custom config
-convexfolio --config config.json --command reproduce-report
-```
-
-### Python API
+Open a Python interpreter (`python3` in your terminal) and try this:
 
 ```python
-import numpy as np
-from convexfolio import Variance, Minimize, CFVaR2Closed, CFVaR2nd
+import numpy as np                              # numpy is a math library
+from convexfolio import Variance, Minimize      # import the solver
 
-# Define inputs
-precision_matrix = np.array([[2.0, 0.1], [0.1, 1.5]])
-cost_vector = np.array([1.2, 0.8])
-expected_payoff = np.array([0.1, 0.3])
+# Imagine you have $1 to split between two options.
+# Option A costs $0.60, Option B costs $0.40.
+# The "precision matrix" below captures how risky each option is
+# (2.0 = riskier for A, 1.5 = less risky for B) and how they
+# wobble together (0.1 = barely related).
+precision_matrix = np.array([[2.0, 0.1],
+                             [0.1, 1.5]])
+cost_vector = np.array([0.60, 0.40])
 
-# Solve variance minimization (closed-form)
-weights = Minimize(Variance(precision_matrix), cost_vector).value
-print(f"Variance solution: {weights}")
-
-# Solve CFVaR2 (closed-form)
-cfvar2_weights = CFVaR2Closed(
-    precision_matrix=precision_matrix,
-    expected_payoff=expected_payoff,
-    cost_vector=cost_vector,
-    alpha=0.05,
-).value
-
-# Evaluate CFVaR2 risk number at any weight vector
-risk = CFVaR2nd(
-    alpha=0.05,
-    expected_payoff=expected_payoff,
-    precision_matrix=precision_matrix,
-    weights=weights,
-).value
-print(f"CFVaR2 risk at variance weights: {risk}")
+# Ask Convexfolio: how do I split to minimise risk?
+answer = Minimize(Variance(precision_matrix), cost_vector).value
+print(answer)
 ```
 
-### Demo Script
+You'll see something like `[0.65, 0.95]`. That means:
 
-```bash
-python scripts/demo.py
-```
+- ~65% of your money in option A
+- ~95% of option B (relative to its $0.40 price)
+
+Translated into actual dollars out of $1: roughly **$0.52 in A and
+$0.48 in B** (because option B is cheaper, you buy more of it). The
+exact dollar split doesn't matter — what matters is that Convexfolio
+found the lowest-risk combination.
+
+The full walk-through with explanations of every line lives in
+[Getting Started](docs/getting-started.md).
 
 ---
 
 ## Configuration
 
-Create a `config.json` to customize execution:
+Want to change something? Create a file called `config.json` in your
+project folder:
 
 ```json
 {
@@ -120,188 +192,66 @@ Create a `config.json` to customize execution:
 }
 ```
 
-| Parameter | Env Variable | Default | Description |
-|-----------|--------------|---------|-------------|
-| `runtime.seed` | — | `7` | Random seed for deterministic execution |
-| `runtime.log_level` | — | `INFO` | Logging verbosity (DEBUG, INFO, WARNING, ERROR) |
-| `runtime.output_directory` | — | `artifacts` | Directory for output reports |
-| `optimization.alpha` | — | `0.05` | Risk parameter (must be between 0 and 0.5) |
-| `optimization.method` | — | `all` | Optimization method to run |
-| `optimization.enforce_nu_greater_than_six` | — | `true` | Enforce nu > 6 constraint |
-
----
-
-## API
-
-The full API surface is documented in [docs/api-reference.md](docs/api-reference.md). Highlights:
-
-| Symbol | Type | Description |
-|--------|------|-------------|
-| `Variance`, `Minimize` | classes | Closed-form variance minimization under budget |
-| `CFVaR2Closed` | class | Closed-form CFVaR2 weight solver |
-| `CFVaR3Numerical`, `CFVaR3Objective` | classes | Numerical CFVaR3 solver + objective factory |
-| `CFVaR2nd`, `CFVaR3rd` | classes | 2nd / 3rd-order CFVaR risk evaluators |
-| `Experiment`, `Runtime`, `Optimization` | dataclasses | Configuration object graph |
-| `load`, `validate` | functions | JSON/YAML config loader and validator |
-| `check` | function | Determinism validation across repeated runs |
-| `reproduce`, `run_and_save` | functions | Pipeline execution and persistence |
-
----
-
-## Examples
+Then pass it to Convexfolio:
 
 ```bash
-# 1. Run the canonical reproduction and write artifacts to the default dir.
-convexfolio --command reproduce-report
-
-# 2. Print the same report to stdout for inspection.
-convexfolio --command print-report
-
-# 3. Confirm three consecutive runs produce identical output.
-convexfolio --command validate-determinism --repetitions 3
-
-# 4. Re-run the reproduction with a different alpha and output dir.
 convexfolio --config config.json --command reproduce-report
 ```
 
-A runnable end-to-end demo is provided:
+What each field means:
 
-```bash
-python scripts/demo.py
-```
-
----
-
-## Project Structure
-
-```
-convexfolio/
-├── convexfolio/         # Main package source
-│   ├── __init__.py      # Public API exports
-│   ├── cli.py           # Command-line interface
-│   ├── config.py        # Configuration dataclasses + loader
-│   ├── determinism.py   # Determinism validation
-│   ├── math.py          # Risk, optimisation, section-2.4 primitives
-│   ├── pipeline.py      # Run + persist report
-│   ├── types.py         # Type definitions
-│   └── utils.py         # Logger, Report, reproduce()
-├── tests/               # Test suite
-├── benchmarks/          # pytest-benchmark suite
-├── scripts/             # Demo and utility scripts
-├── docs/                # Markdown documentation
-└── .github/             # GitHub configuration
-```
+| Field | Plain English |
+|---|---|
+| `runtime.seed` | A starting number for the random generator. Change it to get different sample data; keep it the same to get reproducible results. |
+| `runtime.log_level` | How chatty the package should be: `DEBUG` (very chatty), `INFO` (normal), `WARNING` (only problems), `ERROR` (only failures). |
+| `runtime.output_directory` | Where to save the report file. |
+| `optimization.alpha` | "How cautious do you want the optimiser to be?" Smaller = more cautious. Must be between 0 and 0.5. |
+| `optimization.method` | Which solver to run: `variance`, `cfvar2`, `cfvar3`, or `all` (run everything). |
+| `optimization.enforce_nu_greater_than_six` | If `true`, refuse to run unless the math parameters are well-behaved. |
 
 ---
 
-## Development
+## Where to go next
 
-```bash
-# Install dependencies
-pip install -e '.[dev]'
+- **[Getting Started](docs/getting-started.md)** — A complete
+  beginner's walk-through, building your first portfolio step by step.
+- **[FAQ](docs/faq.md)** — Common questions answered in plain
+  English.
+- **[Glossary](docs/glossary.md)** — Every technical term, defined.
+- **[API Reference](docs/api-reference.md)** — The full list of
+  classes and functions, with examples. Bookmark this once you start
+  writing real code.
+- **[Architecture](docs/architecture.md)** — How the package is put
+  together, for the curious.
 
-# Run linter
-ruff check convexfolio tests scripts benchmarks
+For operators / maintainers:
 
-# Run type checker
-mypy convexfolio
-
-# Run tests
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
-
-# Build package
-python -m build
-
-# Run demo
-python scripts/demo.py
-```
-
-### Quality Gates
-
-```bash
-ruff check convexfolio tests scripts benchmarks && mypy convexfolio && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q && python -m build
-```
-
----
-
-## Testing
-
-```bash
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
-PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest --cov=convexfolio
-```
-
----
-
-## Build
-
-```bash
-python -m build
-```
-
----
-
-## Release
-
-Version is bumped in `pyproject.toml`, the changelog is updated in
-`CHANGELOG.md`, and a `vX.Y.Z` tag is cut. See
-[docs/release.md](docs/release.md) for the full process.
-
----
-
-## Tech Stack
-
-| Category | Technology |
-|----------|------------|
-| Language | Python >= 3.12 |
-| Numerical | [NumPy](https://numpy.org/) == 2.5.2, [SciPy](https://scipy.org/) == 1.18.0 |
-| Testing | [pytest](https://docs.pytest.org/) == 9.1.1, [pytest-benchmark](https://pytest-benchmark.readthedocs.io/) == 5.2.3 |
-| Type Check | [mypy](https://mypy-lang.org/) == 2.3.1 |
-| Lint/Format | [Ruff](https://docs.astral.sh/ruff/) == 0.16.4 |
-| Build | [Setuptools](https://setuptools.pypa.io/) == 84.0.0 |
-
-All dependencies are pinned to exact versions.
-
----
-
-## Roadmap
-
-- [ ] Add real-market data ingestion support
-- [ ] Implement additional risk measures
-- [ ] Add performance benchmarks
-- [ ] Implement parallel processing for large portfolios
-- [ ] Add visualization utilities
-- [ ] Create Docker support
-
----
-
-## Fidelity and Mismatches
-
-- [Fidelity report](docs/fidelity_report.md)
-- [Mismatch report](docs/mismatch_report.md)
-- [Determination notes](docs/research_determination.md)
-- [Release process](docs/release.md)
-
-Missing details are explicitly marked where relevant:
-
-- `NOT DETERMINED`
-- `ASSUMPTION`
-- `UNKNOWN`
+- **[Deployment](docs/deployment.md)** — Run Convexfolio on a server.
+- **[Release process](docs/release.md)** — How new versions get
+  published.
+- **[Fidelity report](docs/fidelity_report.md)** — Does the code
+  match the paper?
+- **[Research determination](docs/research_determination.md)** —
+  Which math quantities are well-defined vs assumed.
+- **[Mismatch report](docs/mismatch_report.md)** — Known
+  differences between the package and the paper.
 
 ---
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute.
+Want to improve Convexfolio? See [CONTRIBUTING.md](CONTRIBUTING.md) for
+how to set up a development environment and submit changes.
 
 ## Code of Conduct
 
-See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for our community standards.
+We expect everyone to follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Security
 
-See [SECURITY.md](SECURITY.md) for reporting vulnerabilities.
+Found a security issue? See [SECURITY.md](SECURITY.md) — please don't
+open a public GitHub issue for security problems.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT — see [LICENSE](LICENSE). Use it, fork it, ship it.

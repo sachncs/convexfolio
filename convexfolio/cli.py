@@ -24,7 +24,14 @@ import argparse
 import json
 from pathlib import Path
 
-from convexfolio import Minimize, Variance
+import matplotlib
+
+matplotlib.use("Agg")
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+from convexfolio import CFVaR2Closed, CFVaR2nd, Minimize, Variance
 from convexfolio.backtest import (
     BacktestConfig,
     load_price_history_csv,
@@ -37,7 +44,6 @@ from convexfolio.data import (
     Summary,
     SyntheticPortfolio,
 )
-from convexfolio.plot import cfvar_sensitivity, efficient_frontier, weights
 from convexfolio.utils import Logger, Report, Reproduce
 
 
@@ -151,27 +157,107 @@ def plot_command(
     outputs: list[str] = []
 
     if parsed_args.chart in ("all", "weights"):
-        w = Minimize(Variance(precision_matrix), cost_vector).value
-        path = weights(w, output_path=f"{output_dir}/weights.png")
-        outputs.append(str(path))
+        weights_value = Minimize(
+            Variance(precision_matrix), cost_vector
+        ).value
+        n = weights_value.shape[0]
+        fig, ax = plt.subplots(figsize=(8.0, max(3.0, 0.4 * n)))
+        y_positions = np.arange(n)
+        colors = [
+            "#2a8f4a" if v >= 0 else "#c14b4b" for v in weights_value
+        ]
+        ax.barh(y_positions, weights_value, color=colors)
+        ax.set_yticks(y_positions)
+        ax.set_yticklabels([f"i{i}" for i in range(n)])
+        ax.set_xlabel("weight")
+        ax.set_title("Portfolio weights")
+        ax.axvline(0.0, color="#666666", linewidth=0.5)
+        ax.grid(True, axis="x", linestyle=":", alpha=0.5)
+        weights_path = Path(output_dir) / "weights.png"
+        weights_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(weights_path, bbox_inches="tight")
+        plt.close(fig)
+        outputs.append(str(weights_path))
 
     if parsed_args.chart in ("all", "frontier"):
-        path = efficient_frontier(
-            precision_matrix,
-            cost_vector,
-            expected_payoff,
-            output_path=f"{output_dir}/frontier.png",
-        )
-        outputs.append(str(path))
+        alphas = [
+            0.01 * (1.5**i)
+            for i in range(20)
+            if 0.01 * (1.5**i) < 0.49
+        ]
+        frontier_returns: list[float] = []
+        frontier_risks: list[float] = []
+        for alpha_value in alphas:
+            try:
+                frontier_weights = CFVaR2Closed(
+                    precision_matrix=precision_matrix,
+                    expected_payoff=expected_payoff,
+                    cost_vector=cost_vector,
+                    alpha=alpha_value,
+                ).value
+                exp_return = float(np.dot(expected_payoff, frontier_weights))
+                risk = CFVaR2nd(
+                    alpha=alpha_value,
+                    expected_payoff=expected_payoff,
+                    precision_matrix=precision_matrix,
+                    weights=frontier_weights,
+                ).value
+            except (ValueError, RuntimeError):
+                continue
+            frontier_returns.append(exp_return)
+            frontier_risks.append(-risk)
+        fig, ax = plt.subplots(figsize=(7.0, 5.0))
+        ax.plot(frontier_risks, frontier_returns, marker="o", color="#2a5fa5")
+        ax.set_xlabel("-CFVaR2 (risk)")
+        ax.set_ylabel("Expected portfolio return")
+        ax.set_title("Efficient frontier (CFVaR2)")
+        ax.grid(True, linestyle=":", alpha=0.5)
+        frontier_path = Path(output_dir) / "frontier.png"
+        frontier_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(frontier_path, bbox_inches="tight")
+        plt.close(fig)
+        outputs.append(str(frontier_path))
 
     if parsed_args.chart in ("all", "sensitivity"):
-        path = cfvar_sensitivity(
-            precision_matrix,
-            cost_vector,
-            expected_payoff,
-            output_path=f"{output_dir}/cfvar_alpha.png",
+        sensitivity_alphas = list(np.linspace(0.01, 0.49, 30))
+        sensitivity_risks: list[float] = []
+        sensitivity_valid: list[float] = []
+        for alpha_value in sensitivity_alphas:
+            try:
+                sensitivity_weights = CFVaR2Closed(
+                    precision_matrix=precision_matrix,
+                    expected_payoff=expected_payoff,
+                    cost_vector=cost_vector,
+                    alpha=alpha_value,
+                ).value
+                risk = CFVaR2nd(
+                    alpha=alpha_value,
+                    expected_payoff=expected_payoff,
+                    precision_matrix=precision_matrix,
+                    weights=sensitivity_weights,
+                ).value
+            except (ValueError, RuntimeError):
+                continue
+            sensitivity_valid.append(alpha_value)
+            sensitivity_risks.append(-risk)
+        fig, ax = plt.subplots(figsize=(7.0, 5.0))
+        ax.plot(
+            sensitivity_valid,
+            sensitivity_risks,
+            marker="o",
+            color="#c14b4b",
         )
-        outputs.append(str(path))
+        ax.set_xlabel("alpha (caution)")
+        ax.set_ylabel("-CFVaR2 (risk)")
+        ax.set_title("CFVaR2 vs alpha")
+        ax.grid(True, linestyle=":", alpha=0.5)
+        sensitivity_path = Path(output_dir) / "cfvar_alpha.png"
+        sensitivity_path.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(sensitivity_path, bbox_inches="tight")
+        plt.close(fig)
+        outputs.append(str(sensitivity_path))
+
+    return outputs
 
     return outputs
 

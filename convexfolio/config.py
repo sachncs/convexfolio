@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import numpy as np
+import yaml
 
 from convexfolio.types import FloatArray
 
@@ -134,8 +135,6 @@ def load(path: str | None) -> Experiment:
     input_path = Path(path)
     suffix = input_path.suffix.lower()
     if suffix in {".yaml", ".yml"}:
-        import yaml
-
         raw_config = yaml.safe_load(input_path.read_text(encoding="utf-8"))
     else:
         raw_config = json.loads(input_path.read_text(encoding="utf-8"))

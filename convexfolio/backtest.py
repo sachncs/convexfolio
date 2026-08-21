@@ -15,12 +15,14 @@ in this same module; the test suite covers both.
 
 from __future__ import annotations
 
+import csv
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
+from convexfolio import CFVaR3Numerical, CFVaR3Objective
 from convexfolio.config import PortfolioInputs
 from convexfolio.constraints import SLSQPLambda
 
@@ -62,8 +64,6 @@ def load_price_history_csv(path: str | Path) -> PriceHistory:
         FileNotFoundError: If the file does not exist.
         ValueError: If the header is missing the ``timestamp`` column.
     """
-    import csv
-
     input_path = Path(path)
     with input_path.open(newline="", encoding="utf-8") as handle:
         reader = csv.reader(handle)
@@ -155,8 +155,6 @@ def run_backtest(
         ValueError: If the price history is too short or has zero
             variance in any instrument.
     """
-    from convexfolio import CFVaR3Numerical, CFVaR3Objective
-
     if history.n_timestamps < 2:
         raise ValueError("price history must have at least 2 timestamps")
     n_timestamps = history.n_timestamps

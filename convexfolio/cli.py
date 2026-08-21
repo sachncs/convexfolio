@@ -24,6 +24,12 @@ import argparse
 import json
 from pathlib import Path
 
+from convexfolio import Minimize, Variance
+from convexfolio.backtest import (
+    BacktestConfig,
+    load_price_history_csv,
+    run_backtest,
+)
 from convexfolio.config import Experiment, load
 from convexfolio.data import (
     PortfolioInputs,
@@ -32,6 +38,7 @@ from convexfolio.data import (
     synthetic_portfolio,
 )
 from convexfolio.determinism import check
+from convexfolio.plot import cfvar_sensitivity, efficient_frontier, weights
 from convexfolio.utils import Logger, reproduce
 
 
@@ -138,12 +145,6 @@ def plot_command(
     Returns:
         A list of output paths written, one entry per chart rendered.
     """
-    from convexfolio.plot import (
-        cfvar_sensitivity,
-        efficient_frontier,
-        weights,
-    )
-
     precision_matrix = experiment.precision_matrix
     cost_vector = experiment.cost_vector
     expected_payoff = experiment.expected_payoff
@@ -151,8 +152,6 @@ def plot_command(
     outputs: list[str] = []
 
     if parsed_args.chart in ("all", "weights"):
-        from convexfolio import Minimize, Variance
-
         w = Minimize(Variance(precision_matrix), cost_vector).value
         path = weights(w, output_path=f"{output_dir}/weights.png")
         outputs.append(str(path))
@@ -192,12 +191,6 @@ def backtest_command(parsed_args: argparse.Namespace) -> None:
         AssertionError: If ``--config`` is given but the loaded
             experiment has no ``inputs`` section.
     """
-    from convexfolio.backtest import (
-        BacktestConfig,
-        load_price_history_csv,
-        run_backtest,
-    )
-
     log = Logger(level="INFO")
     if not parsed_args.path:
         raise SystemExit("--path is required for the backtest command")

@@ -39,6 +39,7 @@ from pathlib import Path
 from typing import Any, TypedDict
 
 import numpy as np
+from datasets import load_dataset
 
 from convexfolio.config import PortfolioInputs
 from convexfolio.math import Minimize, Variance
@@ -234,19 +235,7 @@ class HFDatasetSource:
 
         Yields:
             Raw row dicts as returned by the Hub.
-
-        Raises:
-            ImportError: If the :mod:`datasets` package is not
-                installed.
         """
-        try:
-            from datasets import load_dataset
-        except ImportError as error:
-            raise ImportError(
-                "HFDatasetSource requires the 'datasets' package; "
-                "install with `pip install convexfolio[hf-data]`"
-            ) from error
-
         dataset = load_dataset(
             self.repo_id,
             self.subset,

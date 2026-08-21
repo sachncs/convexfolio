@@ -157,23 +157,25 @@ class SyntheticPortfolio:
 class Summary:
     """JSON-serialisable shape summary of a portfolio.
 
-    Callable: ``Summary(inputs)`` returns the dict directly.
+    The constructor computes the summary dict and stores it on
+    :attr:`value`. Follows the math.py ``.value`` convention so the
+    call shape is uniform across the codebase.
 
     Args:
         inputs: A :class:`~convexfolio.config.PortfolioInputs`
             instance.
 
-    Returns:
-        A dict with keys ``n_instruments``,
-        ``expected_payoff_range`` (``[min, max]`` of the expected
-        payoff vector), ``cost_range`` (``[min, max]`` of the cost
-        vector), and ``precision_trace`` (sum of the diagonal entries
-        of the precision matrix). Safe to serialise with
-        :func:`json.dumps`.
+    Attributes:
+        value: The summary dict with keys ``n_instruments``,
+            ``expected_payoff_range`` (``[min, max]`` of the expected
+            payoff vector), ``cost_range`` (``[min, max]`` of the
+            cost vector), and ``precision_trace`` (sum of the
+            diagonal entries of the precision matrix). Safe to
+            serialise with :func:`json.dumps`.
     """
 
-    def __new__(cls, inputs: PortfolioInputs) -> dict[str, Any]:  # type: ignore[misc]
-        return {
+    def __init__(self, inputs: PortfolioInputs) -> None:
+        self.value: dict[str, Any] = {
             "n_instruments": inputs.n_instruments,
             "expected_payoff_range": [
                 float(inputs.expected_payoff.min()),

@@ -125,7 +125,7 @@ def ingest_command(parsed_args: argparse.Namespace) -> PortfolioInputs:
     if not parsed_args.path:
         raise SystemExit("--path is required for the ingest command")
     inputs = LoadCSV(parsed_args.path)()
-    log.info(json.dumps(Summary(inputs), indent=2))
+    log.info(json.dumps(Summary(inputs).value, indent=2))
     return inputs
 
 

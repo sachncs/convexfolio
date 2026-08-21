@@ -21,9 +21,9 @@ def test_synthetic_portfolio_shapes() -> None:
 
 
 def test_summary_is_json_safe() -> None:
-    """Summary(inputs) returns a JSON-serialisable dict."""
+    """Summary(inputs).value returns a JSON-serialisable dict."""
     inputs = SyntheticPortfolio(n_instruments=3, degrees_of_freedom=8.0, seed=2)()
-    s = Summary(inputs)
+    s = Summary(inputs).value
     json.dumps(s)  # must not raise
 
 
@@ -100,9 +100,9 @@ def test_load_csv_no_header_raises(tmp_path: Path) -> None:
 
 
 def test_summary_contains_expected_keys() -> None:
-    """Summary(inputs) returns the documented dict shape."""
+    """Summary(inputs).value returns the documented dict shape."""
     inputs = SyntheticPortfolio(n_instruments=3, degrees_of_freedom=8.0, seed=7)()
-    s = Summary(inputs)
+    s = Summary(inputs).value
     assert set(s.keys()) == {
         "n_instruments",
         "expected_payoff_range",

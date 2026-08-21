@@ -14,7 +14,6 @@ defaults), and ``validate(config)`` to enforce semantic bounds.
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
 
 import numpy as np
 
@@ -111,13 +110,6 @@ class Experiment:
         return self.inputs.precision_matrix
 
 
-def _load_yaml(path: Path) -> dict[str, Any]:
-    """Load a YAML file using PyYAML. Raises ``ImportError`` if missing."""
-    import yaml
-
-    return yaml.safe_load(path.read_text(encoding="utf-8"))
-
-
 def load(path: str | None) -> Experiment:
     """Load an ``Experiment`` from a JSON or YAML file.
 
@@ -131,7 +123,10 @@ def load(path: str | None) -> Experiment:
     Raises:
         FileNotFoundError: If ``path`` does not exist.
         json.JSONDecodeError: If the file is not valid JSON.
-        yaml.YAMLError: If the file is not valid YAML (and PyYAML is installed).
+        ImportError: If the YAML extra is requested but PyYAML is not
+            installed.
+        yaml.YAMLError: If the file is not valid YAML (and PyYAML is
+            installed).
         ValueError: If the alpha bound is invalid.
     """
     if path is None:
@@ -139,7 +134,9 @@ def load(path: str | None) -> Experiment:
     input_path = Path(path)
     suffix = input_path.suffix.lower()
     if suffix in {".yaml", ".yml"}:
-        raw_config = _load_yaml(input_path)
+        import yaml
+
+        raw_config = yaml.safe_load(input_path.read_text(encoding="utf-8"))
     else:
         raw_config = json.loads(input_path.read_text(encoding="utf-8"))
     raw_runtime = raw_config.get("runtime", {})

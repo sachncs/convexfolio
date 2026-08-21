@@ -5,7 +5,7 @@ Public surface:
 * :func:`parallel_threshold` — reads the ``OPTIONS_PARALLEL_THRESHOLD``
   env var with a default of ``4``. Above this repetition count
   :func:`check` switches to a process pool.
-* :func:`check` — runs :func:`~convexfolio.utils.reproduce` repeatedly
+* :func:`check` — runs :class:`~convexfolio.utils.Reproduce` repeatedly
   (serially or via :class:`ProcessPoolExecutor`) and returns a
   :class:`~convexfolio.utils.Report`.
 """
@@ -16,7 +16,7 @@ import os
 from concurrent.futures import ProcessPoolExecutor
 
 from convexfolio.config import Experiment
-from convexfolio.utils import Report, reproduce
+from convexfolio.utils import Report, Reproduce
 
 
 def parallel_threshold() -> int:
@@ -56,8 +56,12 @@ def check(config: Experiment, repetitions: int = 2) -> Report:
 
     if repetitions >= parallel_threshold():
         with ProcessPoolExecutor() as executor:
-            results = list(executor.map(reproduce, [config] * repetitions))
+            results = list(
+                executor.map(
+                    lambda c: Reproduce(c)(), [config] * repetitions
+                )
+            )
     else:
-        results = [reproduce(config) for _ in range(repetitions)]
+        results = [Reproduce(config)() for _ in range(repetitions)]
 
     return Report(config=config, repetitions=repetitions, results=results)

@@ -75,7 +75,7 @@ from convexfolio.math import (
     Score,
     Variance,
 )
-from convexfolio.utils import Logger, Report, reproduce
+from convexfolio.utils import Logger, Report, Reproduce
 
 __all__ = [
     "Bilinear",
@@ -119,7 +119,8 @@ __all__ = [
     "QualityScore",
     "Quadratic",
     "Reconstruct",
-    "Report",
+"Report",
+    "Reproduce",
     "Runtime",
     "Score",
     "SummariseResults",
@@ -128,9 +129,6 @@ __all__ = [
     "Validate",
     "Variance",
     "check",
-    "load",
-    "load_csv",
-    "reproduce",
     "summary",
     "synthetic_portfolio",
     "validate",

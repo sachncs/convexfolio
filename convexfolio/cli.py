@@ -39,7 +39,7 @@ from convexfolio.data import (
 )
 from convexfolio.determinism import check
 from convexfolio.plot import cfvar_sensitivity, efficient_frontier, weights
-from convexfolio.utils import Logger, reproduce
+from convexfolio.utils import Logger, Reproduce
 
 
 def parser() -> argparse.ArgumentParser:
@@ -228,7 +228,7 @@ def main() -> None:
     * ``validate-determinism`` → :func:`~convexfolio.determinism.check`
     * ``reproduce-report`` → :func:`~convexfolio.determinism.check` plus
       :meth:`~convexfolio.utils.Report.save`
-    * default (no match) → :func:`~convexfolio.utils.reproduce`
+    * default (no match) → :class:`~convexfolio.utils.Reproduce`
 
     Raises:
         SystemExit: With code ``2`` if ``validate-determinism`` finds
@@ -269,7 +269,7 @@ def main() -> None:
         log.info(str(output_path))
         return
 
-    result = reproduce(experiment)
+    result = Reproduce(experiment)()
     log.info(json.dumps(result, indent=2))
 
 

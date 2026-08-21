@@ -63,83 +63,98 @@ class Logger:
         self.logger.error(message)
 
 
-def reproduce(experiment: Experiment) -> dict[str, object]:
+class Reproduce:
     """Run the end-to-end optimisation once and return the structured report.
 
-    Uses synthetic matrices as a self-contained smoke pipeline. External data
-    ingestion is project-dependent; downstream users can replace this stage.
+    Uses synthetic matrices as a self-contained smoke pipeline. External
+    data ingestion is project-dependent; downstream users can replace
+    this stage by composing their own :class:`Reproduce` subclass or by
+    composing :class:`Reproduce` with a custom solver.
 
     Args:
         experiment: Top-level configuration.
 
-    Returns:
-        A JSON-serialisable dict with ``config``, ``inputs``, ``outputs``,
-        and ``uncertainty`` keys.
+    Attributes:
+        experiment: See Args.
+
+    Returns (via ``__call__``):
+        A JSON-serialisable dict with ``config``, ``inputs``,
+        ``outputs``, and ``uncertainty`` keys.
     """
-    rng = np.random.default_rng(experiment.runtime.seed)
-    n_instruments = 5
-    sample_matrix = rng.normal(size=(n_instruments, n_instruments))
-    precision_matrix = sample_matrix.T @ sample_matrix + 0.5 * np.eye(n_instruments)
-    cost_vector = np.abs(rng.normal(size=n_instruments)) + 0.1
-    expected_payoff_vector = rng.normal(size=n_instruments)
 
-    variance_weights = Minimize(Variance(precision_matrix), cost_vector).value
-    cfvar2_weights = CFVaR2Closed(
-        precision_matrix=precision_matrix,
-        expected_payoff=expected_payoff_vector,
-        cost_vector=cost_vector,
-        alpha=experiment.optimization.alpha,
-    ).value
-    # Persist the synthetic inputs on the returned config dict so the
-    # `inputs` round-trips correctly through JSON.
-    experiment_dict = asdict(experiment)
-    experiment_dict["inputs"] = {
-        "expected_payoff": expected_payoff_vector.tolist(),
-        "cost_vector": cost_vector.tolist(),
-        "precision_matrix": precision_matrix.tolist(),
-    }
+    def __init__(self, experiment: Experiment) -> None:
+        self.experiment = experiment
 
-    objective = CFVaR3Objective(
-        alpha=experiment.optimization.alpha,
-        expected_payoff=expected_payoff_vector,
-        precision_matrix=precision_matrix,
-        kappa3_callback=lambda weights: 0.0,
-    )
-    initial_weights = cost_vector / float(cost_vector @ cost_vector)
-    cfvar3_weights = CFVaR3Numerical(
-        cost_vector=cost_vector,
-        initial_weights=initial_weights,
-        objective_callable=objective,
-    ).value
+    def __call__(self) -> dict[str, object]:
+        experiment = self.experiment
+        rng = np.random.default_rng(experiment.runtime.seed)
+        n_instruments = 5
+        sample_matrix = rng.normal(size=(n_instruments, n_instruments))
+        precision_matrix = (
+            sample_matrix.T @ sample_matrix + 0.5 * np.eye(n_instruments)
+        )
+        cost_vector = np.abs(rng.normal(size=n_instruments)) + 0.1
+        expected_payoff_vector = rng.normal(size=n_instruments)
 
-    return {
-        "config": experiment_dict,
-        "inputs": {
-            "u": expected_payoff_vector.tolist(),
-            "v": cost_vector.tolist(),
-            "qmatrix": precision_matrix.tolist(),
-        },
-        "outputs": {
-            "variance_weights": variance_weights.tolist(),
-            "cfvar2_weights": cfvar2_weights.tolist(),
-            "cfvar3_weights": cfvar3_weights.tolist(),
-            "cfvar2_at_variance_weights": CFVaR2nd(
-                alpha=experiment.optimization.alpha,
-                expected_payoff=expected_payoff_vector,
-                precision_matrix=precision_matrix,
-                weights=variance_weights,
-            ).value,
-        },
-        "uncertainty": {
-            "status": "ASSUMPTION",
-            "items": [
-                (
-                    "Pipeline demo uses synthetic inputs; real-market "
-                    "replication requires data-specific integration."
-                ),
-            ],
-        },
-    }
+        variance_weights = Minimize(
+            Variance(precision_matrix), cost_vector
+        ).value
+        cfvar2_weights = CFVaR2Closed(
+            precision_matrix=precision_matrix,
+            expected_payoff=expected_payoff_vector,
+            cost_vector=cost_vector,
+            alpha=experiment.optimization.alpha,
+        ).value
+        # Persist the synthetic inputs on the returned config dict so
+        # the `inputs` round-trips correctly through JSON.
+        experiment_dict = asdict(experiment)
+        experiment_dict["inputs"] = {
+            "expected_payoff": expected_payoff_vector.tolist(),
+            "cost_vector": cost_vector.tolist(),
+            "precision_matrix": precision_matrix.tolist(),
+        }
+
+        objective = CFVaR3Objective(
+            alpha=experiment.optimization.alpha,
+            expected_payoff=expected_payoff_vector,
+            precision_matrix=precision_matrix,
+            kappa3_callback=lambda weights: 0.0,
+        )
+        initial_weights = cost_vector / float(cost_vector @ cost_vector)
+        cfvar3_weights = CFVaR3Numerical(
+            cost_vector=cost_vector,
+            initial_weights=initial_weights,
+            objective_callable=objective,
+        ).value
+
+        return {
+            "config": experiment_dict,
+            "inputs": {
+                "u": expected_payoff_vector.tolist(),
+                "v": cost_vector.tolist(),
+                "qmatrix": precision_matrix.tolist(),
+            },
+            "outputs": {
+                "variance_weights": variance_weights.tolist(),
+                "cfvar2_weights": cfvar2_weights.tolist(),
+                "cfvar3_weights": cfvar3_weights.tolist(),
+                "cfvar2_at_variance_weights": CFVaR2nd(
+                    alpha=experiment.optimization.alpha,
+                    expected_payoff=expected_payoff_vector,
+                    precision_matrix=precision_matrix,
+                    weights=variance_weights,
+                ).value,
+            },
+            "uncertainty": {
+                "status": "ASSUMPTION",
+                "items": [
+                    (
+                        "Pipeline demo uses synthetic inputs; real-market "
+                        "replication requires data-specific integration."
+                    ),
+                ],
+            },
+        }
 
 
 class Report:

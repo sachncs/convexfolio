@@ -4,7 +4,9 @@
   <p align="center">
     <a href="#installation"><img src="https://img.shields.io/badge/python-3.12%20%7C%203.13-blue" alt="Python"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License"></a>
+    <a href="https://github.com/sachncs/convexfolio/releases/latest"><img src="https://img.shields.io/github/v/release/sachncs/convexfolio" alt="Latest release"></a>
     <a href="https://github.com/sachncs/convexfolio/actions"><img src="https://img.shields.io/github/actions/workflow/status/sachncs/convexfolio/ci.yml?branch=main" alt="CI"></a>
+    <a href="https://github.com/sachncs/convexfolio/pkgs/container/convexfolio"><img src="https://img.shields.io/badge/ghcr.io-convexfolio-blue" alt="Docker image"></a>
     <a href="https://github.com/sachncs/convexfolio/stargazers"><img src="https://img.shields.io/github/stars/sachncs/convexfolio" alt="Stars"></a>
     <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/badge/code%20style-ruff-000000.svg" alt="Ruff"></a>
     <a href="https://mypy-lang.org/"><img src="https://img.shields.io/badge/type%20checked-mypy-blue.svg" alt="mypy"></a>
@@ -83,6 +85,28 @@ type `git --version` in your terminal.
 ---
 
 ## Installation
+
+Pick whichever option fits your setup:
+
+### Option 1 — Pre-built wheel from GitHub Releases (fastest)
+
+```bash
+pip install https://github.com/sachncs/convexfolio/releases/download/v0.3.0/convexfolio-0.3.0-py3-none-any.whl
+```
+
+No `git clone`, no build step. Works as soon as a GitHub Release
+exists.
+
+### Option 2 — Docker (no Python install needed)
+
+```bash
+docker run --rm ghcr.io/sachncs/convexfolio --command print-report
+```
+
+The image bundles Python + Convexfolio + its dependencies. Useful on
+servers or when you can't (or don't want to) install Python locally.
+
+### Option 3 — From source (recommended for development)
 
 A "virtual environment" is an isolated Python sandbox that keeps this
 package's stuff from interfering with your other Python projects.

@@ -9,7 +9,7 @@ Four frozen dataclasses form the runtime configuration object graph:
 
 Two composable classes drive the load + validate cycle:
 
-* :class:`LoadConfig` — reads a JSON or YAML file and returns a
+* :class:`Load` — reads a JSON or YAML file and returns a
   fully-built :class:`Experiment`; validation is run on the result.
 * :class:`Validate` — alpha-bounds checker; callable as
   ``Validate()(config)``.
@@ -115,10 +115,10 @@ class Experiment:
         return self.inputs.precision_matrix
 
 
-class LoadConfig:
+class Load:
     """Load an :class:`Experiment` from a JSON or YAML file.
 
-    Callable: ``LoadConfig(path)()`` returns the loaded
+    Callable: ``Load(path)()`` returns the loaded
     :class:`Experiment`. ``Validate`` is run on the result.
 
     Args:

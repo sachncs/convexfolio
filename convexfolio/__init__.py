@@ -4,7 +4,7 @@ The API is grouped by responsibility:
 
 * **Configuration** — :class:`Experiment`, :class:`Runtime`,
   :class:`Optimization`, :class:`PortfolioInputs`,
-  :class:`LoadConfig`, :class:`Validate`.
+  :class:`Load`, :class:`Validate`.
 * **Data ingestion** — :class:`LoadCSV`,
   :class:`SyntheticPortfolio`, :class:`Summary`.
 * **SP500 options-IV HuggingFace integration** —
@@ -25,7 +25,7 @@ The API is grouped by responsibility:
 
 from convexfolio.config import (
     Experiment,
-    LoadConfig,
+    Load,
     Optimization,
     PortfolioInputs,
     Runtime,
@@ -105,7 +105,7 @@ __all__ = [
     "Linear",
     "Linearize",
     "LoadCSV",
-    "LoadConfig",
+    "Load",
     "LoadOptionsIV",
     "Logger",
     "Loss",

@@ -1,22 +1,22 @@
-"""Tests for the LoadConfig and Validate composition classes."""
+"""Tests for the Load and Validate composition classes."""
 
 import json
 from pathlib import Path
 
 import pytest
 
-from convexfolio.config import LoadConfig, Validate
+from convexfolio.config import Load, Validate
 
 
 def test_load_config_defaults() -> None:
-    """LoadConfig(None)() returns a default Experiment."""
-    experiment = LoadConfig(None)()
+    """Load(None)() returns a default Experiment."""
+    experiment = Load(None)()
     assert experiment.optimization.alpha == 0.05
 
 
 def test_validate_rejects_invalid_alpha(tmp_path: Path) -> None:
     """Validate raises ValueError on out-of-bounds alpha."""
-    experiment = LoadConfig(None)()
+    experiment = Load(None)()
     raw_config = {
         "runtime": {
             "seed": experiment.runtime.seed,
@@ -34,12 +34,12 @@ def test_validate_rejects_invalid_alpha(tmp_path: Path) -> None:
     config_file = tmp_path / "oop_bad_config.json"
     config_file.write_text(json.dumps(raw_config), encoding="utf-8")
     with pytest.raises(ValueError):
-        LoadConfig(str(config_file))()
+        Load(str(config_file))()
 
 
 def test_validate_alpha_zero_and_one_rejected(tmp_path: Path) -> None:
     """Alpha at the boundary (0 or 0.5) is rejected."""
-    experiment = LoadConfig(None)()
+    experiment = Load(None)()
     raw_config = {
         "runtime": {
             "seed": experiment.runtime.seed,
@@ -57,7 +57,7 @@ def test_validate_alpha_zero_and_one_rejected(tmp_path: Path) -> None:
     config_file = tmp_path / "alpha_zero.json"
     config_file.write_text(json.dumps(raw_config), encoding="utf-8")
     with pytest.raises(ValueError):
-        LoadConfig(str(config_file))()
+        Load(str(config_file))()
 
 
 def test_load_config_json_default_key_alias(tmp_path: Path) -> None:
@@ -68,7 +68,7 @@ def test_load_config_json_default_key_alias(tmp_path: Path) -> None:
     }
     config_file = tmp_path / "config.json"
     config_file.write_text(json.dumps(raw_config), encoding="utf-8")
-    experiment = LoadConfig(str(config_file))()
+    experiment = Load(str(config_file))()
     assert experiment.runtime.output_directory == "old_name_dir"
 
 
@@ -86,7 +86,7 @@ optimization:
 """
     config_file = tmp_path / "config.yaml"
     config_file.write_text(raw_config, encoding="utf-8")
-    experiment = LoadConfig(str(config_file))()
+    experiment = Load(str(config_file))()
     assert experiment.runtime.seed == 42
     assert experiment.runtime.log_level == "DEBUG"
     assert experiment.runtime.output_directory == "yaml_dir"
@@ -100,20 +100,20 @@ def test_load_config_yml_extension(tmp_path: Path) -> None:
     raw_config = "runtime:\n  seed: 5\n"
     config_file = tmp_path / "config.yml"
     config_file.write_text(raw_config, encoding="utf-8")
-    experiment = LoadConfig(str(config_file))()
+    experiment = Load(str(config_file))()
     assert experiment.runtime.seed == 5
 
 
 def test_validate_accepts_default_experiment() -> None:
     """Validate(default Experiment) does not raise."""
-    experiment = LoadConfig(None)()
+    experiment = Load(None)()
     Validate(experiment)
 
 
 def test_load_config_missing_file_raises(tmp_path: Path) -> None:
     """Missing file raises FileNotFoundError."""
     with pytest.raises(FileNotFoundError):
-        LoadConfig(str(tmp_path / "nonexistent.json"))()
+        Load(str(tmp_path / "nonexistent.json"))()
 
 
 def test_load_config_invalid_json_raises(tmp_path: Path) -> None:
@@ -121,4 +121,4 @@ def test_load_config_invalid_json_raises(tmp_path: Path) -> None:
     bad = tmp_path / "bad.json"
     bad.write_text("not valid json {", encoding="utf-8")
     with pytest.raises(json.JSONDecodeError):
-        LoadConfig(str(bad))()
+        Load(str(bad))()

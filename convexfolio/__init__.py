@@ -3,10 +3,10 @@
 The API is grouped by responsibility:
 
 * **Configuration** — :class:`Experiment`, :class:`Runtime`,
-  :class:`Optimization`, :class:`PortfolioInputs`, :func:`load`,
-  :func:`validate`.
-* **Data ingestion** — :func:`load_csv`, :func:`synthetic_portfolio`,
-  :func:`summary`.
+  :class:`Optimization`, :class:`PortfolioInputs`,
+  :class:`LoadConfig`, :class:`Validate`.
+* **Data ingestion** — :class:`LoadCSV`,
+  :class:`SyntheticPortfolio`, :class:`Summary`.
 * **SP500 options-IV HuggingFace integration** —
   :class:`OptionsRow`, :class:`CrossSectionResult`,
   :class:`BucketWeightStat`, :class:`HFDatasetSource`,
@@ -20,7 +20,7 @@ The API is grouped by responsibility:
   blocks (:class:`Compute`, :class:`Linear`, :class:`Curvature`,
   :class:`Bilinear`, :class:`Cross`).
 * **Pipeline** — :class:`Logger`, :class:`Report`,
-  :func:`reproduce`, :func:`check` (determinism check).
+  :class:`Reproduce`, :func:`check` (determinism check).
 """
 
 from convexfolio.config import (
@@ -129,7 +129,4 @@ __all__ = [
     "Validate",
     "Variance",
     "check",
-    "summary",
-    "synthetic_portfolio",
-    "validate",
 ]

@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+title: "Convexfolio"
+abstract: "Production-ready Python package for optimal option portfolio optimization, based on arXiv:2601.07991v2. Implements variance minimization and CFVaR2 closed-form and CFVaR3 numerical solvers."
+date-released: "2026-08-22"
+version: "0.3.0"
+license: MIT
+repository-code: "https://github.com/sachncs/convexfolio"
+url: "https://github.com/sachncs/convexfolio"
+contact:
+  - name: "Sachin"
+    email: "sachncs@gmail.com"
+keywords:
+  - portfolio-optimization
+  - option-pricing
+  - risk-management
+  - cvar
+  - quantitative-finance
+  - optimization
+preferred-citation:
+  type: article
+  title: "Convexfolio: closed-form and numerical solvers for option portfolio optimization"
+  authors:
+    - family-names: "Sachin"
+      given-names: ""
+  journal: "arXiv"
+  year: 2026
+  url: "https://arxiv.org/abs/2601.07991v2"

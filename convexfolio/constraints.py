@@ -16,14 +16,22 @@ callers don't have to write the dict shape manually.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 
 import numpy as np
 
 from convexfolio.types import FloatArray
 
-SLSQPConstraint = dict[str, object]
+SLSQPLambda = Callable[[np.ndarray], float]
+SLSQPConstraint = dict[str, str | SLSQPLambda]
 ConstraintSpec = tuple[SLSQPConstraint, ...]
+
+
+def fun_of(constraint: SLSQPConstraint) -> SLSQPLambda:
+    """Type-narrowed accessor for the ``fun`` callable in a constraint."""
+    f = constraint["fun"]
+    assert callable(f)
+    return f
 
 
 def budget(cost_vector: FloatArray) -> SLSQPConstraint:
@@ -35,10 +43,10 @@ def budget(cost_vector: FloatArray) -> SLSQPConstraint:
     Returns:
         A SciPy SLSQP constraint dict enforcing the budget.
     """
-    return {
-        "type": "eq",
-        "fun": lambda x, v=cost_vector: float(np.dot(x, v) - 1.0),
-    }
+    def fun(x: np.ndarray, v: FloatArray = cost_vector) -> float:
+        return float(np.dot(x, v) - 1.0)
+
+    return {"type": "eq", "fun": fun}
 
 
 def bounds(min: float, max: float, n: int) -> Sequence[tuple[float, float]]:
@@ -67,10 +75,10 @@ def inequality(
     Returns:
         A SciPy SLSQP constraint dict.
     """
-    return {
-        "type": "ineq",
-        "fun": lambda x, a=coefficients, b=limit: float(b - float(np.dot(x, a))),
-    }
+    def fun(x: np.ndarray, a: FloatArray = coefficients, b: float = limit) -> float:
+        return float(b - float(np.dot(x, a)))
+
+    return {"type": "ineq", "fun": fun}
 
 
 def merge(*groups: ConstraintSpec | Sequence[SLSQPConstraint]) -> ConstraintSpec:

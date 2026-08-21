@@ -13,6 +13,7 @@ import numpy as np
 from scipy.optimize import minimize, minimize_scalar
 from scipy.stats import norm
 
+from convexfolio.constraints import SLSQPLambda
 from convexfolio.types import FloatArray
 
 
@@ -593,12 +594,12 @@ class CFVaR3Numerical:
         cost_vector: FloatArray,
         initial_weights: FloatArray,
         objective_callable,
-        extra_constraints: tuple[dict[str, object], ...] = (),
+        extra_constraints: tuple[dict[str, str | SLSQPLambda], ...] = (),
     ) -> None:
         self.cost_vector = cost_vector
         self.initial_weights = initial_weights
         self.objective_callable = objective_callable
-        constraints: list[dict[str, object]] = [
+        constraints: list[dict[str, str | SLSQPLambda]] = [
             {"type": "eq", "fun": lambda x: float(np.dot(x, cost_vector) - 1.0)}
         ]
         constraints.extend(extra_constraints)

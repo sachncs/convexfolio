@@ -102,7 +102,7 @@ def parser() -> argparse.ArgumentParser:
 
 
 def ingest_command(parsed_args: argparse.Namespace) -> PortfolioInputs:
-    """Run the ``ingest`` command: load a CSV and print its summary.
+    """Run the ``ingest`` command: load a CSV and log its summary.
 
     Args:
         parsed_args: Parsed CLI arguments. Must include ``--path``
@@ -114,10 +114,11 @@ def ingest_command(parsed_args: argparse.Namespace) -> PortfolioInputs:
     Raises:
         SystemExit: If ``--path`` was not provided.
     """
+    log = Logger(level="INFO")
     if not parsed_args.path:
         raise SystemExit("--path is required for the ingest command")
     inputs = load_csv(parsed_args.path)
-    print(json.dumps(summary(inputs), indent=2))
+    log.info(json.dumps(summary(inputs), indent=2))
     return inputs
 
 
@@ -197,6 +198,7 @@ def backtest_command(parsed_args: argparse.Namespace) -> None:
         run_backtest,
     )
 
+    log = Logger(level="INFO")
     if not parsed_args.path:
         raise SystemExit("--path is required for the backtest command")
     history = load_price_history_csv(parsed_args.path)
@@ -219,7 +221,7 @@ def backtest_command(parsed_args: argparse.Namespace) -> None:
         alpha=0.05,
     )
     result = run_backtest(history, config)
-    print(json.dumps(result.summary, indent=2))
+    log.info(json.dumps(result.summary, indent=2))
 
 
 def main() -> None:

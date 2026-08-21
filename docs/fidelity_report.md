@@ -1,66 +1,103 @@
 # Fidelity Report
 
-## Overview
+> 📖 **New here?** See the [Glossary](glossary.md) for terms like
+> *variance*, *CFVaR*, *precision matrix*.
 
-This document describes the fidelity of the implementation to the
-reference paper [arXiv:2601.07991v2](https://arxiv.org/abs/2601.07991v2).
+## What does "fidelity" mean?
 
-## Paper Fidelity
+"Fidelity" is a fancy word for **fidelity** — does this code do what
+the math paper says?
 
-### Variance Minimization (Section 2.1)
+This page tracks, algorithm by algorithm, whether the Convexfolio
+code is a faithful implementation of
+[arXiv:2601.07991v2](https://arxiv.org/abs/2601.07991v2).
+
+For each piece of math in the paper, we list:
+
+- **What the paper says** (in plain English).
+- **What the code does** (which class/function, in which file).
+- **Status**: Implemented / Partial / Not done.
+
+If you want to know "can I trust this code for X?", this is the page.
+
+---
+
+## Paper fidelity
+
+### Variance Minimisation (Section 2.1)
 
 **Status**: Fully Implemented
 
-The minimum variance portfolio optimization under budget constraint is
-implemented as:
+The paper says: find the weights `x` that minimise `0.5 xᵀQx`
+subject to `xᵀv = 1` (the budget constraint). Convexfolio solves
+this with an exact formula.
 
-```
-minimize    0.5 x^T Q x
-subject to  x^T v = 1
-```
-
-**Implementation**: `Minimize(Variance(Q), v).value` in
-`convexfolio/math.py`. Closed-form solution: `x* = Q⁻¹v / (v� Q⁻¹ v)`.
+| | |
+|---|---|
+| **Plain English** | Given the precision matrix `Q` (how risky each option is) and the cost vector `v` (option prices), find the weights that minimise variance while spending exactly $1. |
+| **Class** | `Minimize(Variance(Q), v)` |
+| **Where** | `convexfolio/math.py` |
+| **Method** | Closed-form: `x* = Q⁻¹v / (vᵀQ⁻¹v)` |
 
 ### CFVaR2 Closed-Form (Section 4.2)
 
 **Status**: Fully Implemented
 
-The closed-form solution for CFVaR2 optimization is implemented
-analytically via Appendix-B epsilon-star derivation and the QP with
-dual variables.
+The paper says: find the weights that minimise CFVaR2 (a sharper risk
+measure than variance), using an exact formula based on the
+epsilon-star derivation in Appendix B.
 
-**Implementation**: `CFVaR2Closed(Q, u, v, alpha).value` in
-`convexfolio/math.py`. Uses `OptimalEpsilon` for the Lagrange multiplier.
+| | |
+|---|---|
+| **Plain English** | Solve the same kind of problem, but use a risk measure that's better at catching tail losses. |
+| **Class** | `CFVaR2Closed(Q, u, v, alpha)` |
+| **Where** | `convexfolio/math.py` |
+| **Method** | Closed-form via `OptimalEpsilon` for the Lagrange multiplier. |
 
 ### CFVaR3 Numerical (Section 4.3)
 
 **Status**: Fully Implemented
 
-Third-order risk measure optimization via numerical methods (SLSQP).
+The paper says: solve for weights using a third-order approximation
+of CFVaR. Convexfolio uses SciPy's SLSQP optimiser under the hood.
 
-**Implementation**: `CFVaR3Numerical(v, x0, objective).value` with
-`CFVaR3Objective(alpha, u, Q, κ₃_callback)` in `convexfolio/math.py`.
+| | |
+|---|---|
+| **Plain English** | Same goal as CFVaR2, but using a more accurate risk approximation. Slower (no closed form exists) but closer to the paper. |
+| **Class** | `CFVaR3Numerical(v, x0, objective)` with `CFVaR3Objective(alpha, u, Q, κ₃_callback)` |
+| **Where** | `convexfolio/math.py` |
+| **Method** | SLSQP, with `maxiter=1000, ftol=1e-9` for headroom. |
 
 ### Risk evaluation
 
 **Status**: Fully Implemented
 
-- `CFVaR2nd(alpha, u, Q, x).value` — second-order CFVaR at weights `x`.
-- `CFVaR3rd(alpha, u, Q, x, κ₃).value` — third-order CFVaR with cumulance
-  correction.
+For any candidate weight vector `x`, compute the actual risk number
+it would produce.
+
+| | |
+|---|---|
+| **Plain English** | Given a portfolio, what does its risk number actually look like? |
+| **Classes** | `CFVaR2nd(alpha, u, Q, x)` and `CFVaR3rd(alpha, u, Q, x, κ₃)` |
+| **Where** | `convexfolio/math.py` |
 
 ### Section 2.4 — determined quantities
 
 **Status**: Fully Implemented
 
-- `c`: `Compute(degrees_of_freedom).value` (skew-t coefficient).
-- `h`: `Linear(covariance, skewness).value` (linear bias vector).
-- `q`: `Curvature(third_derivative, h).values` (curvature vector).
-- `Q` reconstruction: `Reconstruct(...).value` (variance-consistent
-  recovery of the symmetric precision matrix).
-- `u`, `Q` linearised: `Linearize(...).dual_residual`,
-  `Linearize(...).precision_matrix`.
+The paper builds a precision matrix `Q` from raw option Greeks data.
+Convexfolio provides classes for every intermediate quantity.
+
+| Paper quantity | Convexfolio class |
+|---|---|
+| `c` (skew-t coefficient) | `Compute(degrees_of_freedom).value` |
+| `h` (linear bias vector) | `Linear(covariance, skewness).value` |
+| `q` (curvature vector) | `Curvature(third_derivative, h).values` |
+| Bilinear / cross matrices | `Bilinear(...).matrix`, `Cross(...).matrix` |
+| `Q` reconstruction | `Reconstruct(...).value` |
+| Linearised `u`, `Q` | `Linearize(...).dual_residual`, `Linearize(...).precision_matrix` |
+
+---
 
 ## Parameter Definitions
 
@@ -68,30 +105,32 @@ Third-order risk measure optimization via numerical methods (SLSQP).
 
 **Status**: Implemented
 
-The scalar `c` from the moment expansion is computed in `Compute`
-(`convexfolio/math.py`).
+The skew-t coefficient. Computed by `Compute(degrees_of_freedom)` in
+`convexfolio/math.py`.
 
 ### `h` (Eq. 3)
 
 **Status**: Implemented
 
-The vector `h` from the moment expansion is computed in `Linear`
-(`convexfolio/math.py`).
+The linear bias vector. Computed by `Linear(covariance, skewness)`
+in `convexfolio/math.py`.
 
 ### `q` (Eq. 3)
 
 **Status**: Implemented
 
-The curvature vector `q` is computed in `Curvature`
-(`convexfolio/math.py`).
+The curvature vector. Computed by `Curvature(third_derivative, h)`
+in `convexfolio/math.py`.
 
 ### `epsilon_star` (Appendix B)
 
 **Status**: Implemented
 
-The optimal `epsilon_star` scalar is computed from the Appendix B
-derivation in `OptimalEpsilon` (`convexfolio/math.py`). Closed-form
-roots preferred; bounded numerical fallback if root conditions fail.
+The optimal Lagrange multiplier. Computed by `OptimalEpsilon(...)`
+in `convexfolio/math.py`. Closed-form roots preferred; bounded
+numerical fallback if roots fail.
+
+---
 
 ## Mismatches and Caveats
 
@@ -100,32 +139,51 @@ roots preferred; bounded numerical fallback if root conditions fail.
 **Status**: ASSUMPTION
 
 The pipeline in `reproduce()` uses synthetic data for demonstration.
-Real-market replication requires data-specific integration.
+Real-market replication requires data-specific integration. See
+[Mismatch Report](mismatch_report.md).
 
 ### Numerical Precision
 
 **Status**: ASSUMPTION
 
-Numerical optimization may have slight variations across platforms due
-to floating-point arithmetic. `CFVaR3Numerical` passes
-`maxiter=1000, ftol=1e-9` to SLSQP for headroom.
+Numerical optimisation may give slightly different results across
+platforms due to floating-point arithmetic. `CFVaR3Numerical`
+passes `maxiter=1000, ftol=1e-9` to SLSQP for headroom.
 
 ### Estimator Parity with R `sn`
 
 **Status**: NOT DETERMINED
 
 Some statistical estimators may differ from R's `sn` package
-implementations.
+implementations. We haven't done a head-to-head comparison.
 
-## Testing Coverage
+---
 
-All implemented algorithms are covered by unit tests in `tests/`:
+## Testing coverage
 
-- `test_optimization.py` — Solver correctness
-  (`Minimize`, `CFVaR2Closed`, `CFVaR3Numerical`).
-- `test_risk.py` — Risk measure calculations (`CFVaR2nd`, `CFVaR3rd`,
-  `Quadratic`, `shapes`).
-- `test_config.py` — Configuration validation (`load`, `validate`).
-- `test_determinism.py` — Reproducibility verification (`check`).
-- `test_determined_quantities.py` — Section 2.4 parameter computation
-  (`Compute`, `Linear`, `Reconstruct`, `PortfolioVariance`).
+Every algorithm above has a unit test. ([Glossary: pytest](glossary.md))
+
+| File | What it tests |
+|---|---|
+| `tests/test_optimization.py` | `Minimize`, `CFVaR2Closed`, `CFVaR3Numerical` correctness. |
+| `tests/test_risk.py` | `CFVaR2nd`, `CFVaR3rd`, `Quadratic`, `shapes`. |
+| `tests/test_config.py` | `load`, `validate`. |
+| `tests/test_determinism.py` | `check` (reproducibility). |
+| `tests/test_determined_quantities.py` | `Compute`, `Linear`, `Reconstruct`, `PortfolioVariance` (Section 2.4). |
+
+Run them all with:
+
+```bash
+PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
+```
+
+---
+
+## Where to look next
+
+- **[Glossary](glossary.md)** — Plain-English definitions.
+- **[Mismatch Report](mismatch_report.md)** — Detailed list of known
+  differences between code and paper.
+- **[Research Determination Notes](research_determination.md)** —
+  Which quantities are well-defined vs assumed.
+- **[Architecture](architecture.md)** — How the package fits together.

@@ -1,4 +1,14 @@
-"""Determinism checks for production reproducibility."""
+"""Determinism checks for production reproducibility.
+
+Public surface:
+
+* :func:`parallel_threshold` — reads the ``OPTIONS_PARALLEL_THRESHOLD``
+  env var with a default of ``4``. Above this repetition count
+  :func:`check` switches to a process pool.
+* :func:`check` — runs :func:`~convexfolio.utils.reproduce` repeatedly
+  (serially or via :class:`ProcessPoolExecutor`) and returns a
+  :class:`~convexfolio.utils.Report`.
+"""
 
 from __future__ import annotations
 
@@ -9,38 +19,34 @@ from convexfolio.config import Experiment
 from convexfolio.utils import Report, reproduce
 
 
-def _parallel_threshold() -> int:
-    """Minimum ``repetitions`` before we switch to a process pool.
+def parallel_threshold() -> int:
+    """Return the minimum ``repetitions`` before the process pool kicks in.
+
+    Reads the ``OPTIONS_PARALLEL_THRESHOLD`` env var; defaults to ``4``
+    when unset or unparseable. Used by :func:`check` to decide between
+    serial and parallel execution.
 
     Returns:
-        Threshold above which parallel execution is used; otherwise run serially.
+        Integer threshold above which parallel execution is used;
+        otherwise :func:`check` runs serially.
     """
     return int(os.environ.get("OPTIONS_PARALLEL_THRESHOLD", "4"))
-
-
-def _run_one(config: Experiment) -> dict[str, object]:
-    """Run a single ``reproduce(config)`` in a worker process.
-
-    Each worker receives the same ``config`` and produces a byte-equal result;
-    the serial-sequential worker output is intentionally identical so the
-    determinism check still validates bitwise reproducibility.
-    """
-    return reproduce(config)
 
 
 def check(config: Experiment, repetitions: int = 2) -> Report:
     """Run ``reproduce(config)`` repeatedly and return a ``Report``.
 
-    Uses a process pool when ``repetitions`` exceeds the configurable
-    threshold (``OPTIONS_PARALLEL_THRESHOLD``, default 4) so large portfolios
-    can be validated faster.
+    Uses a process pool when ``repetitions`` exceeds
+    :func:`parallel_threshold` so large portfolios can be validated
+    faster.
 
     Args:
         config: Top-level configuration.
-        repetitions: Number of repetitions (must be ``>= 2``).
+        repetitions: Number of repetitions. Must be ``>= 2``.
 
     Returns:
-        The ``Report`` describing whether runs were byte-equivalent.
+        The :class:`~convexfolio.utils.Report` describing whether
+        runs were byte-equivalent.
 
     Raises:
         ValueError: If ``repetitions < 2``.
@@ -48,9 +54,9 @@ def check(config: Experiment, repetitions: int = 2) -> Report:
     if repetitions < 2:
         raise ValueError("repetitions must be >= 2")
 
-    if repetitions >= _parallel_threshold():
+    if repetitions >= parallel_threshold():
         with ProcessPoolExecutor() as executor:
-            results = list(executor.map(_run_one, [config] * repetitions))
+            results = list(executor.map(reproduce, [config] * repetitions))
     else:
         results = [reproduce(config) for _ in range(repetitions)]
 

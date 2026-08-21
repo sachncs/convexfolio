@@ -53,10 +53,24 @@ class LoadCSV:
     """
 
     def __init__(self, path: str | Path) -> None:
+        """Store the path; the CSV is read in :meth:`__call__`.
+
+        Args:
+            path: Path to a CSV file on disk.
+        """
         self.path = Path(path)
 
     def __call__(self) -> PortfolioInputs:
-        """Read the CSV and return a :class:`PortfolioInputs`."""
+        """Read the CSV and return a :class:`PortfolioInputs`.
+
+        Returns:
+            A :class:`~convexfolio.config.PortfolioInputs` instance.
+
+        Raises:
+            FileNotFoundError: If ``self.path`` does not exist.
+            ValueError: If the CSV has no header row, is missing
+                required columns, or has no data rows.
+        """
         with self.path.open(newline="", encoding="utf-8") as handle:
             reader = csv.DictReader(handle)
             if reader.fieldnames is None:
@@ -124,6 +138,19 @@ class SyntheticPortfolio:
         degrees_of_freedom: float = 8.0,
         seed: int = 7,
     ) -> None:
+        """Validate and store the synthetic-portfolio parameters.
+
+        Args:
+            n_instruments: Number of options in the portfolio. Must be
+                positive.
+            degrees_of_freedom: Skew-t degrees of freedom. Must be
+                strictly greater than ``1.0`` for the distribution to
+                have finite variance.
+            seed: Random seed for reproducibility.
+
+        Raises:
+            ValueError: If ``degrees_of_freedom <= 1``.
+        """
         if degrees_of_freedom <= 1.0:
             raise ValueError("degrees_of_freedom must be > 1")
         self.n_instruments = n_instruments
@@ -175,6 +202,15 @@ class Summary:
     """
 
     def __init__(self, inputs: PortfolioInputs) -> None:
+        """Compute the summary dict and store it on :attr:`value`.
+
+        Args:
+            inputs: A :class:`~convexfolio.config.PortfolioInputs`
+                instance.
+
+        Attributes:
+            value: The summary dict (populated by ``__init__``).
+        """
         self.value: dict[str, Any] = {
             "n_instruments": inputs.n_instruments,
             "expected_payoff_range": [

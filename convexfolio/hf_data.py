@@ -1,18 +1,18 @@
 """ETL bridge between the SP500 options-IV HuggingFace dataset and Convexfolio.
 
 This module turns the rows of ``gauss314/options-IV-SP500`` into
-:class:`~convexfolio.config.PortfolioInputs` instances and threads them
-through the closed-form variance minimiser. It is organised as five
-pipeline stages — Extract, Parse, Transform, Solve, Summarise — wired
-together by the :class:`CrossSectionRunner` orchestrator.
+:class:`~convexfolio.config.PortfolioInputs` instances and threads
+them through the closed-form variance minimiser. It is organised as
+five pipeline stages — Extract, Parse, Transform, Solve, Summarise —
+wired together by the :class:`CrossSectionRunner` orchestrator.
 
 Public surface:
 
 * **Extract** — :class:`HFDatasetSource` and :class:`CSVFileSource`,
   two duck-typed sources that yield raw row dicts.
-* **Parse** — :class:`Parse`, a stateless class that turns
-  one raw dict into a validated :class:`OptionsRow`. Called as
-  ``Parse(row) -> OptionsRow``.
+* **Parse** — :class:`Parse`, a class whose constructor validates
+  one raw dict into a validated :class:`OptionsRow`. The result is
+  on ``Parse(row).value``.
 * **Transform** — :class:`BuildPortfolioInputs`, a configurable
   composition class with two state parameters
   (``off_diagonal_correlation`` and ``realised_vol_window``).
@@ -24,10 +24,6 @@ Public surface:
 * **Orchestrate** — :class:`LoadOptionsIV` (composes a source with a
   parser) and :class:`CrossSectionRunner` (composes the loader with a
   builder and a summariser).
-
-The :mod:`datasets` package is never imported at module load time.
-Installing ``convexfolio[hf-data]`` is required only when constructing
-an :class:`HFDatasetSource`.
 """
 
 from __future__ import annotations
@@ -131,6 +127,10 @@ class BucketWeightStat(TypedDict):
 def require_numeric(row: dict[str, Any], key: str) -> float:
     """Pull a non-NaN float from a dataset row.
 
+    Module-level helper used by :class:`Parse` to validate each
+    IV/HV column. Public so other parsers can reuse the same
+    contract.
+
     Args:
         row: The raw row dict.
         key: Column name to extract.
@@ -173,6 +173,17 @@ class Parse:
     """
 
     def __init__(self, row: dict[str, Any]) -> None:
+        """Validate the row, build an :class:`OptionsRow`, store on :attr:`value`.
+
+        Args:
+            row: A single raw row dict.
+
+        Raises:
+            ValueError: If ``symbol`` or ``date`` is missing/empty,
+                or if any column in :data:`IV_BUCKETS`,
+                :data:`HV_COLUMNS`, or ``VIX`` is missing or
+                non-finite.
+        """
         symbol = str(row.get("symbol", "")).strip()
         date = str(row.get("date", "")).strip()
         if not symbol:
@@ -232,6 +243,20 @@ class HFDatasetSource:
         symbols: Iterable[str] | None = None,
         max_rows: int | None = None,
     ) -> None:
+        """Store the Hub parameters; iteration happens in :meth:`__iter__`.
+
+        Args:
+            repo_id: HuggingFace dataset repository id. Defaults to
+                :data:`DATASET_REPO_ID`.
+            subset: Config / subset name. Defaults to
+                :data:`DATASET_SUBSET`.
+            split: Split name. Defaults to :data:`DATASET_SPLIT`.
+            streaming: If ``True`` (default), stream rows from the Hub
+                without downloading the full parquet file. Set to
+                ``False`` to materialise the table locally first.
+            symbols: Optional whitelist of ticker symbols to keep.
+            max_rows: Optional cap on the number of rows yielded.
+        """
         self.repo_id = repo_id
         self.subset = subset
         self.split = split
@@ -274,6 +299,12 @@ class CSVFileSource:
     """
 
     def __init__(self, path: str | Path) -> None:
+        """Store the path; iteration happens in :meth:`__iter__`.
+
+        Args:
+            path: Path to a CSV file with the SP500 options-IV
+                dataset's column layout.
+        """
         self.path = Path(path)
 
     def __iter__(self) -> Iterator[dict[str, Any]]:
@@ -318,6 +349,17 @@ class LoadOptionsIV:
         source: Iterable[dict[str, Any]],
         parser: Any = Parse,
     ) -> None:
+        """Store the source and parser; iteration in :meth:`__iter__`.
+
+        Args:
+            source: Any object that yields raw row dicts when iterated.
+                Both :class:`HFDatasetSource` and :class:`CSVFileSource`
+                satisfy this contract via duck typing.
+            parser: Callable turning one raw dict into an
+                :class:`OptionsRow`. Defaults to :class:`Parse` —
+                the callable must expose ``.value`` carrying the
+                parsed row.
+        """
         self.source = source
         self.parser = parser
 
@@ -367,6 +409,23 @@ class BuildPortfolioInputs:
         off_diagonal_correlation: float = 0.1,
         realised_vol_window: str = "median",
     ) -> None:
+        """Validate and store the builder's parameters.
+
+        Args:
+            off_diagonal_correlation: Scalar in ``[0, 1]`` mixing the
+                inverse-vol diagonal with the cross-product outer
+                term. ``0.0`` → fully diagonal precision; ``1.0`` →
+                full correlation. Default ``0.1`` matches
+                :func:`convexfolio.data.load_csv`'s convention.
+            realised_vol_window: ``"median"`` or ``"mean"`` of the
+                row's ``hv_values``. Default ``"median"`` (robust to
+                a single noisy window).
+
+        Raises:
+            ValueError: If ``off_diagonal_correlation`` is outside
+                ``[0, 1]`` or ``realised_vol_window`` is not a
+                recognised aggregation name.
+        """
         if not 0.0 <= off_diagonal_correlation <= 1.0:
             raise ValueError(
                 f"off_diagonal_correlation must be in [0, 1]; got "

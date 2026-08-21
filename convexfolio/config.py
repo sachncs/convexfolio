@@ -71,6 +71,11 @@ class PortfolioInputs:
 
     @property
     def n_instruments(self) -> int:
+        """Number of instruments in the portfolio.
+
+        Returns:
+            The length of ``cost_vector`` (and ``expected_payoff``).
+        """
         return int(self.cost_vector.shape[0])
 
 
@@ -92,6 +97,14 @@ class Experiment:
 
     @property
     def expected_payoff(self) -> FloatArray:
+        """Shortcut to ``inputs.expected_payoff`` (raises if no inputs).
+
+        Returns:
+            The 1-D expected-payoff vector.
+
+        Raises:
+            AssertionError: If ``self.inputs`` is ``None``.
+        """
         assert self.inputs is not None, (
             "experiment has no portfolio inputs; "
             "provide 'inputs' in the config file"
@@ -100,6 +113,14 @@ class Experiment:
 
     @property
     def cost_vector(self) -> FloatArray:
+        """Shortcut to ``inputs.cost_vector`` (raises if no inputs).
+
+        Returns:
+            The 1-D cost vector.
+
+        Raises:
+            AssertionError: If ``self.inputs`` is ``None``.
+        """
         assert self.inputs is not None, (
             "experiment has no portfolio inputs; "
             "provide 'inputs' in the config file"
@@ -108,6 +129,14 @@ class Experiment:
 
     @property
     def precision_matrix(self) -> FloatArray:
+        """Shortcut to ``inputs.precision_matrix`` (raises if no inputs).
+
+        Returns:
+            The 2-D precision matrix.
+
+        Raises:
+            AssertionError: If ``self.inputs`` is ``None``.
+        """
         assert self.inputs is not None, (
             "experiment has no portfolio inputs; "
             "provide 'inputs' in the config file"
@@ -118,8 +147,9 @@ class Experiment:
 class Load:
     """Load an :class:`Experiment` from a JSON or YAML file.
 
-    Callable: ``Load(path)()`` returns the loaded
-    :class:`Experiment`. ``Validate`` is run on the result.
+    Composition: stores the ``path`` in :meth:`__init__`; the file IO
+    + validation happens in :meth:`__call__`. Result is a fully-built
+    :class:`Experiment` (with ``Validate`` already run).
 
     Args:
         path: Path to a ``.json`` or ``.yaml`` / ``.yml`` file,
@@ -136,9 +166,20 @@ class Load:
     """
 
     def __init__(self, path: str | None) -> None:
+        """Store the path; actual file IO happens in :meth:`__call__`.
+
+        Args:
+            path: Path to a ``.json`` or ``.yaml`` / ``.yml`` file,
+                or ``None`` to construct a default :class:`Experiment`.
+        """
         self.path = path
 
     def __call__(self) -> Experiment:
+        """Read the file (or build defaults), validate, return.
+
+        Returns:
+            The loaded :class:`Experiment`.
+        """
         config = Experiment() if self.path is None else self._from_file()
         Validate(config)
         return config
@@ -179,8 +220,8 @@ class Load:
 class Validate:
     """Validate semantic constraints on an :class:`Experiment`.
 
-    The constructor raises ``ValueError`` if any constraint is violated.
-    Currently enforces ``0 < config.optimization.alpha < 0.5``.
+    The constructor raises ``ValueError`` if any constraint is
+    violated. Currently enforces ``0 < config.optimization.alpha < 0.5``.
 
     Args:
         config: The configuration to validate.
@@ -194,6 +235,15 @@ class Validate:
     """
 
     def __init__(self, config: Experiment) -> None:
+        """Run the validation; raise on failure, otherwise store config.
+
+        Args:
+            config: The configuration to validate.
+
+        Raises:
+            ValueError: If ``config.optimization.alpha`` falls outside
+                ``(0, 0.5)``.
+        """
         if not (0.0 < config.optimization.alpha < 0.5):
             raise ValueError("alpha must satisfy 0 < alpha < 0.5")
         self.config = config

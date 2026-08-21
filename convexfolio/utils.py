@@ -32,9 +32,18 @@ from convexfolio.math import (
 
 
 class Logger:
-    """Logging facade over the stdlib ``logging`` module.
+    """Logging facade over the stdlib :mod:`logging` module.
 
-    Single concrete class; no subclasses, no polymorphism.
+    Wraps a stdlib logger with a project-default formatter
+    (``timestamp | level | name | message``) and configures the
+    underlying logger's level on construction. Idempotent: if a
+    handler is already attached, the constructor does not add
+    another.
+
+    Args:
+        level: ``logging`` level name (e.g. ``"INFO"``,
+            ``"DEBUG"``). Unknown values fall back to ``INFO``.
+        name: Logger name. Defaults to ``"convexfolio"``.
 
     Attributes:
         logger: The wrapped stdlib logger.
@@ -45,7 +54,7 @@ class Logger:
 
         Args:
             level: ``logging`` level name (e.g. ``"INFO"``).
-            name: Logger name. Defaults to ``"options"``.
+            name: Logger name. Defaults to ``"convexfolio"``.
         """
         self.logger = logging.getLogger(name)
         self.logger.setLevel(getattr(logging, level.upper(), logging.INFO))
@@ -59,25 +68,45 @@ class Logger:
             self.logger.addHandler(handler)
 
     def debug(self, message: str) -> None:
+        """Log a ``DEBUG``-level message.
+
+        Args:
+            message: The message string.
+        """
         self.logger.debug(message)
 
     def info(self, message: str) -> None:
+        """Log an ``INFO``-level message.
+
+        Args:
+            message: The message string.
+        """
         self.logger.info(message)
 
     def warning(self, message: str) -> None:
+        """Log a ``WARNING``-level message.
+
+        Args:
+            message: The message string.
+        """
         self.logger.warning(message)
 
     def error(self, message: str) -> None:
+        """Log an ``ERROR``-level message.
+
+        Args:
+            message: The message string.
+        """
         self.logger.error(message)
 
 
 class Reproduce:
     """Run the end-to-end optimisation once and return the structured report.
 
-    Uses synthetic matrices as a self-contained smoke pipeline. External
-    data ingestion is project-dependent; downstream users can replace
-    this stage by composing their own :class:`Reproduce` subclass or by
-    composing :class:`Reproduce` with a custom solver.
+    Uses synthetic matrices as a self-contained smoke pipeline.
+    External data ingestion is project-dependent; downstream users
+    can replace this stage by composing their own :class:`Reproduce`
+    subclass or by composing :class:`Reproduce` with a custom solver.
 
     Args:
         experiment: Top-level configuration.
@@ -91,9 +120,20 @@ class Reproduce:
     """
 
     def __init__(self, experiment: Experiment) -> None:
+        """Store the experiment; the pipeline runs in :meth:`__call__`.
+
+        Args:
+            experiment: Top-level configuration.
+        """
         self.experiment = experiment
 
     def __call__(self) -> dict[str, object]:
+        """Run the synthetic-data pipeline once and return the result dict.
+
+        Returns:
+            A JSON-serialisable dict with ``config``, ``inputs``,
+            ``outputs``, and ``uncertainty`` keys.
+        """
         experiment = self.experiment
         rng = np.random.default_rng(experiment.runtime.seed)
         n_instruments = 5
@@ -263,16 +303,31 @@ class Report:
 
     @property
     def deterministic(self) -> bool:
+        """``bool`` view of whether all runs were byte-equivalent.
+
+        Returns:
+            ``True`` if every serialised run matched the first.
+        """
         return bool(self.summary["deterministic"])
 
     @property
     def seed(self) -> int:
+        """The seed used for the run (mirrors ``config.runtime.seed``).
+
+        Returns:
+            The integer seed value from ``config.runtime.seed``.
+        """
         seed = self.summary["seed"]
         assert isinstance(seed, int)
         return seed
 
     @property
     def reference(self) -> dict[str, object]:
+        """The first run's result dict, used as the byte-equivalence reference.
+
+        Returns:
+            The reference :class:`Reproduce` output dict.
+        """
         reference = self.summary["reference"]
         assert isinstance(reference, dict)
         return reference

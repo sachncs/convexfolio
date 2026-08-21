@@ -602,6 +602,7 @@ class CFVaR3Numerical:
             x0=initial_weights,
             method="SLSQP",
             constraints=constraints,
+            options={"maxiter": 1000, "ftol": 1e-9},
         )
         if not result.success:
             raise RuntimeError(f"Optimisation failed: {result.message}")

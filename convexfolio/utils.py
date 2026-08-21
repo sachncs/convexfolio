@@ -97,7 +97,7 @@ def reproduce(experiment: Experiment) -> dict[str, object]:
         precision_matrix=precision_matrix,
         kappa3_callback=lambda weights: 0.0,
     )
-    initial_weights = np.ones(n_instruments) / np.sum(cost_vector)
+    initial_weights = cost_vector / float(cost_vector @ cost_vector)
     cfvar3_weights = CFVaR3Numerical(
         cost_vector=cost_vector,
         initial_weights=initial_weights,

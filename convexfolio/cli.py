@@ -1,9 +1,10 @@
-"""Command line interface for the options package."""
+"""Command line interface for the Convexfolio package."""
 
 import argparse
 import json
 
 from convexfolio.config import load
+from convexfolio.data import PortfolioInputs, load_csv
 from convexfolio.determinism import check
 from convexfolio.pipeline import run_and_save
 from convexfolio.utils import Logger, reproduce
@@ -16,28 +17,60 @@ def parser() -> argparse.ArgumentParser:
         The configured ``ArgumentParser``.
     """
     argument_parser = argparse.ArgumentParser(
-        prog="options", description="Optimal option portfolio optimizer"
+        prog="convexfolio",
+        description="Convexfolio — option portfolio optimizer",
     )
     argument_parser.add_argument(
-        "--config", type=str, default=None, help="Path to JSON config file"
+        "--config", type=str, default=None, help="Path to JSON or YAML config file"
     )
     argument_parser.add_argument(
         "--command",
         type=str,
         default="reproduce-report",
-        choices=["reproduce-report", "print-report", "validate-determinism"],
+        choices=[
+            "reproduce-report",
+            "print-report",
+            "validate-determinism",
+            "ingest",
+        ],
         help="Execution command",
     )
     argument_parser.add_argument(
         "--repetitions", type=int, default=3, help="Determinism repetitions"
     )
+    argument_parser.add_argument(
+        "--path",
+        type=str,
+        default=None,
+        help="Path to a CSV file (used by the 'ingest' command)",
+    )
     return argument_parser
+
+
+def _ingest_command(parsed_args: argparse.Namespace) -> PortfolioInputs:
+    """Load a CSV file and print a JSON summary of the portfolio.
+
+    Args:
+        parsed_args: Parsed CLI arguments; uses ``--path``.
+
+    Returns:
+        The loaded ``PortfolioInputs``.
+    """
+    if not parsed_args.path:
+        raise SystemExit("--path is required for the ingest command")
+    inputs = load_csv(parsed_args.path)
+    print(json.dumps(inputs.summary(), indent=2))
+    return inputs
 
 
 def main() -> None:
     """CLI entrypoint. Dispatches on ``--command`` and logs results."""
-    argument_parser = parser()
-    parsed_args = argument_parser.parse_args()
+    parsed_args = parser().parse_args()
+
+    if parsed_args.command == "ingest":
+        _ingest_command(parsed_args)
+        return
+
     experiment = load(parsed_args.config)
     log = Logger(level=experiment.runtime.log_level)
 

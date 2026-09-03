@@ -31,7 +31,7 @@ jobs:
           echo "major_minor=$(echo ${TAG#v} | cut -d. -f1,2)" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build and push
         uses: docker/build-push-action@v6

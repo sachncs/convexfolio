@@ -54,7 +54,7 @@ dev = [
   "ruff==0.16.4",
 ]
 bench = [
-  "pytest-benchmark==5.2.3",
+  "pytest-benchmark==5.3.0",
   "py-cpuinfo==9.0.0",
 ]
 

@@ -1,0 +1,8 @@
+title: "convexfolio"
+description: "Optimal Option Portfolios for Skew-Elliptical t Returns"
+theme: minima
+logo: /assets/logo.svg
+show_downloads: false
+permalink: /:title/
+plugins:
+  - jekyll-feed

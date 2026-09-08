@@ -166,10 +166,10 @@ def sector_caps_inequalities(
         Tuple of inequality constraints, one per unique sector.
     """
     out: list[SLSQPConstraint] = []
-    n = len(sector_map)
+    n_sectors = len(sector_map)
     unique_sectors = sorted(set(sector_map))
     for sector in unique_sectors:
-        a = np.zeros(n, dtype=float)
+        a = np.zeros(n_sectors, dtype=float)
         for i, s in enumerate(sector_map):
             if s == sector:
                 a[i] = 1.0

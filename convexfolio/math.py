@@ -889,7 +889,9 @@ class Linearize:
             * np.outer(pricing_vector, pricing_vector)
         )
 
-        q = Curvature(third_derivative=third_derivative, h=h).values
+        curvature_vector = Curvature(
+            third_derivative=third_derivative, h=h
+        ).values
         hmatrix = Bilinear(
             delta_matrix=delta_matrix,
             budget_matrix=budget_matrix,
@@ -918,7 +920,7 @@ class Linearize:
             )
             * np.outer(delta_plus_budget_transpose @ h, pricing_vector)
             - (2.0 * c_coefficient * degrees_of_freedom / (degrees_of_freedom - 3.0))
-            * np.outer(delta_plus_budget_transpose @ h, q)
+            * np.outer(delta_plus_budget_transpose @ h, curvature_vector)
             - 2.0
             * c_coefficient**2
             * np.outer(

@@ -109,19 +109,21 @@ class CrossSectionResult:
 
 
 class BucketWeightStat(TypedDict):
-    """Per-bucket weight statistics from :class:`SummariseResults`.
+    """Per-bucket closed-form weight summary statistics.
 
     Attributes:
-        bucket: IV bucket column name from :data:`IV_BUCKETS`.
+        bucket: Bucket index this row summarises.
         mean: Mean of the closed-form optimal weight across groups.
-        std: Population standard deviation of the optimal weight.
-        n: Number of groups that contributed to this bucket's stats.
+        std: Sample standard deviation (population divisor
+            ``sample_count - 1``).
+        sample_count: Number of groups that contributed to this
+            bucket's stats.
     """
 
     bucket: str
     mean: float
     std: float
-    n: int
+    sample_count: int
 
 
 def require_numeric(row: dict[str, Any], key: str) -> float:
@@ -584,14 +586,17 @@ class SummariseResults:
         Returns:
             A dict with keys ``n_groups``, ``n_unique_symbols``,
             ``top_symbols``, ``date_min``, ``date_max``, and
-            ``weight_stats`` (mean / std / n per IV bucket).
+            ``weight_stats`` (mean / std / sample_count per IV
+            bucket).
         """
         bucket_stats: list[BucketWeightStat] = []
         for index, bucket in enumerate(IV_BUCKETS):
             count_for_bucket = self.bucket_count[index]
             if count_for_bucket == 0:
                 bucket_stats.append(
-                    BucketWeightStat(bucket=bucket, mean=0.0, std=0.0, n=0)
+                    BucketWeightStat(
+                        bucket=bucket, mean=0.0, std=0.0, sample_count=0
+                    )
                 )
             elif count_for_bucket == 1:
                 bucket_stats.append(
@@ -599,7 +604,7 @@ class SummariseResults:
                         bucket=bucket,
                         mean=float(self.bucket_mean[index]),
                         std=0.0,
-                        n=1,
+                        sample_count=1,
                     )
                 )
             else:
@@ -609,7 +614,7 @@ class SummariseResults:
                         bucket=bucket,
                         mean=float(self.bucket_mean[index]),
                         std=float(math.sqrt(variance)),
-                        n=count_for_bucket,
+                        sample_count=count_for_bucket,
                     )
                 )
 

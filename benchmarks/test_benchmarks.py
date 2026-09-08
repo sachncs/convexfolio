@@ -20,10 +20,13 @@ from convexfolio.config import Experiment
 from convexfolio.math import CFVaR2Closed, Minimize, Variance
 from convexfolio.utils import Reproduce
 
+pytest_benchmark: object | None
 try:
-    import pytest_benchmark  # noqa: F401
+    import pytest_benchmark as _pytest_benchmark
+
+    pytest_benchmark = _pytest_benchmark
 except ImportError:
-    pytest_benchmark = None  # type: ignore[assignment]
+    pytest_benchmark = None
 
 
 ITERATIONS_PER_RUN = 50

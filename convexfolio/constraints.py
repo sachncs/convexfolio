@@ -43,9 +43,7 @@ def fun_of(constraint: SLSQPConstraint) -> SLSQPLambda:
     """
     f = constraint["fun"]
     if not callable(f):
-        raise TypeError(
-            f"constraint['fun'] must be callable, got {type(f).__name__}"
-        )
+        raise TypeError(f"constraint['fun'] must be callable, got {type(f).__name__}")
     return f
 
 
@@ -90,9 +88,7 @@ def bounds(min: float, max: float, n: int) -> Sequence[tuple[float, float]]:
     return [(float(min), float(max))] * int(n)
 
 
-def inequality_residual(
-    coefficients: FloatArray, limit: float, x: np.ndarray
-) -> float:
+def inequality_residual(coefficients: FloatArray, limit: float, x: np.ndarray) -> float:
     """Evaluate the inequality residual ``limit - a . x``.
 
     Args:

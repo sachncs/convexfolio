@@ -972,26 +972,84 @@ class Linearize:
         self.precision_matrix = 0.5 * (q_symmetric_part + q_symmetric_part.T)
 
 
-def reconstruct_precision_matrix(
-    instrument_count: int, variance_at: Callable[[FloatArray], float]
-) -> np.ndarray:
-    """Reconstruct the symmetric precision matrix from a variance callable.
+def variance_at_basis_vector(
+    weights: FloatArray,
+    price_drift: FloatArray,
+    delta_matrix: FloatArray,
+    third_derivative: FloatArray,
+    expected_payoff: FloatArray,
+    covariance: FloatArray,
+    degrees_of_freedom: float,
+    c_coefficient: float,
+    h: FloatArray,
+) -> float:
+    """Evaluate the section-2.4 portfolio variance at a weight vector.
 
-    Given a callable ``variance_at(x)`` that evaluates the scalar
-    portfolio variance at any weight vector, recover the symmetric
-    precision matrix by evaluating at each basis vector and at each
-    pair-of-basis-vectors sum:
+    Used by :class:`Reconstruct` to probe the variance at basis
+    vectors and pairwise sums; hoisted to module level so the call
+    site does not need a nested closure over the model parameters.
+
+    Args:
+        weights: 1-D weight vector to evaluate at.
+        price_drift: 1-D price-drift vector.
+        delta_matrix: 2-D delta matrix.
+        third_derivative: 3-D third-derivative tensor.
+        expected_payoff: 1-D expected-payoff vector.
+        covariance: 2-D covariance matrix.
+        degrees_of_freedom: Skew-t degrees of freedom.
+        c_coefficient: Skew-t coefficient ``c``.
+        h: Linear bias vector.
+
+    Returns:
+        The scalar portfolio variance at ``weights``.
+    """
+    greeks = Greeks(
+        weights=weights,
+        price_drift=price_drift,
+        delta_matrix=delta_matrix,
+        third_derivative=third_derivative,
+    )
+    return PortfolioVariance(
+        gamma_matrix=greeks.gamma,
+        delta_vector=greeks.delta,
+        expected_payoff=expected_payoff,
+        covariance=covariance,
+        degrees_of_freedom=degrees_of_freedom,
+        c_coefficient=c_coefficient,
+        h=h,
+    ).value
+
+
+def reconstruct_precision_matrix(
+    instrument_count: int,
+    price_drift: FloatArray,
+    delta_matrix: FloatArray,
+    third_derivative: FloatArray,
+    expected_payoff: FloatArray,
+    covariance: FloatArray,
+    degrees_of_freedom: float,
+    c_coefficient: float,
+    h: FloatArray,
+) -> np.ndarray:
+    """Reconstruct the symmetric precision matrix from model parameters.
+
+    Recovers the symmetric ``Q`` by evaluating the section-2.4
+    portfolio variance at each basis vector and at each pair-of-basis
+    sum:
 
     * ``Q[i, i] = 2 * variance_at(e_i)``
     * ``Q[i, j] = variance_at(e_i + e_j) - 0.5 * Q[i, i] - 0.5 * Q[j, j]``
 
-    This isolates the second derivative of the variance with respect
-    to weight pairs, which is the precision matrix entry.
-
     Args:
         instrument_count: Number of instruments (size of the basis).
-        variance_at: Callable mapping a 1-D weight vector to the
-            scalar portfolio variance.
+        price_drift: 1-D price-drift vector.
+        delta_matrix: 2-D delta matrix.
+        third_derivative: 3-D third-derivative tensor.
+        expected_payoff: 1-D expected-payoff vector.
+        covariance: 2-D covariance matrix.
+        degrees_of_freedom: Skew-t degrees of freedom.
+        c_coefficient: Skew-t coefficient ``c``.
+        h: Linear bias vector.
 
     Returns:
         The reconstructed symmetric ``(instrument_count,
@@ -1000,10 +1058,30 @@ def reconstruct_precision_matrix(
     precision_matrix = np.zeros((instrument_count, instrument_count), dtype=float)
     basis = np.eye(instrument_count)
     for i in range(instrument_count):
-        precision_matrix[i, i] = 2.0 * variance_at(basis[i])
+        precision_matrix[i, i] = 2.0 * variance_at_basis_vector(
+            basis[i],
+            price_drift,
+            delta_matrix,
+            third_derivative,
+            expected_payoff,
+            covariance,
+            degrees_of_freedom,
+            c_coefficient,
+            h,
+        )
     for i in range(instrument_count):
         for j in range(i + 1, instrument_count):
-            mixed_variance = variance_at(basis[i] + basis[j])
+            mixed_variance = variance_at_basis_vector(
+                basis[i] + basis[j],
+                price_drift,
+                delta_matrix,
+                third_derivative,
+                expected_payoff,
+                covariance,
+                degrees_of_freedom,
+                c_coefficient,
+                h,
+            )
             precision_matrix[i, j] = (
                 mixed_variance
                 - 0.5 * precision_matrix[i, i]
@@ -1046,25 +1124,14 @@ class Reconstruct:
         c_coefficient = Compute(degrees_of_freedom).value
         h = Linear(covariance, skewness).value
 
-        def variance_at(xvec: FloatArray) -> float:
-            greeks = Greeks(
-                weights=xvec,
-                price_drift=price_drift,
-                delta_matrix=delta_matrix,
-                third_derivative=third_derivative,
-            )
-            return PortfolioVariance(
-                gamma_matrix=greeks.gamma,
-                delta_vector=greeks.delta,
-                expected_payoff=expected_payoff,
-                covariance=covariance,
-                degrees_of_freedom=degrees_of_freedom,
-                c_coefficient=c_coefficient,
-                h=h,
-            ).value
-
-        precision_matrix = reconstruct_precision_matrix(
+        self.value = reconstruct_precision_matrix(
             instrument_count=instrument_count,
-            variance_at=variance_at,
+            price_drift=price_drift,
+            delta_matrix=delta_matrix,
+            third_derivative=third_derivative,
+            expected_payoff=expected_payoff,
+            covariance=covariance,
+            degrees_of_freedom=degrees_of_freedom,
+            c_coefficient=c_coefficient,
+            h=h,
         )
-        self.value = precision_matrix

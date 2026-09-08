@@ -100,12 +100,19 @@ class BacktestConfig:
         transaction_cost_bps: Round-trip transaction cost, in basis
             points (1 bp = 0.01%) of the weight turnover magnitude.
         alpha: CFVaR2 risk parameter.
+        tolerate_solver_failure: When ``True``, a failed rebalance
+            reuses the previous feasible weights (or a budget-feasible
+            starting point on the very first failure). When ``False``
+            (the default), solver failures raise :class:`RuntimeError`
+            so callers see the underlying problem.
+        extra_constraints: Additional SLSQP constraint dicts.
     """
 
     portfolio_inputs: PortfolioInputs
     rebalance_frequency: int = 1
     transaction_cost_bps: float = 5.0
     alpha: float = 0.05
+    tolerate_solver_failure: bool = False
     extra_constraints: tuple[dict[str, str | SLSQPLambda], ...] = field(
         default_factory=tuple
     )
@@ -203,7 +210,11 @@ def run_backtest(
                     objective_callable=objective,
                     extra_constraints=config.extra_constraints,
                 ).value
-            except (ValueError, RuntimeError):
+            except (ValueError, RuntimeError) as exc:
+                if not config.tolerate_solver_failure:
+                    raise RuntimeError(
+                        f"rebalance at t={t} failed: {exc}"
+                    ) from exc
                 w = (
                     previous_weights
                     if (

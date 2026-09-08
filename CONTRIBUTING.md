@@ -30,7 +30,7 @@ This project adheres to our [Code of Conduct](CODE_OF_CONDUCT.md). By participat
    ```bash
    git remote add upstream https://github.com/sachncs/convexfolio.git
    ```
-4. **Create a feature branch** from `main`
+4. **Create a feature branch** from `master`
 
 ## Development Setup
 
@@ -113,8 +113,8 @@ chore(deps): update scipy to 1.12
 1. **Update your fork** with latest upstream changes:
    ```bash
    git fetch upstream
-   git checkout main
-   git merge upstream/main
+   git checkout master
+   git merge upstream/master
    ```
 
 2. **Create a feature branch**:
@@ -151,7 +151,7 @@ chore(deps): update scipy to 1.12
 - [ ] Tests added for new functionality
 - [ ] Documentation updated if needed
 - [ ] No breaking changes (or clearly documented)
-- [ ] Branch is up-to-date with `main`
+- [ ] Branch is up-to-date with `master`
 
 ## Coding Standards
 

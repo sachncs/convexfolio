@@ -101,7 +101,7 @@ explanation.
 
 ## The release steps
 
-### 1. Make sure you're on main, up-to-date
+### 1. Make sure you're on master, up-to-date
 
 ```bash
 git checkout master

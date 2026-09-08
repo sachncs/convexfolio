@@ -72,8 +72,7 @@ def load_price_history_csv(path: str | Path) -> PriceHistory:
             raise ValueError("CSV file has no header row")
         if header[0] != "timestamp":
             raise ValueError(
-                "first CSV column must be 'timestamp' (got "
-                f"{header[0]!r})"
+                f"first CSV column must be 'timestamp' (got {header[0]!r})"
             )
         timestamps: list[str] = []
         rows: list[list[float]] = []
@@ -139,9 +138,7 @@ class BacktestResult:
     summary: dict[str, Any]
 
 
-def run_backtest(
-    history: PriceHistory, config: BacktestConfig
-) -> BacktestResult:
+def run_backtest(history: PriceHistory, config: BacktestConfig) -> BacktestResult:
     """Run a multi-period rebalance backtest.
 
     At every ``rebalance_frequency``-th timestamp, the portfolio is
@@ -180,10 +177,7 @@ def run_backtest(
     cost_per_unit = float(config.transaction_cost_bps) / 10_000.0
 
     for t in range(n_timestamps):
-        rebalance_now = (
-            t == 0
-            or t % int(config.rebalance_frequency) == 0
-        )
+        rebalance_now = t == 0 or t % int(config.rebalance_frequency) == 0
         if rebalance_now:
             if t == 0:
                 initial_prices = history.prices[0]
@@ -203,26 +197,20 @@ def run_backtest(
                     cost_vector=implied_inputs.cost_vector,
                     initial_weights=(
                         implied_inputs.cost_vector
-                        / float(
-                            implied_inputs.cost_vector @ implied_inputs.cost_vector
-                        )
+                        / float(implied_inputs.cost_vector @ implied_inputs.cost_vector)
                     ),
                     objective_callable=objective,
                     extra_constraints=config.extra_constraints,
                 ).value
             except (ValueError, RuntimeError) as exc:
                 if not config.tolerate_solver_failure:
-                    raise RuntimeError(
-                        f"rebalance at t={t} failed: {exc}"
-                    ) from exc
+                    raise RuntimeError(f"rebalance at t={t} failed: {exc}") from exc
                 w = (
                     previous_weights
                     if (
                         previous_weights.any()
                         and np.isclose(
-                            float(
-                                previous_weights @ implied_inputs.cost_vector
-                            ),
+                            float(previous_weights @ implied_inputs.cost_vector),
                             1.0,
                             atol=1e-6,
                         )
@@ -291,8 +279,7 @@ def scale_inputs_for_prices(
     return PortfolioInputs(
         expected_payoff=base.expected_payoff * ratio,
         cost_vector=current_prices.copy(),
-        precision_matrix=base.precision_matrix
-        / np.outer(ratio, ratio),
+        precision_matrix=base.precision_matrix / np.outer(ratio, ratio),
     )
 
 

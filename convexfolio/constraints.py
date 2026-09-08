@@ -43,6 +43,7 @@ def budget(cost_vector: FloatArray) -> SLSQPConstraint:
     Returns:
         A SciPy SLSQP constraint dict enforcing the budget.
     """
+
     def fun(x: np.ndarray, v: FloatArray = cost_vector) -> float:
         return float(np.dot(x, v) - 1.0)
 
@@ -63,9 +64,7 @@ def bounds(min: float, max: float, n: int) -> Sequence[tuple[float, float]]:
     return [(float(min), float(max))] * int(n)
 
 
-def inequality(
-    coefficients: FloatArray, limit: float
-) -> SLSQPConstraint:
+def inequality(coefficients: FloatArray, limit: float) -> SLSQPConstraint:
     """Build the inequality constraint ``a . x <= limit``.
 
     Args:
@@ -75,6 +74,7 @@ def inequality(
     Returns:
         A SciPy SLSQP constraint dict.
     """
+
     def fun(x: np.ndarray, a: FloatArray = coefficients, b: float = limit) -> float:
         return float(b - float(np.dot(x, a)))
 
@@ -125,9 +125,7 @@ def long_only_inequalities(n: int) -> ConstraintSpec:
         Tuple of ``n`` inequality constraints.
     """
     eyes = [np.eye(n, dtype=float)[i] for i in range(n)]
-    return tuple(
-        inequality(-eye, 0.0) for eye in eyes
-    )
+    return tuple(inequality(-eye, 0.0) for eye in eyes)
 
 
 def long_only_bounds(n: int) -> Sequence[tuple[float, float]]:
@@ -145,9 +143,7 @@ def long_only_bounds(n: int) -> Sequence[tuple[float, float]]:
     return bounds(0.0, np.inf, n)
 
 
-def position_limits_inequalities(
-    n: int, max_abs_weight: float
-) -> ConstraintSpec:
+def position_limits_inequalities(n: int, max_abs_weight: float) -> ConstraintSpec:
     """Build inequality constraints enforcing ``|x[i]| <= max_abs_weight``.
 
     Two inequalities per instrument: ``x[i] <= max_abs_weight`` and

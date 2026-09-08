@@ -82,9 +82,7 @@ def test_load_csv_rejects_missing_columns(tmp_path: Path) -> None:
 def test_load_csv_rejects_empty(tmp_path: Path) -> None:
     """Header-only CSV raises ValueError on no data rows."""
     csv_path = tmp_path / "empty.csv"
-    csv_path.write_text(
-        "expected_payoff,cost,precision_diag\n", encoding="utf-8"
-    )
+    csv_path.write_text("expected_payoff,cost,precision_diag\n", encoding="utf-8")
     with pytest.raises(ValueError, match="no data rows"):
         LoadCSV(csv_path)()
 

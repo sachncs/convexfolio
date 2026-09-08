@@ -106,8 +106,7 @@ class Experiment:
             AssertionError: If ``self.inputs`` is ``None``.
         """
         assert self.inputs is not None, (
-            "experiment has no portfolio inputs; "
-            "provide 'inputs' in the config file"
+            "experiment has no portfolio inputs; provide 'inputs' in the config file"
         )
         return self.inputs.expected_payoff
 
@@ -122,8 +121,7 @@ class Experiment:
             AssertionError: If ``self.inputs`` is ``None``.
         """
         assert self.inputs is not None, (
-            "experiment has no portfolio inputs; "
-            "provide 'inputs' in the config file"
+            "experiment has no portfolio inputs; provide 'inputs' in the config file"
         )
         return self.inputs.cost_vector
 
@@ -138,8 +136,7 @@ class Experiment:
             AssertionError: If ``self.inputs`` is ``None``.
         """
         assert self.inputs is not None, (
-            "experiment has no portfolio inputs; "
-            "provide 'inputs' in the config file"
+            "experiment has no portfolio inputs; provide 'inputs' in the config file"
         )
         return self.inputs.precision_matrix
 
@@ -202,9 +199,7 @@ class Load:
         portfolio_inputs: PortfolioInputs | None = None
         if raw_inputs is not None:
             portfolio_inputs = PortfolioInputs(
-                expected_payoff=np.asarray(
-                    raw_inputs["expected_payoff"], dtype=float
-                ),
+                expected_payoff=np.asarray(raw_inputs["expected_payoff"], dtype=float),
                 cost_vector=np.asarray(raw_inputs["cost_vector"], dtype=float),
                 precision_matrix=np.asarray(
                     raw_inputs["precision_matrix"], dtype=float

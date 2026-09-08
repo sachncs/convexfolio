@@ -134,9 +134,7 @@ def ingest_command(parsed_args: argparse.Namespace) -> PortfolioInputs:
     return inputs
 
 
-def plot_command(
-    parsed_args: argparse.Namespace, experiment: Experiment
-) -> list[str]:
+def plot_command(parsed_args: argparse.Namespace, experiment: Experiment) -> list[str]:
     """Run the ``plot`` command: render chart(s) of an experiment.
 
     Args:
@@ -158,15 +156,11 @@ def plot_command(
     outputs: list[str] = []
 
     if parsed_args.chart in ("all", "weights"):
-        weights_value = Minimize(
-            Variance(precision_matrix), cost_vector
-        ).value
+        weights_value = Minimize(Variance(precision_matrix), cost_vector).value
         n = weights_value.shape[0]
         fig, ax = plt.subplots(figsize=(8.0, max(3.0, 0.4 * n)))
         y_positions = np.arange(n)
-        colors = [
-            "#2a8f4a" if v >= 0 else "#c14b4b" for v in weights_value
-        ]
+        colors = ["#2a8f4a" if v >= 0 else "#c14b4b" for v in weights_value]
         ax.barh(y_positions, weights_value, color=colors)
         ax.set_yticks(y_positions)
         ax.set_yticklabels([f"i{i}" for i in range(n)])
@@ -181,11 +175,7 @@ def plot_command(
         outputs.append(str(weights_path))
 
     if parsed_args.chart in ("all", "frontier"):
-        alphas = [
-            0.01 * (1.5**i)
-            for i in range(20)
-            if 0.01 * (1.5**i) < 0.49
-        ]
+        alphas = [0.01 * (1.5**i) for i in range(20) if 0.01 * (1.5**i) < 0.49]
         frontier_returns: list[float] = []
         frontier_risks: list[float] = []
         skipped_alphas_frontier: list[dict[str, object]] = []
@@ -358,9 +348,7 @@ def main() -> None:
         return
 
     if parsed_args.command == "validate-determinism":
-        report = Report.from_reproduce(
-            experiment, repetitions=parsed_args.repetitions
-        )
+        report = Report.from_reproduce(experiment, repetitions=parsed_args.repetitions)
         log.info(json.dumps(report.summary, indent=2))
         if not report.deterministic:
             raise SystemExit(2)

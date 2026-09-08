@@ -86,6 +86,4 @@ def test_cfvar2_closed_form(
 
 def test_reproduce(benchmark: pytest_benchmark.BenchmarkFixture) -> None:
     """Full single-run pipeline (default 5-instrument portfolio)."""
-    benchmark.pedantic(
-        reproduce_action, iterations=ITERATIONS_PER_RUN, rounds=ROUNDS
-    )
+    benchmark.pedantic(reproduce_action, iterations=ITERATIONS_PER_RUN, rounds=ROUNDS)

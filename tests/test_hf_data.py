@@ -154,9 +154,7 @@ def test_build_portfolio_inputs_rejects_non_positive_iv() -> None:
     broken = OptionsRow(
         symbol=rows[0].symbol,
         date=rows[0].date,
-        iv_values=np.array(
-            [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -0.1], dtype=float
-        ),
+        iv_values=np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -0.1], dtype=float),
         hv_values=rows[0].hv_values,
         vix=rows[0].vix,
     )
@@ -184,12 +182,8 @@ def test_build_portfolio_inputs_satisfies_budget_constraint() -> None:
     rows = list(LoadOptionsIV(CSVFileSource(FIXTURE_PATH)))
     builder = BuildPortfolioInputs()
     inputs = builder(rows[0])
-    weights = Minimize(
-        Variance(inputs.precision_matrix), inputs.cost_vector
-    ).value
-    assert np.isclose(
-        float(weights.T @ inputs.cost_vector), 1.0, atol=1e-8
-    )
+    weights = Minimize(Variance(inputs.precision_matrix), inputs.cost_vector).value
+    assert np.isclose(float(weights.T @ inputs.cost_vector), 1.0, atol=1e-8)
 
 
 def test_summarise_results_welford_matches_naive_two_pass() -> None:
@@ -207,9 +201,7 @@ def test_summarise_results_welford_matches_naive_two_pass() -> None:
             continue
 
     for row, inputs in valid_rows:
-        weights = Minimize(
-            Variance(inputs.precision_matrix), inputs.cost_vector
-        ).value
+        weights = Minimize(Variance(inputs.precision_matrix), inputs.cost_vector).value
         from convexfolio.hf_data import CrossSectionResult
 
         summariser.update(
@@ -242,12 +234,8 @@ def test_summarise_results_welford_matches_naive_two_pass() -> None:
                 float(column.mean()), rel=1e-12
             )
         else:
-            assert stat["mean"] == pytest.approx(
-                float(column.mean()), rel=1e-12
-            )
-            assert stat["std"] == pytest.approx(
-                float(column.std()), rel=1e-12
-            )
+            assert stat["mean"] == pytest.approx(float(column.mean()), rel=1e-12)
+            assert stat["std"] == pytest.approx(float(column.std()), rel=1e-12)
 
 
 def test_cross_section_runner_end_to_end() -> None:
@@ -268,9 +256,7 @@ def test_cross_section_runner_skips_malformed_rows() -> None:
     raw_rows = list(CSVFileSource(FIXTURE_PATH))
     bad_raw = {**raw_rows[0], "symbol": "BAD", "DOTM_IV": -1.0}
     loader = LoadOptionsIV([bad_raw, *raw_rows])
-    runner = CrossSectionRunner(
-        loader, BuildPortfolioInputs(), skip_invalid_rows=True
-    )
+    runner = CrossSectionRunner(loader, BuildPortfolioInputs(), skip_invalid_rows=True)
     summary = runner.run()
     assert summary["n_groups"] == 4
     assert summary["skipped_rows"] == 1

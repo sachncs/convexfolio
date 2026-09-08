@@ -68,9 +68,10 @@ def synthetic_kappa3_from_seed(
     cost_vector = np.asarray(cost_vector, dtype=float)
     precision_matrix = np.asarray(precision_matrix, dtype=float)
     n_instruments = cost_vector.shape[0]
-    reference_variance = float(
-        expected_payoff @ np.linalg.solve(precision_matrix, expected_payoff)
-    ) or 1.0
+    reference_variance = (
+        float(expected_payoff @ np.linalg.solve(precision_matrix, expected_payoff))
+        or 1.0
+    )
     coefficients = rng.normal(size=n_instruments) * (reference_variance / 100.0)
 
     def third_cumulance(weights: np.ndarray) -> float:
@@ -205,8 +206,8 @@ class Reproduce:
             rng = np.random.default_rng(experiment.runtime.seed)
             n_instruments = 5
             sample_matrix = rng.normal(size=(n_instruments, n_instruments))
-            precision_matrix = (
-                sample_matrix.T @ sample_matrix + 1.0 * np.eye(n_instruments)
+            precision_matrix = sample_matrix.T @ sample_matrix + 1.0 * np.eye(
+                n_instruments
             )
             cost_vector = np.abs(rng.normal(size=n_instruments)) + 0.1
             expected_payoff_vector = rng.normal(size=n_instruments) * 0.1
@@ -220,9 +221,7 @@ class Reproduce:
                 ],
             }
 
-        variance_weights = Minimize(
-            Variance(precision_matrix), cost_vector
-        ).value
+        variance_weights = Minimize(Variance(precision_matrix), cost_vector).value
         cfvar2_weights = CFVaR2Closed(
             precision_matrix=precision_matrix,
             expected_payoff=expected_payoff_vector,
@@ -360,15 +359,11 @@ class Report:
         """
         if repetitions < 2:
             raise ValueError("repetitions must be >= 2")
-        parallel_threshold = int(
-            os.environ.get("OPTIONS_PARALLEL_THRESHOLD", "4")
-        )
+        parallel_threshold = int(os.environ.get("OPTIONS_PARALLEL_THRESHOLD", "4"))
         if repetitions >= parallel_threshold:
             with ProcessPoolExecutor() as executor:
                 results = list(
-                    executor.map(
-                        lambda c: Reproduce(c)(), [config] * repetitions
-                    )
+                    executor.map(lambda c: Reproduce(c)(), [config] * repetitions)
                 )
         else:
             results = [Reproduce(config)() for _ in range(repetitions)]

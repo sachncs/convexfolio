@@ -521,10 +521,9 @@ class BuildPortfolioInputs:
         diag = 1.0 / np.maximum(iv_values * realised_vol, 1e-6)
         outer = np.outer(diag, diag) ** 0.5
         outer = outer + np.diag(diag - outer.diagonal())
-        return (
-            self.off_diagonal_correlation * outer
-            + (1.0 - self.off_diagonal_correlation) * np.diag(diag)
-        )
+        return self.off_diagonal_correlation * outer + (
+            1.0 - self.off_diagonal_correlation
+        ) * np.diag(diag)
 
 
 class SummariseResults:
@@ -677,9 +676,7 @@ class CrossSectionRunner:
     ) -> None:
         self.loader = loader
         self.builder = builder
-        self.summariser = (
-            summariser if summariser is not None else SummariseResults()
-        )
+        self.summariser = summariser if summariser is not None else SummariseResults()
         self.skip_invalid_rows = skip_invalid_rows
 
     def run(self) -> dict[str, Any]:

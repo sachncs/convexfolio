@@ -78,9 +78,7 @@ class LoadCSV:
             required = {"expected_payoff", "cost", "precision_diag"}
             missing = required - set(reader.fieldnames)
             if missing:
-                raise ValueError(
-                    f"CSV missing required columns: {sorted(missing)}"
-                )
+                raise ValueError(f"CSV missing required columns: {sorted(missing)}")
             rows = [
                 {
                     "expected_payoff": float(r["expected_payoff"]),
@@ -91,9 +89,7 @@ class LoadCSV:
             ]
         if not rows:
             raise ValueError("CSV file has no data rows")
-        expected_payoff = np.array(
-            [r["expected_payoff"] for r in rows], dtype=float
-        )
+        expected_payoff = np.array([r["expected_payoff"] for r in rows], dtype=float)
         cost_vector = np.array([r["cost"] for r in rows], dtype=float)
         diag = np.array([r["precision_diag"] for r in rows], dtype=float)
         precision_matrix = np.outer(diag, diag) ** 0.5
@@ -101,10 +97,9 @@ class LoadCSV:
             diag - precision_matrix.diagonal()
         )
         correlation = 0.1
-        precision_matrix = (
-            correlation * precision_matrix
-            + (1.0 - correlation) * np.diag(diag)
-        )
+        precision_matrix = correlation * precision_matrix + (
+            1.0 - correlation
+        ) * np.diag(diag)
         return PortfolioInputs(
             expected_payoff=expected_payoff,
             cost_vector=cost_vector,
@@ -167,9 +162,7 @@ class SyntheticPortfolio:
         """
         rng = np.random.default_rng(self.seed)
         sample = rng.normal(size=(self.n_instruments, self.n_instruments))
-        precision_matrix = (
-            sample.T @ sample + 0.5 * np.eye(self.n_instruments)
-        )
+        precision_matrix = sample.T @ sample + 0.5 * np.eye(self.n_instruments)
         cost_vector = np.abs(rng.normal(size=self.n_instruments)) + 0.1
         expected_payoff = rng.normal(size=self.n_instruments) * (
             self.degrees_of_freedom / (self.degrees_of_freedom - 2.0)

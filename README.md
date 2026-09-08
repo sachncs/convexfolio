@@ -9,9 +9,14 @@
     <a href="https://github.com/sachncs/convexfolio/pkgs/container/convexfolio"><img src="https://img.shields.io/badge/ghcr.io-convexfolio-blue" alt="Docker image"></a>
     <a href="https://github.com/sachncs/convexfolio/stargazers"><img src="https://img.shields.io/github/stars/sachncs/convexfolio" alt="Stars"></a>
     <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/badge/code%20style-ruff-000000.svg" alt="Ruff"></a>
-    <a href="https://mypy-lang.org/"><img src="https://img.shields.io/badge/type%20checked-mypy-blue.svg" alt="mypy"></a>
+    <a href="https://mypy-lang.org/"><img src="https://img.shields.io/badge/type%20checked--mypy--strict-blue" alt="mypy"></a>
   </p>
 </p>
+
+> **Not investment advice.** Convexfolio is research software. The
+> outputs are mathematical illustrations; verify them independently
+> before any use. See [LICENSE](LICENSE) and the disclaimer at the
+> bottom of this README.
 
 ---
 
@@ -23,12 +28,18 @@ Convexfolio is a small Python tool that answers one question:
 > money between them so my risk is as small as possible?"*
 
 You feed it the prices, the expected payoffs, and a "how risky is each
-option" matrix. It hands you back the **weights** — the percentage of
-your money that should go into each option.
+option" matrix. The package returns the **weights** — the fraction of
+your budget that should go into each option under the chosen risk
+model.
 
 It implements the math from a research paper
 ([arXiv:2601.07991v2](https://arxiv.org/abs/2601.07991v2)). You don't
 need to read the paper to use the package.
+
+> ⚠️ **Treat the outputs as mathematical illustrations, not as a
+> recommendation.** Convexfolio has not been audited for live trading.
+> Use it to study portfolio mathematics; do not rely on it for
+> investment decisions without independent verification.
 
 ---
 
@@ -181,15 +192,17 @@ answer = Minimize(Variance(precision_matrix), cost_vector).value
 print(answer)
 ```
 
-You'll see something like `[0.65, 0.95]`. That means:
+You'll see something like `[1.0591133, 0.91133005]`. Each number is
+the weight placed on that option. Because option A costs $0.60 and
+option B costs $0.40, the optimal weights satisfy
+``0.60 × 1.0591133 + 0.40 × 0.91133005 ≈ 1.00`` — i.e. you spend
+exactly $1 across the two options.
 
-- ~65% of your money in option A
-- ~95% of option B (relative to its $0.40 price)
-
-Translated into actual dollars out of $1: roughly **$0.52 in A and
-$0.48 in B** (because option B is cheaper, you buy more of it). The
-exact dollar split doesn't matter — what matters is that Convexfolio
-found the lowest-risk combination.
+The actual dollars spent per option at this optimum are $0.64 on A
+and $0.36 on B (because ``0.60 × 1.0591133 = 0.6355`` and
+``0.40 × 0.91133005 = 0.3645``). The exact dollar split doesn't
+matter — what matters is that Convexfolio found the lowest-risk
+combination.
 
 The full walk-through with explanations of every line lives in
 [Getting Started](docs/getting-started.md).
@@ -279,3 +292,14 @@ open a public GitHub issue for security problems.
 ## License
 
 MIT — see [LICENSE](LICENSE). Use it, fork it, ship it.
+
+---
+
+## Disclaimer
+
+Convexfolio is a research-preview package. The mathematical outputs
+are illustrative; they are **not investment advice**. The maintainers
+make no claim about the suitability of any output for trading,
+hedging, or any other financial decision. Always verify outputs
+against independent models and current market data before any
+operational use.

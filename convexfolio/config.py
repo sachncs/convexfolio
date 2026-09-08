@@ -103,11 +103,13 @@ class Experiment:
             The 1-D expected-payoff vector.
 
         Raises:
-            AssertionError: If ``self.inputs`` is ``None``.
+            ValueError: If ``self.inputs`` is ``None``.
         """
-        assert self.inputs is not None, (
-            "experiment has no portfolio inputs; provide 'inputs' in the config file"
-        )
+        if self.inputs is None:
+            raise ValueError(
+                "experiment has no portfolio inputs; "
+                "provide 'inputs' in the config file"
+            )
         return self.inputs.expected_payoff
 
     @property
@@ -118,11 +120,13 @@ class Experiment:
             The 1-D cost vector.
 
         Raises:
-            AssertionError: If ``self.inputs`` is ``None``.
+            ValueError: If ``self.inputs`` is ``None``.
         """
-        assert self.inputs is not None, (
-            "experiment has no portfolio inputs; provide 'inputs' in the config file"
-        )
+        if self.inputs is None:
+            raise ValueError(
+                "experiment has no portfolio inputs; "
+                "provide 'inputs' in the config file"
+            )
         return self.inputs.cost_vector
 
     @property
@@ -133,11 +137,13 @@ class Experiment:
             The 2-D precision matrix.
 
         Raises:
-            AssertionError: If ``self.inputs`` is ``None``.
+            ValueError: If ``self.inputs`` is ``None``.
         """
-        assert self.inputs is not None, (
-            "experiment has no portfolio inputs; provide 'inputs' in the config file"
-        )
+        if self.inputs is None:
+            raise ValueError(
+                "experiment has no portfolio inputs; "
+                "provide 'inputs' in the config file"
+            )
         return self.inputs.precision_matrix
 
 
@@ -182,8 +188,10 @@ class Load:
         return config
 
     def _from_file(self) -> Experiment:
-        assert self.path is not None
-        input_path = Path(self.path)
+        path = self.path
+        if path is None:
+            raise ValueError("Load._from_file called without a path")
+        input_path = Path(path)
         suffix = input_path.suffix.lower()
         if suffix in {".yaml", ".yml"}:
             raw_config = yaml.safe_load(input_path.read_text(encoding="utf-8"))

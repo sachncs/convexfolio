@@ -28,9 +28,24 @@ ConstraintSpec = tuple[SLSQPConstraint, ...]
 
 
 def fun_of(constraint: SLSQPConstraint) -> SLSQPLambda:
-    """Type-narrowed accessor for the ``fun`` callable in a constraint."""
+    """Type-narrowed accessor for the ``fun`` callable in a constraint.
+
+    Args:
+        constraint: An SLSQP constraint dict produced by :func:`budget`,
+            :func:`inequality`, etc.
+
+    Returns:
+        The ``fun`` callable, narrowed to :data:`SLSQPLambda`.
+
+    Raises:
+        TypeError: If ``constraint["fun"]`` is not callable.
+    """
     f = constraint["fun"]
-    assert callable(f)
+    if not callable(f):
+        raise TypeError(
+            f"constraint['fun'] must be callable, "
+            f"got {type(f).__name__}"
+        )
     return f
 
 

@@ -288,9 +288,10 @@ def backtest_command(parsed_args: argparse.Namespace) -> None:
 
     if parsed_args.config:
         experiment = Load(parsed_args.config)()
-        assert experiment.inputs is not None, (
-            "config file must include an 'inputs' section for backtest"
-        )
+        if experiment.inputs is None:
+            raise SystemExit(
+                "config file must include an 'inputs' section for backtest"
+            )
         portfolio_inputs = experiment.inputs
     else:
         portfolio_inputs = SyntheticPortfolio(

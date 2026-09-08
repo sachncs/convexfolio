@@ -259,8 +259,6 @@ def plot_command(
 
     return outputs
 
-    return outputs
-
 
 def backtest_command(parsed_args: argparse.Namespace) -> None:
     """Run the ``backtest`` command: multi-period rebalance backtest.

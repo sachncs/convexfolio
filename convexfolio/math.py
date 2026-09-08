@@ -931,6 +931,47 @@ class Linearize:
         self.precision_matrix = 0.5 * (q_symmetric_part + q_symmetric_part.T)
 
 
+def reconstruct_precision_matrix(
+    instrument_count: int, variance_at: Callable[[FloatArray], float]
+) -> np.ndarray:
+    """Reconstruct the symmetric precision matrix from a variance callable.
+
+    Given a callable ``variance_at(x)`` that evaluates the scalar
+    portfolio variance at any weight vector, recover the symmetric
+    precision matrix by evaluating at each basis vector and at each
+    pair-of-basis-vectors sum:
+
+    * ``Q[i, i] = 2 * variance_at(e_i)``
+    * ``Q[i, j] = variance_at(e_i + e_j) - 0.5 * Q[i, i] - 0.5 * Q[j, j]``
+
+    This isolates the second derivative of the variance with respect
+    to weight pairs, which is the precision matrix entry.
+
+    Args:
+        instrument_count: Number of instruments (size of the basis).
+        variance_at: Callable mapping a 1-D weight vector to the
+            scalar portfolio variance.
+
+    Returns:
+        The reconstructed symmetric ``(instrument_count,
+        instrument_count)`` precision matrix.
+    """
+    precision_matrix = np.zeros((instrument_count, instrument_count), dtype=float)
+    basis = np.eye(instrument_count)
+    for i in range(instrument_count):
+        precision_matrix[i, i] = 2.0 * variance_at(basis[i])
+    for i in range(instrument_count):
+        for j in range(i + 1, instrument_count):
+            mixed_variance = variance_at(basis[i] + basis[j])
+            precision_matrix[i, j] = (
+                mixed_variance
+                - 0.5 * precision_matrix[i, i]
+                - 0.5 * precision_matrix[j, j]
+            )
+            precision_matrix[j, i] = precision_matrix[i, j]
+    return precision_matrix
+
+
 class Reconstruct:
     """Reconstruct the precision matrix.
 
@@ -981,17 +1022,8 @@ class Reconstruct:
                 h=h,
             ).value
 
-        precision_matrix = np.zeros((instrument_count, instrument_count), dtype=float)
-        basis = np.eye(instrument_count)
-        for i in range(instrument_count):
-            precision_matrix[i, i] = 2.0 * variance_at(basis[i])
-        for i in range(instrument_count):
-            for j in range(i + 1, instrument_count):
-                mixed_variance = variance_at(basis[i] + basis[j])
-                precision_matrix[i, j] = (
-                    mixed_variance
-                    - 0.5 * precision_matrix[i, i]
-                    - 0.5 * precision_matrix[j, j]
-                )
-                precision_matrix[j, i] = precision_matrix[i, j]
+        precision_matrix = reconstruct_precision_matrix(
+            instrument_count=instrument_count,
+            variance_at=variance_at,
+        )
         self.value = precision_matrix

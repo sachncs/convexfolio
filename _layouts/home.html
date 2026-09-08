@@ -1,0 +1,48 @@
+---
+layout: default
+---
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-split">
+      <div class="hero-copy">
+        <p class="overline">Open source · Python 3.12+ · MIT</p>
+        <h1>Find the lowest-risk way to split money across options.</h1>
+        <p class="lead">Convexfolio takes a handful of option prices, expected payoffs,
+          and a risk model, and returns the exact weight split that minimises your risk —
+          solved reproducibly, from the terminal or Python.</p>
+        <div class="hero-meta">
+          <span class="chip">pip install convexfolio</span>
+          <span class="chip">deterministic</span>
+          <span class="chip">zero JS</span>
+          <span class="chip">MIT license</span>
+        </div>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="{{ site.baseurl }}/docs/getting-started/">Get started</a>
+          <a class="btn btn-ghost" href="https://github.com/sachncs/convexfolio" rel="noopener">View on GitHub</a>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div class="curve-card" aria-hidden="true">
+          <div class="row"><span class="k">Variance (closed form)</span><span class="v good">0.42 · 0.58</span></div>
+          <div class="row"><span class="k">CFVaR₂ (closed form)</span><span class="v good">0.39 · 0.61</span></div>
+          <div class="row"><span class="k">CFVaR₃ (numerical)</span><span class="v good">0.41 · 0.59</span></div>
+          <div class="row"><span class="k">Result</span><span class="v">deterministic ✓</span></div>
+          <div class="curve-bar" style="margin-top:14px">
+            <svg viewBox="0 0 260 40" width="100%" height="40" preserveAspectRatio="none" role="img">
+              <path d="M 2 8 Q 130 40 258 8" fill="none" stroke="url(#convexgrad)" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="130" cy="24" r="4" fill="#F5B04B"/>
+              <defs><linearGradient id="convexgrad" x1="0" y1="0" x2="260" y2="0" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#2DD4BF"/><stop offset="1" stop-color="#2DD4BF"/>
+              </linearGradient></defs>
+            </svg>
+          </div>
+          <div style="font:600 12px/1 ui-monospace,Menlo,Consolas,monospace;color:#8FA4BD;text-align:center;padding-top:8px">risk curve — optimum at the minimum</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="section container">
+  {{ content }}
+</section>

@@ -1,0 +1,10 @@
+---
+layout: default
+---
+<article class="container doc">
+  <div class="doc-title">
+    <span>{{ page.title | default: site.title }}</span>
+    <a href="{{ site.baseurl }}/docs/getting-started/">Documentation ↗</a>
+  </div>
+  {{ content }}
+</article>

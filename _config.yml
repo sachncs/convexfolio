@@ -1,8 +1,48 @@
 title: "convexfolio"
-description: "Optimal Option Portfolios for Skew-Elliptical t Returns"
-theme: minima
+tagline: "Optimal Option Portfolios for Skew-Elliptical t Returns"
+description: "Convexfolio is an open-source Python library that finds the lowest-risk way to split money across a set of options, under skew-elliptical t returns."
+baseurl: "/convexfolio"
 logo: /assets/logo.svg
 show_downloads: false
 permalink: /:title/
+
+# Custom layouts replace the third-party `minima` theme so every page
+# renders with the same brand chrome and a lean, dependency-free stylesheet.
+
+# Apply the branded `page` layout to every Markdown page by default.
+# Pages that opt into their own layout (e.g. the homepage) keep theirs.
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: page
+
 plugins:
   - jekyll-feed
+
+# Keep the published site lean: never serve the Python source tree, tests,
+# build outputs, or CI files as static content.
+exclude:
+  - convexfolio
+  - convexfolio.egg-info
+  - tests
+  - benchmarks
+  - scripts
+  - artifact*
+  - yaml_artifacts
+  - dist
+  - src
+  - .github
+  - _approval_tests_temp
+  - .approval_tests_temp
+  - .benchmarks
+  - .mypy_cache
+  - .pytest_cache
+  - .ruff_cache
+  - Dockerfile
+  - pyproject.toml
+  - .editorconfig
+  - .gitattributes
+  - .dockerignore
+  - "*.whl"
+  - README.md

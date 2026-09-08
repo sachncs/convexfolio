@@ -594,9 +594,7 @@ class SummariseResults:
             count_for_bucket = self.bucket_count[index]
             if count_for_bucket == 0:
                 bucket_stats.append(
-                    BucketWeightStat(
-                        bucket=bucket, mean=0.0, std=0.0, sample_count=0
-                    )
+                    BucketWeightStat(bucket=bucket, mean=0.0, std=0.0, sample_count=0)
                 )
             elif count_for_bucket == 1:
                 bucket_stats.append(

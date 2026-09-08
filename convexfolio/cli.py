@@ -158,18 +158,12 @@ def plot_command(parsed_args: argparse.Namespace, experiment: Experiment) -> lis
     if parsed_args.chart in ("all", "weights"):
         weights_value = Minimize(Variance(precision_matrix), cost_vector).value
         instrument_count = weights_value.shape[0]
-        fig, ax = plt.subplots(
-            figsize=(8.0, max(3.0, 0.4 * instrument_count))
-        )
+        fig, ax = plt.subplots(figsize=(8.0, max(3.0, 0.4 * instrument_count)))
         y_positions = np.arange(instrument_count)
-        colors = [
-            "#2a8f4a" if v >= 0 else "#c14b4b" for v in weights_value
-        ]
+        colors = ["#2a8f4a" if v >= 0 else "#c14b4b" for v in weights_value]
         ax.barh(y_positions, weights_value, color=colors)
         ax.set_yticks(y_positions)
-        ax.set_yticklabels(
-            [f"i{index}" for index in range(instrument_count)]
-        )
+        ax.set_yticklabels([f"i{index}" for index in range(instrument_count)])
         ax.set_xlabel("weight")
         ax.set_title("Portfolio weights")
         ax.axvline(0.0, color="#666666", linewidth=0.5)

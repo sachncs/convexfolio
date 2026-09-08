@@ -889,9 +889,7 @@ class Linearize:
             * np.outer(pricing_vector, pricing_vector)
         )
 
-        curvature_vector = Curvature(
-            third_derivative=third_derivative, h=h
-        ).values
+        curvature_vector = Curvature(third_derivative=third_derivative, h=h).values
         hmatrix = Bilinear(
             delta_matrix=delta_matrix,
             budget_matrix=budget_matrix,

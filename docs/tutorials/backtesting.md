@@ -8,7 +8,7 @@ This tutorial shows you how to test a portfolio strategy over a
 historical price series, with periodic rebalancing and transaction
 costs.
 
-> � **New here?** See the [Glossary]({{ site.baseurl }}/docs/glossary/).
+> 📖 **New here?** See the [Glossary]({{ site.baseurl }}/docs/glossary/).
 
 **Time required**: ~10 minutes.
 

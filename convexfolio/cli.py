@@ -22,6 +22,9 @@ importable for programmatic use.
 
 import argparse
 import json
+import sys
+from importlib.metadata import PackageNotFoundError
+from importlib.metadata import version as package_version
 from pathlib import Path
 
 import matplotlib
@@ -30,6 +33,7 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
+import yaml
 
 from convexfolio import CFVaR2Closed, CFVaR2nd, Minimize, Variance
 from convexfolio.backtest import (
@@ -47,6 +51,53 @@ from convexfolio.data import (
 from convexfolio.utils import Logger, Report, Reproduce
 
 
+def _convexfolio_version() -> str:
+    """Return the installed ``convexfolio`` package version.
+
+    Returns:
+        The version string reported by package metadata. Falls back
+        to ``"unknown"`` if metadata is not available (e.g. running
+        from an unpacked source tree without installed dist-info).
+    """
+    try:
+        return package_version("convexfolio")
+    except PackageNotFoundError:
+        return "unknown"
+
+
+def load_experiment(path: str | None) -> Experiment:
+    """Load an :class:`Experiment` from a path, wrapping errors for the CLI.
+
+    Args:
+        path: Path to a ``.json`` or ``.yaml`` / ``.yml`` config file,
+            or ``None`` to build a default experiment.
+
+    Returns:
+        The loaded and validated :class:`Experiment`.
+
+    Raises:
+        SystemExit: With a one-line message if the file is missing,
+            contains invalid JSON / YAML, violates an alpha bound, or
+            fails any other loader precondition.
+    """
+    try:
+        experiment = Load(path)()
+    except FileNotFoundError as exc:
+        raise SystemExit(
+            f"config file not found: {path!r} "
+            "(use --config path/to/config.json or omit --command to use defaults)"
+        ) from exc
+    except json.JSONDecodeError as exc:
+        raise SystemExit(
+            f"invalid JSON in {path!r}: {exc.msg} (line {exc.lineno}, col {exc.colno})"
+        ) from exc
+    except yaml.YAMLError as exc:
+        raise SystemExit(f"invalid YAML in {path!r}: {exc}") from exc
+    except ValueError as exc:
+        raise SystemExit(f"invalid config in {path!r}: {exc}") from exc
+    return experiment
+
+
 def parser() -> argparse.ArgumentParser:
     """Build the CLI argument parser.
 
@@ -58,6 +109,11 @@ def parser() -> argparse.ArgumentParser:
     argument_parser = argparse.ArgumentParser(
         prog="convexfolio",
         description="Convexfolio — option portfolio optimizer",
+    )
+    argument_parser.add_argument(
+        "--version",
+        action="version",
+        version=f"convexfolio {_convexfolio_version()}",
     )
     argument_parser.add_argument(
         "--config",
@@ -339,7 +395,7 @@ def main() -> None:
         backtest_command(parsed_args)
         return
 
-    experiment = Load(parsed_args.config)()
+    experiment = load_experiment(parsed_args.config)
     log = Logger(level=experiment.runtime.log_level)
 
     if parsed_args.command == "plot":
@@ -363,7 +419,9 @@ def main() -> None:
         return
 
     result = Reproduce(experiment)()
-    log.info(json.dumps(result, indent=2))
+    sys.stdout.write(json.dumps(result, indent=2))
+    sys.stdout.write("\n")
+    sys.stdout.flush()
 
 
 if __name__ == "__main__":

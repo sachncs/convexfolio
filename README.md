@@ -102,7 +102,7 @@ Pick whichever option fits your setup:
 ### Option 1 — Pre-built wheel from GitHub Releases (fastest)
 
 ```bash
-pip install https://github.com/sachncs/convexfolio/releases/download/v0.3.0/convexfolio-0.3.0-py3-none-any.whl
+pip install https://github.com/sachncs/convexfolio/releases/download/v1.0.0/convexfolio-1.0.0-py3-none-any.whl
 ```
 
 No `git clone`, no build step. Works as soon as a GitHub Release
@@ -297,8 +297,8 @@ MIT — see [LICENSE](LICENSE). Use it, fork it, ship it.
 
 ## Disclaimer
 
-Convexfolio is a research-preview package. The mathematical outputs
-are illustrative; they are **not investment advice**. The maintainers
+Convexfolio is a mathematical tool. The solver outputs are
+illustrative; they are **not investment advice**. The maintainers
 make no claim about the suitability of any output for trading,
 hedging, or any other financial decision. Always verify outputs
 against independent models and current market data before any

@@ -7,6 +7,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-09-08
+
+First production-stable release. The public API established in
+0.3.0 is unchanged; the only deltas are project metadata, CLI
+ergonomics, and operational polish.
+
+### Added
+- `convexfolio --version` flag, powered by `importlib.metadata.version`.
+- `.github/CODEOWNERS` mapping all paths to `sachncs@gmail.com`.
+- Friendly one-line error messages for missing `--config` paths,
+  invalid JSON / YAML, and out-of-range `alpha` (no raw tracebacks
+  on bad CLI input).
+
+### Changed
+- Version bumped to `1.0.0`.
+- Trove classifier restored to `Development Status :: 5 - Production/Stable`.
+- Package description drops the "research-preview" qualifier
+  while keeping the explicit "not investment advice" disclaimer.
+- `CITATION.cff` abstract drops the "research-preview" qualifier
+  while keeping the "not investment advice" line; release date
+  bumped to 2026-09-08.
+- `Reproduce.__call__` now honours `Experiment.inputs` instead of
+  discarding it; if `inputs` is `None` the synthetic 5-instrument
+  path is still used and the result carries an explicit
+  `uncertainty.ASSUMPTION` annotation.
+- CFVaR3 solver receives a real, weight-dependent third-cumulance
+  callback (`synthetic_kappa3_from_seed`) instead of a constant
+  zero, so the third-order correction is genuinely active in the
+  shipped pipeline.
+- `CFVaR2nd` validation of `SyntheticPortfolio.degrees_of_freedom`
+  tightened to reject `nu <= 2.0` (the lower bound for finite
+  Student-t variance), eliminating a divide-by-zero in the (1.0, 2.0]
+  range that previously slipped past the `> 1.0` check.
+
+### Fixed
+- `SyntheticPortfolio` no longer divides by zero when
+  `1.0 < degrees_of_freedom <= 2.0`.
+- `Reproduce.__call__` no longer overwrites user-supplied inputs
+  with synthetic data.
+- `Backtest.run_backtest` rebalance fallback uses a budget-feasible
+  starting point and respects the previous feasible weights when
+  the solver fails (`tolerate_solver_failure=True` opt-in).
+- `CHANGELOG.md [0.3.0]` no longer has a duplicated `### Changed`
+  section.
+- `convexfolio/__init__.py __all__` is now sorted alphabetically and
+  the `Report` entry is correctly indented.
+- Architecture diagram in `docs/architecture.md` no longer contains a
+  U+FFFD replacement character; references to deleted
+  `pipeline.py` / `determinism.py` modules removed.
+- `apis` referenced in docs (`load`, `reproduce`, `validate`,
+  `check`, `run_and_save`) replaced with the actual CapWords
+  public classes (`Load`, `Reproduce`, `Validate`,
+  `Report.from_reproduce`).
+- README quick-start example shows the actual solver output
+  (`[1.0591133, 0.91133005]`) instead of a fabricated
+  `[0.65, 0.95]`.
+- `mypy` configuration switched to `strict = true`.
+- All closure factories (`budget.fun`, `inequality.fun`,
+  `variance_at` in `Reconstruct.__init__`) hoisted to module level
+  with Google-style docstrings.
+- `isinstance(...)` removed from production code; `assert`
+  preconditions replaced with typed `raise` statements.
+
+### Removed
+- `long_only_bounds` and `position_limits_bounds` thin wrappers
+  (callers use `bounds(...)` directly).
+- `_ITERS`, `_BENCHMARK_PLUGIN`, `_wall_clock_run`, `_has_plugin`,
+  `_run` underscored module-level helpers in `benchmarks/test_benchmarks.py`.
+- The `bench` optional-dependency extra (`pytest-benchmark` is now
+  a required runtime dependency).
+
 ## [0.3.0] - 2026-08-22
 
 ### Changed

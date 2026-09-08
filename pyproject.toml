@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "convexfolio"
-version = "0.3.0"
-description = "Convexfolio — research-preview option portfolio optimizer (paper-faithful baseline + extensible package API). Not investment advice."
+version = "1.0.0"
+description = "Convexfolio — option portfolio optimizer (paper-faithful baseline + extensible package API). Not investment advice."
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
@@ -21,7 +21,7 @@ keywords = [
   "optimization",
 ]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Financial and Insurance Industry",
   "Intended Audience :: Science/Research",
   "Operating System :: OS Independent",

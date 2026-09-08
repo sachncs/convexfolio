@@ -33,7 +33,7 @@ jobs:
         run: mypy convexfolio
 
       - name: Pytest
-        run: PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
+        run: PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q tests/
 
       - name: Benchmarks
         run: pytest --benchmark-only --benchmark-columns=mean benchmarks/

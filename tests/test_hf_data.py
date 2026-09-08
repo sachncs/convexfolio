@@ -199,11 +199,14 @@ def test_summarise_results_welford_matches_naive_two_pass() -> None:
     summariser = SummariseResults()
 
     weight_columns: list[list[float]] = [[] for _ in IV_BUCKETS]
+    valid_rows: list[object] = []
     for row in rows:
         try:
-            inputs = builder(row)
+            valid_rows.append((row, builder(row)))
         except ValueError:
             continue
+
+    for row, inputs in valid_rows:
         weights = Minimize(
             Variance(inputs.precision_matrix), inputs.cost_vector
         ).value

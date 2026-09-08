@@ -171,7 +171,7 @@ constrains it loosely; Convexfolio assumes `nu > 6` by default.
 
 The `Q` matrix reconstruction uses a variance-consistent formulation
 so the quadratic form `0.5 xᵀQx` matches the direct portfolio
-variance computation to ~10�⁷ precision.
+variance computation to ~10⁻⁷ precision.
 
 Verified by `tests/test_determined_quantities.py::test_reconstructed_q_matches_direct_variance_formula`.
 

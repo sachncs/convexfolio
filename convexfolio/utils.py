@@ -294,7 +294,7 @@ class Report:
         all_match: Whether every run was byte-equivalent to the first.
         summary: Public summary dict (safe to ``json.dumps``).
         deterministic: ``bool`` view of the ``summary["deterministic"]``.
-        seed: ``int`` view of the ``summary["seed"]`` field.
+        seed: The seed recorded in the summary.
         reference: Reference report (the first run).
     """
 
@@ -325,11 +325,13 @@ class Report:
         serialized = [json.dumps(r, sort_keys=True) for r in results]
         self.serialized = serialized
         self.all_match = all(item == serialized[0] for item in serialized[1:])
+        self.seed: int = config.runtime.seed
+        self.reference: dict[str, object] = results[0]
         self.summary: dict[str, object] = {
             "deterministic": self.all_match,
             "repetitions": repetitions,
-            "seed": config.runtime.seed,
-            "reference": results[0],
+            "seed": self.seed,
+            "reference": self.reference,
         }
 
     @classmethod
@@ -377,28 +379,6 @@ class Report:
             ``True`` if every serialised run matched the first.
         """
         return bool(self.summary["deterministic"])
-
-    @property
-    def seed(self) -> int:
-        """The seed used for the run (mirrors ``config.runtime.seed``).
-
-        Returns:
-            The integer seed value from ``config.runtime.seed``.
-        """
-        seed = self.summary["seed"]
-        assert isinstance(seed, int)
-        return seed
-
-    @property
-    def reference(self) -> dict[str, object]:
-        """The first run's result dict, used as the byte-equivalence reference.
-
-        Returns:
-            The reference :class:`Reproduce` output dict.
-        """
-        reference = self.summary["reference"]
-        assert isinstance(reference, dict)
-        return reference
 
     def save(self, path: str) -> Path:
         """Persist the report summary as JSON.

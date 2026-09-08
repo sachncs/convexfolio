@@ -175,6 +175,16 @@ The project uses Ruff for linting with default settings:
 line-length = 88
 ```
 
+The line length is set to 88 characters rather than the [Google
+Python Style Guide](https://google.github.io/styleguide/pyguide.html)
+default of 80 because the closed-form math expressions and SLSQP
+constraint builder call sites carry many keyword arguments
+(`expected_payoff=`, `precision_matrix=`, `cost_vector=`,
+`alpha=`, ...) and the readability of those expressions drops
+sharply below ~85 columns. This is an intentional deviation from
+the Google default, documented here so reviewers don't flag it as
+a regression.
+
 ### Mypy Configuration
 
 ```toml

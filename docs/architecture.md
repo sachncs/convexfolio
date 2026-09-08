@@ -191,6 +191,37 @@ Each accepts a `--config path/to/config.json` flag.
 
 ---
 
+## Composition over inheritance
+
+Every solver and risk primitive in `convexfolio/` follows the same
+duck-typed contract: capture inputs in `__init__`, expose the result
+on `.value` (or a named attribute). Callers compose them like
+`Minimize(Variance(Q), c).value`, never `isinstance(x, Variance)`.
+
+There is no `isinstance` dispatch in production code. There is no
+`ABC`, no `Protocol`, no `@abstractmethod`, no `metaclass=`, and no
+deep inheritance hierarchy. `BucketWeightStat(TypedDict)` is the
+only "extends" in the tree, and TypedDict is structural typing, not
+inheritance.
+
+Why this matters:
+
+* **Substitutability.** Anything that exposes `.value` works.
+  `Minimize` accepts any callable that maps a weight vector to a
+  variance, not specifically `Variance`.
+* **Testability.** Each class can be constructed and asserted on in
+  isolation; no fixture graph to set up.
+* **Readability.** A reader sees the computation by reading the call
+  chain, not by chasing virtual methods.
+
+If a future change needs ad-hoc polymorphism (for example, a custom
+solver that does not fit the `Q + c` shape), reach for a
+`Callable[[FloatArray], float]` parameter rather than a class
+hierarchy or `isinstance` check. The `kappa3_callback` argument on
+`CFVaR3Numerical` is the canonical example of this pattern.
+
+---
+
 ## Where to look next
 
 - **[API Reference](api-reference.md)** — Every public symbol, with

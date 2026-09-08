@@ -9,7 +9,7 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability within this project, please send an email to **[INSERT SECURITY EMAIL]**. All security vulnerabilities will be promptly addressed.
+If you discover a security vulnerability within this project, please send an email to **sachncs@gmail.com**. All security vulnerabilities will be promptly addressed.
 
 **Please do not report security vulnerabilities through public GitHub issues.**
 
@@ -65,5 +65,5 @@ We appreciate the security research community and will acknowledge reporters who
 
 For security-related inquiries, please contact:
 
-- **Email**: [INSERT SECURITY EMAIL]
+- **Email**: sachncs@gmail.com
 - **GitHub**: Create a private security advisory via the "Security" tab

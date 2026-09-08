@@ -167,8 +167,8 @@ Every algorithm above has a unit test. ([Glossary: pytest](glossary.md))
 |---|---|
 | `tests/test_optimization.py` | `Minimize`, `CFVaR2Closed`, `CFVaR3Numerical` correctness. |
 | `tests/test_risk.py` | `CFVaR2nd`, `CFVaR3rd`, `Quadratic`, `shapes`. |
-| `tests/test_config.py` | `load`, `validate`. |
-| `tests/test_determinism.py` | `check` (reproducibility). |
+| `tests/test_config.py` | `Load`, `Validate`. |
+| `tests/test_determinism.py` | `Report.from_reproduce` (3 tests): deterministic, serialised summary, single-repetition rejection. |
 | `tests/test_determined_quantities.py` | `Compute`, `Linear`, `Reconstruct`, `PortfolioVariance` (Section 2.4). |
 
 Run them all with:

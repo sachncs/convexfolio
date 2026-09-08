@@ -194,7 +194,7 @@ a regression.
 ```toml
 [tool.mypy]
 python_version = "3.12"
-strict = false
+strict = true
 warn_unused_ignores = true
 warn_return_any = false
 ```

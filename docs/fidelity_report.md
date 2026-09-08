@@ -9,7 +9,7 @@ title: "Fidelity Report"
 
 ## What does "fidelity" mean?
 
-"Fidelity" is a fancy word for **fidelity** — does this code do what
+"Fidelity" is a fancy word for **faithfulness** — does this code do what
 the math paper says?
 
 This page tracks, algorithm by algorithm, whether the Convexfolio

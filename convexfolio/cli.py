@@ -154,6 +154,7 @@ def plot_command(
     cost_vector = experiment.cost_vector
     expected_payoff = experiment.expected_payoff
     output_dir = experiment.runtime.output_directory
+    log = Logger(level=experiment.runtime.log_level)
     outputs: list[str] = []
 
     if parsed_args.chart in ("all", "weights"):
@@ -187,6 +188,7 @@ def plot_command(
         ]
         frontier_returns: list[float] = []
         frontier_risks: list[float] = []
+        skipped_alphas_frontier: list[dict[str, object]] = []
         for alpha_value in alphas:
             try:
                 frontier_weights = CFVaR2Closed(
@@ -202,10 +204,17 @@ def plot_command(
                     precision_matrix=precision_matrix,
                     weights=frontier_weights,
                 ).value
-            except (ValueError, RuntimeError):
+            except (ValueError, RuntimeError) as exc:
+                skipped_alphas_frontier.append(
+                    {"alpha": alpha_value, "reason": str(exc)}
+                )
                 continue
             frontier_returns.append(exp_return)
             frontier_risks.append(-risk)
+        if skipped_alphas_frontier:
+            log.warning(
+                f"frontier: {len(skipped_alphas_frontier)} alpha value(s) skipped"
+            )
         fig, ax = plt.subplots(figsize=(7.0, 5.0))
         ax.plot(frontier_risks, frontier_returns, marker="o", color="#2a5fa5")
         ax.set_xlabel("-CFVaR2 (risk)")
@@ -222,6 +231,7 @@ def plot_command(
         sensitivity_alphas = list(np.linspace(0.01, 0.49, 30))
         sensitivity_risks: list[float] = []
         sensitivity_valid: list[float] = []
+        skipped_alphas_sensitivity: list[dict[str, object]] = []
         for alpha_value in sensitivity_alphas:
             try:
                 sensitivity_weights = CFVaR2Closed(
@@ -236,10 +246,17 @@ def plot_command(
                     precision_matrix=precision_matrix,
                     weights=sensitivity_weights,
                 ).value
-            except (ValueError, RuntimeError):
+            except (ValueError, RuntimeError) as exc:
+                skipped_alphas_sensitivity.append(
+                    {"alpha": alpha_value, "reason": str(exc)}
+                )
                 continue
             sensitivity_valid.append(alpha_value)
             sensitivity_risks.append(-risk)
+        if skipped_alphas_sensitivity:
+            log.warning(
+                f"sensitivity: {len(skipped_alphas_sensitivity)} alpha value(s) skipped"
+            )
         fig, ax = plt.subplots(figsize=(7.0, 5.0))
         ax.plot(
             sensitivity_valid,

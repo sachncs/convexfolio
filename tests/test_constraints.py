@@ -11,10 +11,8 @@ from convexfolio.constraints import (
     fun_of,
     inequality,
     leverage_cap_inequality,
-    long_only_bounds,
     long_only_inequalities,
     merge,
-    position_limits_bounds,
     position_limits_inequalities,
     sector_caps_inequalities,
 )
@@ -69,7 +67,7 @@ def test_long_only_inequalities_count() -> None:
 
 
 def test_long_only_bounds_are_non_negative() -> None:
-    b = long_only_bounds(3)
+    b = bounds(0.0, np.inf, 3)
     for lo, hi in b:
         assert lo == 0.0
         assert hi == float("inf")
@@ -81,7 +79,7 @@ def test_position_limits_inequalities_count() -> None:
 
 
 def test_position_limits_bounds_match() -> None:
-    b = position_limits_bounds(3, 0.5)
+    b = bounds(-0.5, 0.5, 3)
     for lo, hi in b:
         assert lo == -0.5
         assert hi == 0.5

@@ -128,21 +128,6 @@ def long_only_inequalities(n: int) -> ConstraintSpec:
     return tuple(inequality(-eye, 0.0) for eye in eyes)
 
 
-def long_only_bounds(n: int) -> Sequence[tuple[float, float]]:
-    """Bounds tuple for ``long_only``-style closed-form solvers.
-
-    Use this with solvers that accept SciPy's ``bounds`` parameter
-    rather than SLSQP constraints.
-
-    Args:
-        n: Number of instruments.
-
-    Returns:
-        List of ``(0.0, inf)`` tuples.
-    """
-    return bounds(0.0, np.inf, n)
-
-
 def position_limits_inequalities(n: int, max_abs_weight: float) -> ConstraintSpec:
     """Build inequality constraints enforcing ``|x[i]| <= max_abs_weight``.
 
@@ -162,21 +147,6 @@ def position_limits_inequalities(n: int, max_abs_weight: float) -> ConstraintSpe
         out.append(inequality(eye, max_abs_weight))
         out.append(inequality(-eye, max_abs_weight))
     return tuple(out)
-
-
-def position_limits_bounds(
-    n: int, max_abs_weight: float
-) -> Sequence[tuple[float, float]]:
-    """Bounds tuple enforcing ``|x[i]| <= max_abs_weight``.
-
-    Args:
-        n: Number of instruments.
-        max_abs_weight: Maximum absolute weight per instrument.
-
-    Returns:
-        List of ``(-max, +max)`` tuples.
-    """
-    return bounds(-max_abs_weight, max_abs_weight, n)
 
 
 def sector_caps_inequalities(

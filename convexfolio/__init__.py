@@ -52,9 +52,8 @@ The API is grouped by responsibility and exported via ``__all__``:
 **Constraints** — SLSQP constraint builders
     * :func:`fun_of`, :func:`budget`, :func:`bounds`,
       :func:`inequality`, :func:`merge`, :func:`budget_with_extras`,
-      :func:`long_only_inequalities`, :func:`long_only_bounds`,
+      :func:`long_only_inequalities`,
       :func:`position_limits_inequalities`,
-      :func:`position_limits_bounds`,
       :func:`sector_caps_inequalities`,
       :func:`leverage_cap_inequality`
 

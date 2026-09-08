@@ -35,6 +35,9 @@ jobs:
       - name: Pytest
         run: PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 
+      - name: Benchmarks
+        run: pytest --benchmark-only --benchmark-columns=mean benchmarks/
+
   build:
     runs-on: ubuntu-latest
     steps:

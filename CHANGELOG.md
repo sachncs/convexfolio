@@ -42,30 +42,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `np.ones(n) / np.sum(cost_vector)`, eliminating wasted SLSQP
   iterations satisfying the budget constraint.
 
-### Changed
-- **BREAKING**: Package renamed from `options` to `convexfolio`. The
-  Python import path is now `convexfolio`, the CLI command is now
-  `convexfolio`, and the GitHub repository is `sachncs/convexfolio`.
-  No compatibility shim is provided — `import options` and the `options`
-  CLI command no longer work.
-- **BREAKING**: Dropped support for Python 3.10 and Python 3.11.
-  Minimum supported version is now Python 3.12.
-- **BREAKING**: Tightened all dependency pins from `>=X.Y` to exact
-  `==X.Y.Z`. Downstream users must now match pinned versions.
-- **BREAKING**: Removed the `Risk` class facade from `convexfolio.math`;
-  callers should compose `CFVaR2nd` and `CFVaR3rd` directly.
-- **BREAKING**: Removed the Sphinx documentation build pipeline
-  (`docs/conf.py`, `docs/*.rst`, `docs/_build`, `docs/_static`). All
-  documentation now lives in Markdown files under `docs/`.
-- Upgraded runtime dependencies: `numpy==2.5.2`, `scipy==1.18.0`,
-  `pyyaml==6.0.3`.
-- Upgraded dev dependencies: `pytest==9.1.1`, `mypy==2.3.1`,
-  `ruff==0.16.4`.
-- Upgraded bench dependencies: `pytest-benchmark==5.2.3`,
-  `py-cpuinfo==9.0.0` (new required transitive dep).
-- Upgraded build-system dependencies: `setuptools==84.0.0`,
-  `wheel==0.48.0`.
-
 ## [0.2.1] - 2026-05-09
 
 ### Added

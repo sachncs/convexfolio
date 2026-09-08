@@ -43,5 +43,5 @@ Add any other context, screenshots, or error messages about the problem.
 ## Checklist
 
 - [ ] I have searched existing issues
-- [ ] I am using a supported Python version (>=3.10)
+- [ ] I am using a supported Python version (>=3.12)
 - [ ] I have included all relevant environment details

@@ -18,7 +18,7 @@ import pytest
 
 from convexfolio.config import Experiment
 from convexfolio.math import CFVaR2Closed, Minimize, Variance
-from convexfolio.utils import reproduce
+from convexfolio.utils import Reproduce
 
 try:
     import pytest_benchmark  # noqa: F401
@@ -26,34 +26,34 @@ except ImportError:
     pytest_benchmark = None  # type: ignore[assignment]
 
 
-_ITERS = 50
-_BENCHMARK_PLUGIN = "benchmark"
+ITERATIONS_PER_RUN = 50
+BENCHMARK_PLUGIN_NAME = "benchmark"
 
 
-def _wall_clock_run(test_name: str, func: Callable[[], object]) -> None:
-    """Run ``_ITERS`` times and print the average wall-clock latency."""
+def wall_clock_run(test_name: str, func: Callable[[], object]) -> None:
+    """Run ``ITERATIONS_PER_RUN`` times and print the average latency."""
     start = time.perf_counter()
-    for _ in range(_ITERS):
+    for _ in range(ITERATIONS_PER_RUN):
         func()
     elapsed = time.perf_counter() - start
-    avg_us = elapsed / _ITERS * 1e6
-    print(f"\n{test_name}: {avg_us:.2f} us (avg of {_ITERS} runs)")
+    avg_us = elapsed / ITERATIONS_PER_RUN * 1e6
+    print(f"\n{test_name}: {avg_us:.2f} us (avg of {ITERATIONS_PER_RUN} runs)")
 
 
-def _has_plugin(pytestconfig: pytest.Config) -> bool:
+def has_benchmark_plugin(pytestconfig: pytest.Config) -> bool:
     return pytest_benchmark is not None and pytestconfig.pluginmanager.hasplugin(
-        _BENCHMARK_PLUGIN
+        BENCHMARK_PLUGIN_NAME
     )
 
 
-def _run(
+def run_benchmark(
     pytestconfig: pytest.Config, test_name: str, func: Callable[[], object]
 ) -> None:
-    if _has_plugin(pytestconfig):
-        benchmark = pytestconfig.pluginmanager.getplugin(_BENCHMARK_PLUGIN)
-        benchmark.pedantic(func, iterations=_ITERS, rounds=3)
+    if has_benchmark_plugin(pytestconfig):
+        benchmark = pytestconfig.pluginmanager.getplugin(BENCHMARK_PLUGIN_NAME)
+        benchmark.pedantic(func, iterations=ITERATIONS_PER_RUN, rounds=3)
     else:
-        _wall_clock_run(test_name, func)
+        wall_clock_run(test_name, func)
 
 
 @pytest.fixture(params=[5, 20, 50])
@@ -91,7 +91,7 @@ def cfvar2_action(portfolio: dict[str, np.ndarray]) -> np.ndarray:
 
 def reproduce_action() -> dict[str, object]:
     """Action under benchmark: full single-run pipeline."""
-    return reproduce(Experiment())
+    return Reproduce(Experiment())()
 
 
 def test_minimize_variance(
@@ -99,7 +99,9 @@ def test_minimize_variance(
     pytestconfig: pytest.Config,
 ) -> None:
     """Closed-form variance minimizer at 5/20/50 instruments."""
-    _run(pytestconfig, "minimize_variance", lambda: minimize_action(portfolio))
+    run_benchmark(
+        pytestconfig, "minimize_variance", lambda: minimize_action(portfolio)
+    )
 
 
 def test_cfvar2_closed_form(
@@ -107,9 +109,11 @@ def test_cfvar2_closed_form(
     pytestconfig: pytest.Config,
 ) -> None:
     """Closed-form CFVaR2 weight solver at 5/20/50 instruments."""
-    _run(pytestconfig, "cfvar2_closed_form", lambda: cfvar2_action(portfolio))
+    run_benchmark(
+        pytestconfig, "cfvar2_closed_form", lambda: cfvar2_action(portfolio)
+    )
 
 
 def test_reproduce(pytestconfig: pytest.Config) -> None:
     """Full single-run pipeline (default 5-instrument portfolio)."""
-    _run(pytestconfig, "reproduce", reproduce_action)
+    run_benchmark(pytestconfig, "reproduce", reproduce_action)

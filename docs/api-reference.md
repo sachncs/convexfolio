@@ -242,7 +242,7 @@ c = Compute(degrees_of_freedom=8.0).value
 
 ### `Quadratic(precision_matrix, weights)`
 
-**What it is:** Computes the variance `0.5 x�Qx`.
+**What it is:** Computes the variance `0.5 xᵀQx`.
 
 **Attribute:** `.value` — scalar variance.
 

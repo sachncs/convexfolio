@@ -43,10 +43,23 @@ def fun_of(constraint: SLSQPConstraint) -> SLSQPLambda:
     f = constraint["fun"]
     if not callable(f):
         raise TypeError(
-            f"constraint['fun'] must be callable, "
-            f"got {type(f).__name__}"
+            f"constraint['fun'] must be callable, got {type(f).__name__}"
         )
     return f
+
+
+def budget_residual(x: np.ndarray, cost_vector: FloatArray) -> float:
+    """Evaluate the budget residual ``x . v - 1``.
+
+    Args:
+        x: 1-D weight vector.
+        cost_vector: 1-D cost vector ``v``.
+
+    Returns:
+        The signed residual; positive means over-budget, negative means
+        under-budget.
+    """
+    return float(np.dot(x, cost_vector) - 1.0)
 
 
 def budget(cost_vector: FloatArray) -> SLSQPConstraint:
@@ -58,11 +71,10 @@ def budget(cost_vector: FloatArray) -> SLSQPConstraint:
     Returns:
         A SciPy SLSQP constraint dict enforcing the budget.
     """
-
-    def fun(x: np.ndarray, v: FloatArray = cost_vector) -> float:
-        return float(np.dot(x, v) - 1.0)
-
-    return {"type": "eq", "fun": fun}
+    return {
+        "type": "eq",
+        "fun": lambda x, v=cost_vector: budget_residual(x, v),
+    }
 
 
 def bounds(min: float, max: float, n: int) -> Sequence[tuple[float, float]]:
@@ -79,6 +91,23 @@ def bounds(min: float, max: float, n: int) -> Sequence[tuple[float, float]]:
     return [(float(min), float(max))] * int(n)
 
 
+def inequality_residual(
+    x: np.ndarray, coefficients: FloatArray, limit: float
+) -> float:
+    """Evaluate the inequality residual ``limit - a . x``.
+
+    Args:
+        x: 1-D weight vector.
+        coefficients: 1-D coefficient vector ``a``.
+        limit: Right-hand side.
+
+    Returns:
+        Slack to the constraint; positive means feasible, negative
+        means violated.
+    """
+    return float(limit - float(np.dot(x, coefficients)))
+
+
 def inequality(coefficients: FloatArray, limit: float) -> SLSQPConstraint:
     """Build the inequality constraint ``a . x <= limit``.
 
@@ -89,11 +118,10 @@ def inequality(coefficients: FloatArray, limit: float) -> SLSQPConstraint:
     Returns:
         A SciPy SLSQP constraint dict.
     """
-
-    def fun(x: np.ndarray, a: FloatArray = coefficients, b: float = limit) -> float:
-        return float(b - float(np.dot(x, a)))
-
-    return {"type": "ineq", "fun": fun}
+    return {
+        "type": "ineq",
+        "fun": lambda x, a=coefficients, b=limit: inequality_residual(x, a, b),
+    }
 
 
 def merge(*groups: ConstraintSpec | Sequence[SLSQPConstraint]) -> ConstraintSpec:

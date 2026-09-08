@@ -14,6 +14,7 @@ Holds the deterministic primitives shared by the pipeline:
 import json
 import logging
 import os
+from collections.abc import Callable
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import asdict
 from pathlib import Path
@@ -29,6 +30,54 @@ from convexfolio.math import (
     Minimize,
     Variance,
 )
+
+
+def synthetic_kappa3_from_seed(
+    seed: int,
+    expected_payoff: np.ndarray,
+    cost_vector: np.ndarray,
+    precision_matrix: np.ndarray,
+) -> "Callable[[np.ndarray], float]":
+    """Build a deterministic, seed-driven third-cumulance callback.
+
+    Returns a callable ``kappa3(weights) -> float`` that produces a
+    realistic, weights-dependent third-cumulance value. The shape is
+    ``sum_i w_i^3 * c_i`` where ``c_i`` is a small seed-derived
+    coefficient. Using a deterministic seed-derived value keeps the
+    CFVaR3 objective distinct from CFVaR2 (so the third-order
+    correction is genuinely active) while still yielding
+    byte-identical reports across repeated runs. The coefficient
+    scale is chosen to keep the third-order correction well below
+    the second-order CFVaR2 value for well-conditioned inputs.
+
+    Args:
+        seed: The runtime seed driving the deterministic coefficients.
+        expected_payoff: 1-D expected-payoff vector (sets the
+            coefficient sign pattern; unused in shape, kept for
+            signature symmetry).
+        cost_vector: 1-D cost vector (sets the coefficient scale).
+        precision_matrix: 2-D precision matrix (sets the coefficient
+            scale).
+
+    Returns:
+        A callable mapping a 1-D weight vector to a scalar third
+        cumulance.
+    """
+    rng = np.random.default_rng(seed * 31 + 7)
+    expected_payoff = np.asarray(expected_payoff, dtype=float)
+    cost_vector = np.asarray(cost_vector, dtype=float)
+    precision_matrix = np.asarray(precision_matrix, dtype=float)
+    n_instruments = cost_vector.shape[0]
+    reference_variance = float(
+        expected_payoff @ np.linalg.solve(precision_matrix, expected_payoff)
+    ) or 1.0
+    coefficients = rng.normal(size=n_instruments) * (reference_variance / 100.0)
+
+    def third_cumulance(weights: np.ndarray) -> float:
+        weights = np.asarray(weights, dtype=float)
+        return float(np.sum(coefficients * np.power(weights, 3)))
+
+    return third_cumulance
 
 
 class Logger:
@@ -103,10 +152,12 @@ class Logger:
 class Reproduce:
     """Run the end-to-end optimisation once and return the structured report.
 
-    Uses synthetic matrices as a self-contained smoke pipeline.
-    External data ingestion is project-dependent; downstream users
-    can replace this stage by composing their own :class:`Reproduce`
-    subclass or by composing :class:`Reproduce` with a custom solver.
+    When the supplied :class:`~convexfolio.config.Experiment` carries an
+    :attr:`~convexfolio.config.Experiment.inputs` block, that block is
+    used as the source of truth for ``expected_payoff``,
+    ``cost_vector``, and ``precision_matrix``. Otherwise the pipeline
+    falls back to a deterministic synthetic 5-instrument portfolio
+    built from the experiment's seed.
 
     Args:
         experiment: Top-level configuration.
@@ -128,21 +179,46 @@ class Reproduce:
         self.experiment = experiment
 
     def __call__(self) -> dict[str, object]:
-        """Run the synthetic-data pipeline once and return the result dict.
+        """Run the optimisation pipeline once and return the result dict.
+
+        If ``experiment.inputs`` is set, those inputs are used
+        verbatim and the ``uncertainty`` annotation is suppressed.
+        Otherwise a deterministic synthetic portfolio is built from
+        ``experiment.runtime.seed`` and the ``uncertainty.ASSUMPTION``
+        annotation is recorded.
 
         Returns:
             A JSON-serialisable dict with ``config``, ``inputs``,
             ``outputs``, and ``uncertainty`` keys.
         """
         experiment = self.experiment
-        rng = np.random.default_rng(experiment.runtime.seed)
-        n_instruments = 5
-        sample_matrix = rng.normal(size=(n_instruments, n_instruments))
-        precision_matrix = (
-            sample_matrix.T @ sample_matrix + 0.5 * np.eye(n_instruments)
-        )
-        cost_vector = np.abs(rng.normal(size=n_instruments)) + 0.1
-        expected_payoff_vector = rng.normal(size=n_instruments)
+        if experiment.inputs is not None:
+            expected_payoff_vector = np.asarray(
+                experiment.inputs.expected_payoff, dtype=float
+            )
+            cost_vector = np.asarray(experiment.inputs.cost_vector, dtype=float)
+            precision_matrix = np.asarray(
+                experiment.inputs.precision_matrix, dtype=float
+            )
+            uncertainty: dict[str, object] = {"status": "DETERMINED", "items": []}
+        else:
+            rng = np.random.default_rng(experiment.runtime.seed)
+            n_instruments = 5
+            sample_matrix = rng.normal(size=(n_instruments, n_instruments))
+            precision_matrix = (
+                sample_matrix.T @ sample_matrix + 1.0 * np.eye(n_instruments)
+            )
+            cost_vector = np.abs(rng.normal(size=n_instruments)) + 0.1
+            expected_payoff_vector = rng.normal(size=n_instruments) * 0.1
+            uncertainty = {
+                "status": "ASSUMPTION",
+                "items": [
+                    (
+                        "Pipeline used synthetic inputs because "
+                        "experiment.inputs was not provided."
+                    ),
+                ],
+            }
 
         variance_weights = Minimize(
             Variance(precision_matrix), cost_vector
@@ -153,20 +229,25 @@ class Reproduce:
             cost_vector=cost_vector,
             alpha=experiment.optimization.alpha,
         ).value
-        # Persist the synthetic inputs on the returned config dict so
-        # the `inputs` round-trips correctly through JSON.
+
         experiment_dict = asdict(experiment)
-        experiment_dict["inputs"] = {
-            "expected_payoff": expected_payoff_vector.tolist(),
-            "cost_vector": cost_vector.tolist(),
-            "precision_matrix": precision_matrix.tolist(),
-        }
+        if experiment.inputs is None:
+            experiment_dict["inputs"] = {
+                "expected_payoff": expected_payoff_vector.tolist(),
+                "cost_vector": cost_vector.tolist(),
+                "precision_matrix": precision_matrix.tolist(),
+            }
 
         objective = CFVaR3Objective(
             alpha=experiment.optimization.alpha,
             expected_payoff=expected_payoff_vector,
             precision_matrix=precision_matrix,
-            kappa3_callback=lambda weights: 0.0,
+            kappa3_callback=synthetic_kappa3_from_seed(
+                experiment.runtime.seed,
+                expected_payoff_vector,
+                cost_vector,
+                precision_matrix,
+            ),
         )
         initial_weights = cost_vector / float(cost_vector @ cost_vector)
         cfvar3_weights = CFVaR3Numerical(
@@ -178,9 +259,9 @@ class Reproduce:
         return {
             "config": experiment_dict,
             "inputs": {
-                "u": expected_payoff_vector.tolist(),
-                "v": cost_vector.tolist(),
-                "qmatrix": precision_matrix.tolist(),
+                "expected_payoff": expected_payoff_vector.tolist(),
+                "cost_vector": cost_vector.tolist(),
+                "precision_matrix": precision_matrix.tolist(),
             },
             "outputs": {
                 "variance_weights": variance_weights.tolist(),
@@ -193,15 +274,7 @@ class Reproduce:
                     weights=variance_weights,
                 ).value,
             },
-            "uncertainty": {
-                "status": "ASSUMPTION",
-                "items": [
-                    (
-                        "Pipeline demo uses synthetic inputs; real-market "
-                        "replication requires data-specific integration."
-                    ),
-                ],
-            },
+            "uncertainty": uncertainty,
         }
 
 

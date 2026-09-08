@@ -119,8 +119,8 @@ class SyntheticPortfolio:
         n_instruments: Number of options in the portfolio. Must be
             positive.
         degrees_of_freedom: Skew-t degrees of freedom. Must be
-            strictly greater than ``1.0`` for the distribution to
-            have finite variance.
+            strictly greater than ``2.0`` for the synthetic payoff
+            formula to yield finite variance.
         seed: Random seed for reproducibility.
 
     Attributes:
@@ -129,7 +129,7 @@ class SyntheticPortfolio:
         seed: See Args.
 
     Raises:
-        ValueError: If ``degrees_of_freedom <= 1``.
+        ValueError: If ``degrees_of_freedom <= 2``.
     """
 
     def __init__(
@@ -144,15 +144,15 @@ class SyntheticPortfolio:
             n_instruments: Number of options in the portfolio. Must be
                 positive.
             degrees_of_freedom: Skew-t degrees of freedom. Must be
-                strictly greater than ``1.0`` for the distribution to
-                have finite variance.
+                strictly greater than ``2.0`` for the synthetic payoff
+                formula to yield finite variance.
             seed: Random seed for reproducibility.
 
         Raises:
-            ValueError: If ``degrees_of_freedom <= 1``.
+            ValueError: If ``degrees_of_freedom <= 2``.
         """
-        if degrees_of_freedom <= 1.0:
-            raise ValueError("degrees_of_freedom must be > 1")
+        if degrees_of_freedom <= 2.0:
+            raise ValueError("degrees_of_freedom must be > 2 for finite variance")
         self.n_instruments = n_instruments
         self.degrees_of_freedom = degrees_of_freedom
         self.seed = seed

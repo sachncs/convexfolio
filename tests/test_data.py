@@ -45,7 +45,11 @@ def test_synthetic_portfolio_seed_changes_output() -> None:
 
 def test_synthetic_portfolio_rejects_invalid_nu() -> None:
     """Construction raises when degrees_of_freedom is at the boundary."""
-    with pytest.raises(ValueError, match="degrees_of_freedom must be > 1"):
+    with pytest.raises(ValueError, match="degrees_of_freedom must be > 2"):
+        SyntheticPortfolio(n_instruments=3, degrees_of_freedom=2.0, seed=7)
+    with pytest.raises(ValueError, match="degrees_of_freedom must be > 2"):
+        SyntheticPortfolio(n_instruments=3, degrees_of_freedom=1.5, seed=7)
+    with pytest.raises(ValueError, match="degrees_of_freedom must be > 2"):
         SyntheticPortfolio(n_instruments=3, degrees_of_freedom=1.0, seed=7)
 
 

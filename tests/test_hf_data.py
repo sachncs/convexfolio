@@ -23,6 +23,7 @@ from convexfolio import (
     HV_COLUMNS,
     IV_BUCKETS,
     BuildPortfolioInputs,
+    CrossSectionResult,
     CrossSectionRunner,
     CSVFileSource,
     HFDatasetSource,
@@ -202,8 +203,6 @@ def test_summarise_results_welford_matches_naive_two_pass() -> None:
 
     for row, inputs in valid_rows:
         weights = Minimize(Variance(inputs.precision_matrix), inputs.cost_vector).value
-        from convexfolio.hf_data import CrossSectionResult
-
         summariser.update(
             CrossSectionResult(
                 symbol=row.symbol,

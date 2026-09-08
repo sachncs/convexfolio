@@ -8,6 +8,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from convexfolio import Minimize, Variance
 from convexfolio.data import LoadCSV, Summary, SyntheticPortfolio
 
 
@@ -64,8 +65,6 @@ def test_load_csv_parses_sample_fixture() -> None:
 
 def test_load_csv_round_trip_through_solver() -> None:
     """LoadCSV + Minimize round-trip satisfies the budget constraint."""
-    from convexfolio import Minimize, Variance
-
     inputs = LoadCSV("tests/fixtures/sample_portfolio.csv")()
     weights = Minimize(Variance(inputs.precision_matrix), inputs.cost_vector).value
     assert np.isclose(float(weights.T @ inputs.cost_vector), 1.0, atol=1e-6)

@@ -1,5 +1,7 @@
 """Tests for :meth:`Report.from_reproduce` determinism orchestration."""
 
+import json
+
 import numpy as np
 import pytest
 
@@ -19,8 +21,6 @@ def test_pipeline_is_deterministic_given_same_seed() -> None:
 
 def test_report_from_reproduce_serialises_summary() -> None:
     """The summary dict round-trips through json.dumps."""
-    import json
-
     experiment = Experiment()
     report = Report.from_reproduce(experiment, repetitions=2)
     json.dumps(report.summary)  # must not raise
@@ -31,8 +31,6 @@ def test_report_from_reproduce_serialises_summary() -> None:
 
 def test_report_from_reproduce_rejects_single_repetition() -> None:
     """ValueError raised when repetitions < 2."""
-    import pytest
-
     experiment = Experiment()
     with pytest.raises(ValueError, match="repetitions must be >= 2"):
         Report.from_reproduce(experiment, repetitions=1)

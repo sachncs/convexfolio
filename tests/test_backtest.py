@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+import tempfile
 from collections.abc import Generator
 from pathlib import Path
 
@@ -21,8 +23,6 @@ from convexfolio.data import SyntheticPortfolio
 
 @pytest.fixture()
 def tmp_dir() -> Generator[Path]:
-    import tempfile
-
     with tempfile.TemporaryDirectory() as td:
         yield Path(td)
 
@@ -159,8 +159,6 @@ def test_run_backtest_rejects_zero_rebalance_frequency(history: PriceHistory) ->
 
 
 def test_run_backtest_json_safe_summary(history: PriceHistory) -> None:
-    import json
-
     inputs = SyntheticPortfolio(5, 8.0, 7)()
     cfg = BacktestConfig(portfolio_inputs=inputs, rebalance_frequency=2)
     result = run_backtest(history, cfg)

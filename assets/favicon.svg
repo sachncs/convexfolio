@@ -1,6 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <rect width="64" height="64" rx="12" fill="#3776AB"/>
-  <text x="50%" y="55%" text-anchor="middle" dominant-baseline="middle"
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="convexfolio">
+  <title>convexfolio</title>
+  <defs>
+    <linearGradient id="cf-fg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0B1526"/>
+      <stop offset="1" stop-color="#14385C"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="12" fill="url(#cf-fg)"/>
+  <text x="24" y="35" text-anchor="middle" dominant-baseline="central"
         font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
-        font-size="40" font-weight="700" fill="#FFFFFF">C</text>
+        font-size="36" font-weight="800" letter-spacing="-1" fill="#FFFFFF">C</text>
+  <path d="M 42 27 Q 51 45 60 27" fill="none" stroke="#2DD4BF" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="51" cy="36" r="3.2" fill="#F5B04B"/>
 </svg>

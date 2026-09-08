@@ -1,7 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="convexfolio logo">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="convexfolio logo">
   <title>convexfolio</title>
-  <rect width="512" height="512" rx="96" fill="#3776AB"/>
-  <text x="50%" y="55%" text-anchor="middle" dominant-baseline="middle"
+  <defs>
+    <linearGradient id="cf-bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0B1526"/>
+      <stop offset="1" stop-color="#14385C"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#cf-bg)"/>
+  <text x="200" y="288" text-anchor="middle" dominant-baseline="central"
         font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
-        font-size="280" font-weight="700" fill="#FFFFFF">C</text>
+        font-size="300" font-weight="800" letter-spacing="-8" fill="#FFFFFF">C</text>
+  <path d="M 340 196 Q 415 360 490 196" fill="none" stroke="#2DD4BF" stroke-width="26" stroke-linecap="round"/>
+  <circle cx="415" cy="278" r="20" fill="#F5B04B"/>
 </svg>

@@ -212,12 +212,14 @@ print(answer)
 You'll see something like:
 
 ```
-[0.6522  0.9565]
+[1.0591133  0.91133005]
 ```
 
-Read that as: put **0.65 units of A** and **0.96 units of B** in
+Read that as: put **1.06 units of A** and **0.91 units of B** in
 your portfolio. (A "unit" here is "however many contracts it takes
-to spend $1.")
+to spend $1.") With option A at $0.60 and option B at $0.40, this
+turns into roughly **$0.64 on A and $0.36 on B**, spending exactly
+$1.
 
 To leave the Python prompt:
 

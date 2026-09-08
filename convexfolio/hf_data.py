@@ -641,6 +641,16 @@ class CrossSectionRunner:
     :class:`~convexfolio.math.Variance` → update the summariser →
     return the finalised summary dict.
 
+    When a row's :class:`ValueError` from the builder is encountered,
+    the runner behaviour depends on the ``skip_invalid_rows`` flag:
+
+    * If ``False`` (the default), the runner re-raises a
+      :class:`ValueError` that includes the offending row's symbol
+      and date so the caller can decide what to do.
+    * If ``True``, the runner increments ``summary["skipped_rows"]``
+      and continues, making the data loss explicit rather than
+      silent.
+
     Args:
         loader: Row iterator source (e.g.
             ``LoadOptionsIV(HFDatasetSource(...), parse_options_row)``).
@@ -648,11 +658,14 @@ class CrossSectionRunner:
             builder.
         summariser: Streaming accumulator. Defaults to a fresh
             :class:`SummariseResults`.
+        skip_invalid_rows: When ``True``, skip rows the builder
+            rejects instead of propagating the :class:`ValueError`.
 
     Attributes:
         loader: See Args.
         builder: See Args.
         summariser: See Args.
+        skip_invalid_rows: See Args.
     """
 
     def __init__(
@@ -660,25 +673,39 @@ class CrossSectionRunner:
         loader: LoadOptionsIV,
         builder: BuildPortfolioInputs,
         summariser: SummariseResults | None = None,
+        skip_invalid_rows: bool = False,
     ) -> None:
         self.loader = loader
         self.builder = builder
         self.summariser = (
             summariser if summariser is not None else SummariseResults()
         )
+        self.skip_invalid_rows = skip_invalid_rows
 
     def run(self) -> dict[str, Any]:
         """Run the full pipeline; return the summarised result dict.
 
         Returns:
-            The finalised summary dict from
-            :meth:`SummariseResults.finalise`. Rows that raise during
-            parsing or solving are skipped silently.
+            A dict with the :meth:`SummariseResults.finalise` summary.
+            If ``skip_invalid_rows=True`` and any row was rejected, the
+            dict also carries a ``skipped_rows`` count.
+
+        Raises:
+            ValueError: If the builder rejects a row and
+                ``skip_invalid_rows`` is ``False``. The raised error
+                identifies the row by ``symbol`` and ``date``.
         """
+        skipped_rows = 0
         for row in self.loader:
             try:
                 inputs = self.builder(row)
-            except ValueError:
+            except ValueError as exc:
+                if not self.skip_invalid_rows:
+                    raise type(exc)(
+                        f"builder rejected row symbol={row.symbol!r} "
+                        f"date={row.date!r}: {exc}"
+                    ) from exc
+                skipped_rows += 1
                 continue
             weights = Minimize(
                 Variance(inputs.precision_matrix), inputs.cost_vector
@@ -691,7 +718,10 @@ class CrossSectionRunner:
                     weights=weights,
                 )
             )
-        return self.summariser.finalise()
+        summary = self.summariser.finalise()
+        if self.skip_invalid_rows:
+            summary["skipped_rows"] = skipped_rows
+        return summary
 
 
 __all__ = [

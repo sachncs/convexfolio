@@ -261,14 +261,27 @@ def test_cross_section_runner_end_to_end() -> None:
 
 
 def test_cross_section_runner_skips_malformed_rows() -> None:
-    """Runner silently skips rows that fail the builder's validation."""
+    """Runner with skip_invalid_rows=True skips and counts bad rows."""
+    raw_rows = list(CSVFileSource(FIXTURE_PATH))
+    bad_raw = {**raw_rows[0], "symbol": "BAD", "DOTM_IV": -1.0}
+    loader = LoadOptionsIV([bad_raw, *raw_rows])
+    runner = CrossSectionRunner(
+        loader, BuildPortfolioInputs(), skip_invalid_rows=True
+    )
+    summary = runner.run()
+    assert summary["n_groups"] == 4
+    assert summary["skipped_rows"] == 1
+    assert "BAD" not in {entry["symbol"] for entry in summary["top_symbols"]}
+
+
+def test_cross_section_runner_raises_on_malformed_row_by_default() -> None:
+    """Runner with skip_invalid_rows=False raises ValueError on bad row."""
     raw_rows = list(CSVFileSource(FIXTURE_PATH))
     bad_raw = {**raw_rows[0], "symbol": "BAD", "DOTM_IV": -1.0}
     loader = LoadOptionsIV([bad_raw, *raw_rows])
     runner = CrossSectionRunner(loader, BuildPortfolioInputs())
-    summary = runner.run()
-    assert summary["n_groups"] == 4
-    assert "BAD" not in {entry["symbol"] for entry in summary["top_symbols"]}
+    with pytest.raises(ValueError, match="builder rejected row"):
+        runner.run()
 
 
 def test_hf_dataset_source_construction_does_not_import_datasets() -> None:

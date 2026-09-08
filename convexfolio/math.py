@@ -8,6 +8,7 @@ order risk number.
 """
 
 import math
+from collections.abc import Callable
 
 import numpy as np
 from scipy.optimize import minimize, minimize_scalar
@@ -593,7 +594,7 @@ class CFVaR3Numerical:
         self,
         cost_vector: FloatArray,
         initial_weights: FloatArray,
-        objective_callable,
+        objective_callable: Callable[[FloatArray], float],
         extra_constraints: tuple[dict[str, str | SLSQPLambda], ...] = (),
     ) -> None:
         self.cost_vector = cost_vector
@@ -634,7 +635,7 @@ class CFVaR3Objective:
         alpha: float,
         expected_payoff: FloatArray,
         precision_matrix: FloatArray,
-        kappa3_callback,
+        kappa3_callback: Callable[[FloatArray], float],
     ) -> None:
         self.alpha = alpha
         self.expected_payoff = expected_payoff

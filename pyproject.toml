@@ -74,7 +74,6 @@ select = ["E", "F", "W", "I", "B", "UP", "C4", "SIM"]
 
 [tool.mypy]
 python_version = "3.12"
-strict = false
+strict = true
 warn_unused_ignores = true
-warn_return_any = false
 ignore_missing_imports = true

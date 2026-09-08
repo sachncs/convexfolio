@@ -204,9 +204,19 @@ def run_backtest(
                     extra_constraints=config.extra_constraints,
                 ).value
             except (ValueError, RuntimeError):
-                w = previous_weights if previous_weights.any() else (
-                    implied_inputs.cost_vector
-                    / float(implied_inputs.cost_vector @ implied_inputs.cost_vector)
+                w = (
+                    previous_weights
+                    if (
+                        previous_weights.any()
+                        and np.isclose(
+                            float(
+                                previous_weights @ implied_inputs.cost_vector
+                            ),
+                            1.0,
+                            atol=1e-6,
+                        )
+                    )
+                    else (1.0 / implied_inputs.cost_vector)
                 )
             delta = w - previous_weights
             cost = cost_per_unit * float(np.sum(np.abs(delta)))

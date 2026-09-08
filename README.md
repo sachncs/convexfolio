@@ -6,10 +6,7 @@
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License"></a>
     <a href="https://github.com/sachncs/convexfolio/releases/latest"><img src="https://img.shields.io/github/v/release/sachncs/convexfolio" alt="Latest release"></a>
     <a href="https://github.com/sachncs/convexfolio/actions"><img src="https://img.shields.io/github/actions/workflow/status/sachncs/convexfolio/ci.yml?branch=main" alt="CI"></a>
-    <a href="https://github.com/sachncs/convexfolio/pkgs/container/convexfolio"><img src="https://img.shields.io/badge/ghcr.io-convexfolio-blue" alt="Docker image"></a>
     <a href="https://github.com/sachncs/convexfolio/stargazers"><img src="https://img.shields.io/github/stars/sachncs/convexfolio" alt="Stars"></a>
-    <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/badge/code%20style-ruff-000000.svg" alt="Ruff"></a>
-    <a href="https://mypy-lang.org/"><img src="https://img.shields.io/badge/type%20checked--mypy--strict-blue" alt="mypy"></a>
   </p>
 </p>
 

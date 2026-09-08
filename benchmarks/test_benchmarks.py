@@ -22,9 +22,7 @@ from convexfolio.utils import Reproduce
 
 pytest_benchmark: object | None
 try:
-    import pytest_benchmark as _pytest_benchmark
-
-    pytest_benchmark = _pytest_benchmark
+    import pytest_benchmark
 except ImportError:
     pytest_benchmark = None
 

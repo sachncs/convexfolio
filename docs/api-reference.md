@@ -36,8 +36,8 @@ If you only ever use five things from this package, use these:
 | `Minimize(Variance(Q), v)` | Closed-form variance minimisation. The most common call. |
 | `CFVaR2Closed(Q, u, v, alpha)` | Closed-form CFVaR2 weight solver. Sharper risk measure. |
 | `CFVaR2nd(alpha, u, Q, x)` | Evaluate the CFVaR2 risk number at a given weight vector. |
-| `Experiment` / `load(path)` | The configuration object and how to load it. |
-| `reproduce(experiment)` | End-to-end pipeline that runs everything and returns a JSON-serialisable dict. |
+| `Experiment` / `Load(path)` | The configuration object and how to load it. |
+| `Reproduce(experiment)()` | End-to-end pipeline that runs everything and returns a JSON-serialisable dict. |
 
 The rest of this page covers every other public symbol.
 
@@ -79,9 +79,9 @@ risk = CFVaR2nd(alpha, u, Q, weights).value
 ### Recipe 4: full pipeline (run everything, get a dict)
 
 ```python
-from convexfolio import Experiment, reproduce
+from convexfolio import Experiment, Reproduce
 
-report = reproduce(Experiment())
+report = Reproduce(Experiment())()
 # report["outputs"]["variance_weights"] is a list of floats
 # report["outputs"]["cfvar2_weights"] is a list of floats
 # report["outputs"]["cfvar3_weights"] is a list of floats
@@ -90,9 +90,9 @@ report = reproduce(Experiment())
 ### Recipe 5: load a config file
 
 ```python
-from convexfolio import load
+from convexfolio.config import Load
 
-config = load("config.json")      # or config.yaml, or load(None) for defaults
+config = Load("config.json")()      # or config.yaml, or Load(None)() for defaults
 ```
 
 ---
@@ -101,11 +101,14 @@ config = load("config.json")      # or config.yaml, or load(None) for defaults
 
 | Module | Contents |
 |---|---|
-| `convexfolio.config` | `Experiment`, `Runtime`, `Optimization`, `load`, `validate` |
-| `convexfolio.math` | Risk, optimisation, and section-2.4 primitives |
-| `convexfolio.determinism` | `check` |
-| `convexfolio.pipeline` | `run_and_save` |
-| `convexfolio.utils` | `Logger`, `Report`, `reproduce` |
+| `convexfolio.config` | `Experiment`, `Runtime`, `Optimization`, `PortfolioInputs`, `Load`, `Validate` |
+| `convexfolio.math` | `Variance`, `Minimize`, `CFVaR2Closed`, `CFVaR2nd`, `CFVaR3rd`, `CFVaR3Numerical`, `CFVaR3Objective`, `OptimalEpsilon`, `QualityScore`, plus section-2.4 primitives (`Compute`, `Linear`, `Curvature`, `Bilinear`, `Cross`, `Greeks`, `PortfolioVariance`, `Linearize`, `Reconstruct`, `Cumulant`) |
+| `convexfolio.utils` | `Logger`, `Reproduce`, `Report` |
+| `convexfolio.data` | `LoadCSV`, `SyntheticPortfolio`, `Summary` |
+| `convexfolio.constraints` | `budget`, `bounds`, `inequality`, `merge`, plus long-only / sector / leverage builders |
+| `convexfolio.backtest` | `PriceHistory`, `BacktestConfig`, `BacktestResult`, `load_price_history_csv`, `run_backtest`, `scale_inputs_for_prices`, `max_drawdown` |
+| `convexfolio.cli` | `parser`, `ingest_command`, `plot_command`, `backtest_command`, `main` |
+| `convexfolio.hf_data` | SP500 options-IV ingestion (`LoadOptionsIV`, `Parse`, `HFDatasetSource`, `CSVFileSource`, `BuildPortfolioInputs`, `SummariseResults`, `CrossSectionRunner`, `OptionsRow`, `CrossSectionResult`, `BucketWeightStat`) and dataset constants |
 
 ---
 
@@ -121,6 +124,7 @@ the pipeline needs to run.
 class Experiment:
     runtime: Runtime = field(default_factory=Runtime)
     optimization: Optimization = field(default_factory=Optimization)
+    inputs: PortfolioInputs | None = None
 ```
 
 A *frozen* dataclass means it can't be changed after creation — so a
@@ -142,9 +146,10 @@ config you pass in can't quietly mutate mid-run.
 | `method` | `str` | `"all"` | Which solver to run. |
 | `enforce_nu_greater_than_six` | `bool` | `True` | Refuse to run if math parameters are weird. |
 
-### `load(path: str | None) -> Experiment`
+### `Load(path: str | None) -> Experiment`
 
 **What it does:** Reads a config file and returns an `Experiment`.
+Callable as `Load(path)()`.
 
 **Parameters:**
 
@@ -157,16 +162,16 @@ config you pass in can't quietly mutate mid-run.
 `yaml.YAMLError`, or `ValueError` (alpha out of range).
 
 ```python
-from convexfolio.config import load
-config = load("config.json")
-config = load(None)                  # use defaults
+from convexfolio.config import Load
+config = Load("config.json")()
+config = Load(None)()                  # use defaults
 ```
 
-### `validate(config: Experiment) -> None`
+### `Validate(config: Experiment) -> None`
 
 **What it does:** Enforces semantic constraints on a config. Raises
 `ValueError` if alpha is outside `(0, 0.5)`. Called automatically by
-`load`.
+`Load`.
 
 ---
 
@@ -444,35 +449,32 @@ variance at basis vectors and pairwise sums.
 
 ## Determinism & pipeline
 
-### `check(config: Experiment, repetitions: int = 2) -> Report`
+### `Report.from_reproduce(config: Experiment, repetitions: int = 2) -> Report`
 
-**What it does:** Runs `reproduce(config)` repeatedly and returns a
-`Report` describing whether the runs were byte-identical. Uses a
+**What it does:** Runs `Reproduce(config)()` repeatedly and returns
+a `Report` describing whether the runs were byte-identical. Uses a
 process pool when `repetitions ≥ OPTIONS_PARALLEL_THRESHOLD` (default
 4).
 
 ```python
-from convexfolio import check
-report = check(experiment, repetitions=3)
+from convexfolio.config import Experiment
+from convexfolio.utils import Report
+
+report = Report.from_reproduce(Experiment(), repetitions=3)
 assert report.deterministic is True
 ```
 
-### `run_and_save(experiment: Experiment, output_dir: str) -> Path`
-
-**What it does:** Runs a determinism check (3 repetitions) and
-persists the resulting `Report` to `output_dir/report.json`. Returns
-the written path.
-
-### `reproduce(experiment: Experiment) -> dict`
+### `Reproduce(experiment: Experiment) -> Callable[[], dict]`
 
 **What it does:** End-to-end pipeline — runs variance minimisation,
-CFVaR2, and CFVaR3 once on a synthetic 5-instrument portfolio and
-returns a JSON-serialisable dict. The `dict` has keys: `config`,
-`inputs`, `outputs`, `uncertainty`.
+CFVaR2, and CFVaR3 once on a portfolio (user-supplied
+`experiment.inputs` when present, else a synthetic 5-instrument
+portfolio) and returns a JSON-serialisable dict. The `dict` has keys:
+`config`, `inputs`, `outputs`, `uncertainty`.
 
 ```python
-from convexfolio import Experiment, reproduce
-report = reproduce(Experiment())
+from convexfolio import Experiment, Reproduce
+report = Reproduce(Experiment())()
 # report["outputs"]["variance_weights"] -> list[float]
 # report["outputs"]["cfvar2_weights"]   -> list[float]
 # report["outputs"]["cfvar3_weights"]   -> list[float]

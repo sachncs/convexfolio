@@ -20,17 +20,19 @@ disclosed for transparency.
 
 **Severity**: Low (Design Decision)
 
-**Description**: The `reproduce()` pipeline uses synthetic data
-(random matrices and vectors) so the package is self-contained.
-There's no built-in feed from a real-options data source.
+**Description**: The `Reproduce` pipeline uses synthetic data when
+called without `experiment.inputs`. The package ships with a
+deterministic seed-driven synthetic generator so the demo is
+self-contained; there's no built-in feed from a real-options data
+source.
 
-**Impact**: Results from `reproduce()` don't represent real market
-conditions.
+**Impact**: Results from the synthetic-data path of `Reproduce` don't
+represent real market conditions.
 
-**Resolution**: For real-world use, write your own pipeline that
-ingests your market data, then call the solver classes directly
-(`Minimize`, `CFVaR2Closed`, etc.). The classes don't care where the
-inputs come from.
+**Resolution**: For real-world use, supply your own
+`PortfolioInputs` (or write a small adapter that builds one from your
+market data) and call `Reproduce(experiment)()` with `experiment.inputs`
+populated. The solver classes don't care where the inputs come from.
 
 ### 2. Numerical optimisation tolerance
 
@@ -46,20 +48,22 @@ not a bug.
 **Resolution**: If you need tighter reproducibility, set your own
 solver options or run in a pinned container.
 
-### 3. CFVaR3 mock third cumulant
+### 3. CFVaR3 third cumulant
 
 **Severity**: Low (Demo Only)
 
-**Description**: The demo pipeline uses `kappa3_callback=lambda x: 0.0`
-— a placeholder third cumulant. Real applications would supply an
-actual function mapping weights to the third cumulance.
+**Description**: The demo pipeline uses
+`synthetic_kappa3_from_seed(seed, u, v, Q)` — a deterministic,
+weight-dependent third-cumulance callback driven by the experiment
+seed. Real applications would supply an actual third cumulance
+(e.g. via `Cumulant(...).value`) for their data.
 
-**Impact**: CFVaR3 results from the demo are illustrative. With
-`κ₃ = 0`, CFVaR3 reduces to CFVaR2 (verified by
-`tests/test_risk.py::test_cfvar3_reduces_to_cfvar2_when_kappa3_zero`).
+**Impact**: CFVaR3 results from the demo use the seed-derived
+synthetic kappa3; for real data, swap in a `Cumulant`-based callback
+to use the paper's full formula.
 
 **Resolution**: When using `CFVaR3Numerical`, pass a real
-`kappa3_callback` to `CFVaR3Objective`.
+`kappa3_callback` to `CFVaR3Objective` (e.g. `lambda w: Cumulant(...).value`).
 
 ---
 

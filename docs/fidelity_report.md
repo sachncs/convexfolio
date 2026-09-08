@@ -138,8 +138,9 @@ numerical fallback if roots fail.
 
 **Status**: ASSUMPTION
 
-The pipeline in `reproduce()` uses synthetic data for demonstration.
-Real-market replication requires data-specific integration. See
+The pipeline in `Reproduce` uses synthetic data when run without
+`experiment.inputs`. Real-market replication requires
+data-specific integration. See
 [Mismatch Report](mismatch_report.md).
 
 ### Numerical Precision

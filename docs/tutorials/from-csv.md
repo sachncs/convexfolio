@@ -82,10 +82,10 @@ That's a sanity check — five options loaded, payoffs between -0.02 and
 Open a Python prompt (`python3` in your terminal) and type:
 
 ```python
-from convexfolio.data import load_csv
+from convexfolio.data import LoadCSV
 from convexfolio import Variance, Minimize
 
-inputs = load_csv("portfolio.csv")
+inputs = LoadCSV("portfolio.csv")()
 print(f"Loaded {inputs.n_instruments} options")
 
 weights = Minimize(

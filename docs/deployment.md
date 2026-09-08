@@ -245,7 +245,7 @@ few are useful:
 
 | Variable | Effect |
 |---|---|
-| `OPTIONS_PARALLEL_THRESHOLD` | In `check()`, switch to a process pool when repetitions exceed this. Default `4`. |
+| `OPTIONS_PARALLEL_THRESHOLD` | In `Report.from_reproduce`, switch to a process pool when repetitions exceed this. Default `4`. |
 | `PYTHONPATH` | Where Python looks for modules. The systemd / cron examples already set this via the venv. |
 
 To set them in systemd, add `Environment=KEY=value` lines under

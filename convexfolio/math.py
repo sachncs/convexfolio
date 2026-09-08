@@ -222,6 +222,9 @@ class Variance:
 
     Args:
         precision_matrix: 2-D precision matrix ``Q``.
+
+    Attributes:
+        precision_matrix: See Args.
     """
 
     def __init__(self, precision_matrix: FloatArray) -> None:
@@ -388,6 +391,12 @@ class Minimize:
 
     Usage: ``Minimize(Variance(Q), c).value`` returns the weights
     minimising variance subject to ``c.T @ x == 1``.
+
+    Attributes:
+        variance: The :class:`Variance` objective whose precision
+            matrix is inverted.
+        cost_vector: The 1-D budget cost vector.
+        value: The optimal weights ``x*`` satisfying ``c.T @ x == 1``.
     """
 
     def __init__(self, variance: Variance, cost_vector: FloatArray) -> None:
@@ -407,6 +416,11 @@ class Loss:
         coeff_a: Coefficient of ``ε²``.
         coeff_b: Coefficient of ``ε``.
         coeff_c: Constant term.
+
+    Attributes:
+        coeff_a: See Args.
+        coeff_b: See Args.
+        coeff_c: See Args.
     """
 
     def __init__(self, coeff_a: float, coeff_b: float, coeff_c: float) -> None:
@@ -429,6 +443,14 @@ class Score:
         coeff_b: Coefficient of ``ε``.
         coeff_c: Constant term.
         z_score: Standard-normal quantile for confidence level ``alpha``.
+
+    Attributes:
+        coeff_a: See Args.
+        coeff_b: See Args.
+        coeff_c: See Args.
+        z_score: See Args.
+        loss: The :class:`Loss` quadratic built from ``coeff_a``,
+            ``coeff_b``, ``coeff_c``.
     """
 
     def __init__(
@@ -457,8 +479,21 @@ class OptimalEpsilon:
     Preferred path: closed-form roots from Appendix B. Deterministic
     fallback: bounded numerical minimisation if root conditions fail.
 
-    Preferred path: closed-form roots from Appendix B.
-    Deterministic fallback: bounded numerical minimisation if root conditions fail.
+    Args:
+        alpha: Confidence level in ``(0, 1)``.
+        expected_payoff: 1-D expected-payoff vector ``u``.
+        cost_vector: 1-D cost vector ``v``.
+        precision_matrix: 2-D precision matrix ``Q``.
+
+    Attributes:
+        alpha: See Args.
+        expected_payoff: See Args.
+        cost_vector: See Args.
+        precision_matrix: See Args.
+        score: :class:`Score` instance built from the closed-form
+            coefficients, used both for candidate filtering and as the
+            fallback minimiser.
+        value: The chosen optimal epsilon ``ε*``.
     """
 
     def __init__(
@@ -628,6 +663,12 @@ class CFVaR3Objective:
         expected_payoff: 1-D expected-payoff vector.
         precision_matrix: 2-D precision matrix.
         kappa3_callback: Callable mapping weights to the third cumulance.
+
+    Attributes:
+        alpha: See Args.
+        expected_payoff: See Args.
+        precision_matrix: See Args.
+        kappa3_callback: See Args.
     """
 
     def __init__(

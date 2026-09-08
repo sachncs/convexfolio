@@ -17,6 +17,7 @@ callers don't have to write the dict shape manually.
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
+from functools import partial
 
 import numpy as np
 
@@ -48,12 +49,12 @@ def fun_of(constraint: SLSQPConstraint) -> SLSQPLambda:
     return f
 
 
-def budget_residual(x: np.ndarray, cost_vector: FloatArray) -> float:
+def budget_residual(cost_vector: FloatArray, x: np.ndarray) -> float:
     """Evaluate the budget residual ``x . v - 1``.
 
     Args:
-        x: 1-D weight vector.
         cost_vector: 1-D cost vector ``v``.
+        x: 1-D weight vector.
 
     Returns:
         The signed residual; positive means over-budget, negative means
@@ -71,10 +72,8 @@ def budget(cost_vector: FloatArray) -> SLSQPConstraint:
     Returns:
         A SciPy SLSQP constraint dict enforcing the budget.
     """
-    return {
-        "type": "eq",
-        "fun": lambda x, v=cost_vector: budget_residual(x, v),
-    }
+    bound_fun: SLSQPLambda = partial(budget_residual, cost_vector)
+    return {"type": "eq", "fun": bound_fun}
 
 
 def bounds(min: float, max: float, n: int) -> Sequence[tuple[float, float]]:
@@ -92,14 +91,14 @@ def bounds(min: float, max: float, n: int) -> Sequence[tuple[float, float]]:
 
 
 def inequality_residual(
-    x: np.ndarray, coefficients: FloatArray, limit: float
+    coefficients: FloatArray, limit: float, x: np.ndarray
 ) -> float:
     """Evaluate the inequality residual ``limit - a . x``.
 
     Args:
-        x: 1-D weight vector.
         coefficients: 1-D coefficient vector ``a``.
         limit: Right-hand side.
+        x: 1-D weight vector.
 
     Returns:
         Slack to the constraint; positive means feasible, negative
@@ -118,10 +117,8 @@ def inequality(coefficients: FloatArray, limit: float) -> SLSQPConstraint:
     Returns:
         A SciPy SLSQP constraint dict.
     """
-    return {
-        "type": "ineq",
-        "fun": lambda x, a=coefficients, b=limit: inequality_residual(x, a, b),
-    }
+    ineq_fun: SLSQPLambda = partial(inequality_residual, coefficients, limit)
+    return {"type": "ineq", "fun": ineq_fun}
 
 
 def merge(*groups: ConstraintSpec | Sequence[SLSQPConstraint]) -> ConstraintSpec:

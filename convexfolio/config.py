@@ -37,7 +37,7 @@ class Runtime:
 
     seed: int = 7
     log_level: str = "INFO"
-    output_directory: str = "artifacts"
+    output_directory: str = "site/artifacts"
 
 
 @dataclass(frozen=True)

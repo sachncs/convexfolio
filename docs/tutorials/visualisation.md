@@ -62,7 +62,7 @@ Save your config (with the `inputs` section) to `config.json`:
   "runtime": {
     "seed": 7,
     "log_level": "INFO",
-    "output_directory": "artifacts"
+    "output_directory": "site/artifacts"
   },
   "optimization": {
     "alpha": 0.05,
@@ -89,12 +89,12 @@ Then:
 convexfolio --config config.json --command plot
 ```
 
-You'll see three PNGs in `artifacts/`:
+You'll see three PNGs in `site/artifacts/`:
 
 ```
-artifacts/weights.png
-artifacts/frontier.png
-artifacts/cfvar_alpha.png
+site/artifacts/weights.png
+site/artifacts/frontier.png
+site/artifacts/cfvar_alpha.png
 ```
 
 ---

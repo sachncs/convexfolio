@@ -141,11 +141,11 @@ Now save it to a file instead:
 
 ```bash
 convexfolio --command reproduce-report
-ls artifacts/
-cat artifacts/report.json
+ls site/artifacts/
+cat site/artifacts/report.json
 ```
 
-A new folder called `artifacts/` appeared. Inside is `report.json` —
+A new folder called `site/artifacts/` appeared. Inside is `report.json` —
 the same report, saved to disk.
 
 > 🎉 **You just ran your first portfolio optimisation.**
@@ -242,7 +242,7 @@ Create a file called `config.json` in your project folder:
   "runtime": {
     "seed": 7,
     "log_level": "INFO",
-    "output_directory": "artifacts"
+    "output_directory": "site/artifacts"
   },
   "optimization": {
     "alpha": 0.20,
@@ -259,7 +259,7 @@ Now run with the config:
 
 ```bash
 convexfolio --config config.json --command reproduce-report
-cat artifacts/report.json
+cat site/artifacts/report.json
 ```
 
 Look at the `cfvar2_weights` and `cfvar3_weights` arrays. Compare

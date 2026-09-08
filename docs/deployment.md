@@ -78,7 +78,7 @@ sudo tee /opt/convexfolio/config/config.json > /dev/null <<'EOF'
   "runtime": {
     "seed": 7,
     "log_level": "INFO",
-    "output_directory": "/var/lib/convexfolio/artifacts"
+    "output_directory": "/var/lib/convexfolio/site/artifacts"
   },
   "optimization": {
     "alpha": 0.05,
@@ -114,7 +114,7 @@ Check the log:
 
 ```bash
 tail -n 50 /var/log/convexfolio.log
-ls /var/lib/convexfolio/artifacts/
+ls /var/lib/convexfolio/site/artifacts/
 ```
 
 You should see `report.json` written after the first run.
@@ -206,9 +206,9 @@ docker build -t convexfolio:latest .
 ### Step 3 — run the container
 
 ```bash
-# One-off run, with reports saved to ./artifacts on the host
+# One-off run, with reports saved to ./site/artifacts on the host
 docker run --rm \
-    -v "$(pwd)/artifacts:/app/artifacts" \
+    -v "$(pwd)/site/artifacts:/app/site/artifacts" \
     convexfolio:latest
 ```
 
@@ -221,7 +221,7 @@ container orchestrator like Kubernetes. ([Glossary: Docker]({{ site.baseurl }}/d
 ## Output management
 
 Whichever option you pick, the package writes to
-`runtime.output_directory`. Default is `artifacts/`. Pick a path
+`runtime.output_directory`. Default is `site/artifacts/`. Pick a path
 that's:
 
 - On a persistent volume (not in `/tmp` or container scratch space).
@@ -232,8 +232,8 @@ A common pattern: timestamp the output directory:
 
 ```cron
 0 2 * * * cd /opt/convexfolio && \
-    mkdir -p "artifacts/$(date +\%Y-\%m-\%d)" && \
-    sed -i "s|output_directory.*|output_directory: \"artifacts/$(date +\%Y-\%m-\%d)\"|" config/config.json && \
+    mkdir -p "site/artifacts/$(date +\%Y-\%m-\%d)" && \
+    sed -i "s|output_directory.*|output_directory: \"site/artifacts/$(date +\%Y-\%m-\%d)\"|" config/config.json && \
     .venv/bin/convexfolio --config config/config.json --command reproduce-report
 ```
 
@@ -300,16 +300,16 @@ Check `journalctl -u convexfolio -xe` for the error. Common causes:
 - Wrong working directory in the unit file.
 - Permissions on the config or output directory.
 
-### Docker container can't write artifacts
+### Docker container can't write site/artifacts
 
-The `-v "$(pwd)/artifacts:/app/artifacts"` mount makes the host
+The `-v "$(pwd)/site/artifacts:/app/site/artifacts"` mount makes the host
 folder available inside the container. If the host folder doesn't
 exist, Docker creates it as root, and the container (running as a
 non-root user) can't write to it. Fix:
 
 ```bash
-mkdir -p ./artifacts
-chmod 777 ./artifacts    # or chown to match the container's user
+mkdir -p ./site/artifacts
+chmod 777 ./site/artifacts    # or chown to match the container's user
 ```
 
 ---

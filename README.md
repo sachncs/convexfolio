@@ -164,8 +164,8 @@ You can also generate a JSON file instead of printing to the screen:
 
 ```bash
 convexfolio --command reproduce-report
-ls artifacts/
-cat artifacts/report.json
+ls site/artifacts/
+cat site/artifacts/report.json
 ```
 
 ---
@@ -219,7 +219,7 @@ project folder:
   "runtime": {
     "seed": 7,
     "log_level": "INFO",
-    "output_directory": "artifacts"
+    "output_directory": "site/artifacts"
   },
   "optimization": {
     "alpha": 0.05,

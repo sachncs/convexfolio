@@ -61,5 +61,5 @@ _site/
 MANIFEST
 
 # Artifacts (generated outputs)
-artifacts/*.json
-!artifacts/.gitkeep
+site/artifacts/*.json
+!site/artifacts/.gitkeep

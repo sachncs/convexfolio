@@ -140,7 +140,7 @@ config you pass in can't quietly mutate mid-run.
 |---|---|---|---|
 | `seed` | `int` | `7` | Starting number for the random number generator. |
 | `log_level` | `str` | `"INFO"` | How chatty to be: `DEBUG`, `INFO`, `WARNING`, `ERROR`. |
-| `output_directory` | `str` | `"artifacts"` | Folder where reports are saved. |
+| `output_directory` | `str` | `"site/artifacts"` | Folder where reports are saved. |
 
 ### `Optimization` (frozen dataclass)
 
@@ -523,7 +523,7 @@ Run the pipeline and save a JSON report to disk.
 convexfolio --command reproduce-report [--config CONFIG]
 ```
 
-Default output: `artifacts/report.json`.
+Default output: `site/artifacts/report.json`.
 
 #### `print-report`
 

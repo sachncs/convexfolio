@@ -23,11 +23,11 @@ report. Everything else is plumbing.
             ┌──────────────────────────┐
             │  config.py               │  ← reads config.json / .yaml
             │  + utils.Logger          │  ← prints progress
-            └─────────────�────────────┘
+            └─────────────┬────────────┘
                           │ loads
                           ▼
             ┌──────────────────────────┐
-            │  utils.reproduce()       │  ← the pipeline
+            │  utils.Reproduce         │  ← the pipeline
             │   ├─ Variance / CFVaR2   │     (the math)
             │   ├─ Minimize / SLSQP    │
             │   └─ Risk evaluators     │
@@ -52,10 +52,12 @@ Think of the package like a small restaurant.
 |---|---|---|
 | `cli.py` | Takes commands from the terminal. | The waiter taking your order. |
 | `config.py` | Reads your settings file. | The host checking your reservation. |
-| `utils.py` | Glue code: logger, report object, the main `reproduce()` pipeline. | The kitchen manager coordinating everything. |
+| `utils.py` | Glue code: `Logger`, `Report`, the `Reproduce` pipeline. | The kitchen manager coordinating everything. |
 | `math.py` | All the numerical classes — risk, optimisation, section 2.4 primitives. | The kitchen itself. |
-| `pipeline.py` | Runs the determinism check and saves the report. | The cashier writing the receipt. |
-| `determinism.py` | Runs the pipeline multiple times to verify it produces identical results. | The quality-control inspector. |
+| `backtest.py` | Multi-period rebalancing simulator. | The dining-room host tracking turnover across courses. |
+| `constraints.py` | SLSQP constraint builders (budget, long-only, sector caps). | The reservation ledger. |
+| `data.py` | CSV loader, synthetic portfolio, shape summary. | The pantry supplier. |
+| `hf_data.py` | Hugging Face SP500 options-IV ingestion pipeline. | The off-site delivery driver. |
 | `types.py` | Type aliases (`FloatArray`). | A shared dictionary of cooking terms. |
 | `__init__.py` | The list of things the package exports. | The menu. |
 
@@ -125,14 +127,15 @@ created. It has two parts:
 - `runtime` — execution settings (seed, log level, output directory).
 - `optimization` — math settings (alpha, method, enforce_nu flag).
 
-`load(path)` reads a JSON or YAML file and produces an `Experiment`.
-`validate(config)` enforces constraints (e.g., `0 < alpha < 0.5`).
+`Load(path)` reads a JSON or YAML file and produces an `Experiment`.
+`Validate(config)` enforces constraints (e.g., `0 < alpha < 0.5`).
 
 ```python
-from convexfolio import Experiment, load, validate
+from convexfolio import Experiment
+from convexfolio.config import Load, Validate
 
-config = load("config.json")      # or load(None) for defaults
-validate(config)                  # raises ValueError if alpha is bad
+config = Load("config.json")()    # or Load(None)() for defaults
+Validate(config)                  # raises ValueError if alpha is bad
 ```
 
 ---

@@ -2,7 +2,7 @@ title: "convexfolio"
 tagline: "Optimal Option Portfolios for Skew-Elliptical t Returns"
 description: "Convexfolio is an open-source Python library that finds the lowest-risk way to split money across a set of options, under skew-elliptical t returns."
 baseurl: "/convexfolio"
-logo: /site/assets/logo.svg
+logo: /assets/logo.svg
 show_downloads: false
 permalink: /:title/
 
@@ -11,6 +11,7 @@ permalink: /:title/
 # includes, layouts and assets are configured to their new locations.
 includes_dir: site/includes
 layouts_dir: site/layouts
+assets_dir: site/assets
 
 # Apply the branded `page` layout to every Markdown page by default.
 # Pages that opt into their own layout (e.g. the homepage) keep theirs.

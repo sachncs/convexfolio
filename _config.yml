@@ -2,12 +2,15 @@ title: "convexfolio"
 tagline: "Optimal Option Portfolios for Skew-Elliptical t Returns"
 description: "Convexfolio is an open-source Python library that finds the lowest-risk way to split money across a set of options, under skew-elliptical t returns."
 baseurl: "/convexfolio"
-logo: /assets/logo.svg
+logo: /site/assets/logo.svg
 show_downloads: false
 permalink: /:title/
 
-# Custom layouts replace the third-party `minima` theme so every page
-# renders with the same brand chrome and a lean, dependency-free stylesheet.
+# Site presentation lives in the `site/` folder. GitHub Pages loads this file
+# only from the repository root, so _config.yml must stay here while the
+# includes, layouts and assets are configured to their new locations.
+includes_dir: site/includes
+layouts_dir: site/layouts
 
 # Apply the branded `page` layout to every Markdown page by default.
 # Pages that opt into their own layout (e.g. the homepage) keep theirs.
@@ -21,17 +24,20 @@ plugins:
   - jekyll-feed
 
 # Keep the published site lean: never serve the Python source tree, tests,
-# build outputs, or CI files as static content.
+# build outputs, or CI files as static content. The site/includes and
+# site/layouts sources are used at build time but not published, and the
+# runtime report output (site/artifacts) is generated, not served.
 exclude:
   - convexfolio
   - convexfolio.egg-info
   - tests
   - benchmarks
   - scripts
-  - artifact*
-  - yaml_artifacts
   - dist
   - src
+  - site/includes
+  - site/layouts
+  - site/artifacts
   - .github
   - _approval_tests_temp
   - .approval_tests_temp

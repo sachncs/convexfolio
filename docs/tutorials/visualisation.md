@@ -1,9 +1,13 @@
+---
+layout: page
+title: "Tutorial: Visualising a Portfolio"
+---
 # Tutorial: Visualising a Portfolio
 
 This tutorial shows you how to turn Convexfolio's numerical output into
 charts you can drop into a slide deck or share with a stakeholder.
 
-> 📖 **New here?** See the [Glossary](../glossary.md).
+> 📖 **New here?** See the [Glossary]({{ site.baseurl }}/docs/glossary/).
 
 **Time required**: ~5 minutes.
 
@@ -161,7 +165,7 @@ cfvar_sensitivity(precision_matrix, cost_vector, expected_payoff, output_path="c
 
 ## Where to look next
 
-- **[API Reference](../api-reference.md)** — All plot functions.
-- **[from-CSV tutorial](from-csv.md)** — Loading inputs.
-- **[Constraints tutorial](constraints.md)** — Adding real-world
+- **[API Reference]({{ site.baseurl }}/docs/api-reference/)** — All plot functions.
+- **[from-CSV tutorial]({{ site.baseurl }}/docs/tutorials/from-csv/)** — Loading inputs.
+- **[Constraints tutorial]({{ site.baseurl }}/docs/tutorials/constraints/)** — Adding real-world
   constraints before plotting.

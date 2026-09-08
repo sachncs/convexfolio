@@ -1,3 +1,7 @@
+---
+layout: page
+title: "Security Policy"
+---
 # Security Policy
 
 ## Supported Versions

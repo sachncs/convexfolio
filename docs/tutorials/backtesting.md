@@ -1,10 +1,14 @@
+---
+layout: page
+title: "Tutorial: Multi-Period Backtesting"
+---
 # Tutorial: Multi-Period Backtesting
 
 This tutorial shows you how to test a portfolio strategy over a
 historical price series, with periodic rebalancing and transaction
 costs.
 
-> � **New here?** See the [Glossary](../glossary.md).
+> � **New here?** See the [Glossary]({{ site.baseurl }}/docs/glossary/).
 
 **Time required**: ~10 minutes.
 
@@ -162,7 +166,7 @@ The result has time-series arrays (`portfolio_value`, `weights`,
 
 ## Where to look next
 
-- **[Constraints tutorial](constraints.md)** — Add long-only to
+- **[Constraints tutorial]({{ site.baseurl }}/docs/tutorials/constraints/)** — Add long-only to
   stabilise backtest results.
-- **[API Reference](../api-reference.md)** — Full backtest API.
-- **[from-CSV tutorial](from-csv.md)** — Loading portfolio inputs.
+- **[API Reference]({{ site.baseurl }}/docs/api-reference/)** — Full backtest API.
+- **[from-CSV tutorial]({{ site.baseurl }}/docs/tutorials/from-csv/)** — Loading portfolio inputs.

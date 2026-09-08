@@ -1,3 +1,7 @@
+---
+layout: page
+title: "Contributing to Convexfolio"
+---
 # Contributing to Convexfolio
 
 Thank you for your interest in contributing! This document provides guidelines and instructions for contributing to this project.

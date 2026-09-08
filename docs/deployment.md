@@ -1,10 +1,14 @@
+---
+layout: page
+title: "Deployment"
+---
 # Deployment
 
 How to run Convexfolio on a server so it works automatically — once a
 day, on a schedule, or behind a Docker container.
 
 > 📖 **New to servers?** See the
-> [Glossary](glossary.md) for terms like `systemd`, `cron`, `Docker`.
+> [Glossary]({{ site.baseurl }}/docs/glossary/) for terms like `systemd`, `cron`, `Docker`.
 
 ---
 
@@ -120,7 +124,7 @@ You should see `report.json` written after the first run.
 ## Option 2 — systemd (for one-off or boot-time runs)
 
 `systemd` is Linux's built-in service manager. It's how every Linux
-daemon runs. ([Glossary: systemd](glossary.md))
+daemon runs. ([Glossary: systemd]({{ site.baseurl }}/docs/glossary/))
 
 ### Step 1 — install the package
 
@@ -150,7 +154,7 @@ StandardError=journal
 WantedBy=multi-user.target
 ```
 
-Format: standard systemd unit file. ([Glossary: systemd](glossary.md))
+Format: standard systemd unit file. ([Glossary: systemd]({{ site.baseurl }}/docs/glossary/))
 
 ### Step 3 — enable and run
 
@@ -172,7 +176,7 @@ sudo journalctl -u convexfolio -n 50
 ## Option 3 — Docker (for portability)
 
 Docker packages Convexfolio + its dependencies into one image that
-runs the same on every machine. ([Glossary: Docker](glossary.md))
+runs the same on every machine. ([Glossary: Docker]({{ site.baseurl }}/docs/glossary/))
 
 ### Step 1 — write the Dockerfile
 
@@ -210,7 +214,7 @@ docker run --rm \
 
 For a scheduled Docker run, you'd typically combine this with cron on
 the host (yes, you can have cron run `docker run ...`) or use a
-container orchestrator like Kubernetes. ([Glossary: Docker](glossary.md))
+container orchestrator like Kubernetes. ([Glossary: Docker]({{ site.baseurl }}/docs/glossary/))
 
 ---
 
@@ -312,8 +316,8 @@ chmod 777 ./artifacts    # or chown to match the container's user
 
 ## Where to look next
 
-- **[Glossary](glossary.md)** — Every term used here.
-- **[Release process](release.md)** — How to publish a new version
+- **[Glossary]({{ site.baseurl }}/docs/glossary/)** — Every term used here.
+- **[Release process]({{ site.baseurl }}/docs/release/)** — How to publish a new version
   after fixing things in production.
-- **[Architecture](architecture.md)** — How the package is put
+- **[Architecture]({{ site.baseurl }}/docs/architecture/)** — How the package is put
   together.

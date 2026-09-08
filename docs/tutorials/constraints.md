@@ -1,9 +1,13 @@
+---
+layout: page
+title: "Tutorial: Constrained Portfolio Optimisation"
+---
 # Tutorial: Constrained Portfolio Optimisation
 
 This tutorial shows you how to add real-world constraints to a
 portfolio — long-only, position limits, sector caps, leverage cap.
 
-> 📖 **New here?** See the [Glossary](../glossary.md).
+> 📖 **New here?** See the [Glossary]({{ site.baseurl }}/docs/glossary/).
 
 **Time required**: ~10 minutes.
 
@@ -46,7 +50,7 @@ print(f"Loaded {inputs.n_instruments} options")
 ```
 
 If you don't have a `portfolio.csv` yet, see the
-[from-CSV tutorial](from-csv.md).
+[from-CSV tutorial]({{ site.baseurl }}/docs/tutorials/from-csv/).
 
 ---
 
@@ -178,8 +182,8 @@ what a real fund could actually implement.
 
 ## Where to look next
 
-- **[API Reference](../api-reference.md)** — Full constraint API.
-- **[Glossary](../glossary.md)** — Plain-English definitions.
-- **[from-CSV tutorial](from-csv.md)** — Loading portfolio inputs.
-- **[Visualisation tutorial](visualisation.md)** — Plotting the
+- **[API Reference]({{ site.baseurl }}/docs/api-reference/)** — Full constraint API.
+- **[Glossary]({{ site.baseurl }}/docs/glossary/)** — Plain-English definitions.
+- **[from-CSV tutorial]({{ site.baseurl }}/docs/tutorials/from-csv/)** — Loading portfolio inputs.
+- **[Visualisation tutorial]({{ site.baseurl }}/docs/tutorials/visualisation/)** — Plotting the
   results.

@@ -1,3 +1,7 @@
+---
+layout: page
+title: "Architecture"
+---
 # Architecture
 
 A look under the hood of Convexfolio — how the pieces fit together.
@@ -5,7 +9,7 @@ You don't need to read this to use the package. Read it if you want
 to modify it, contribute to it, or just satisfy your curiosity.
 
 > 📖 **New to the codebase?** See the
-> [Glossary](glossary.md) for terms used here.
+> [Glossary]({{ site.baseurl }}/docs/glossary/) for terms used here.
 
 ---
 
@@ -121,7 +125,7 @@ These build the precision matrix `Q` from raw option data.
 
 ## The configuration
 
-`Experiment` is a [frozen dataclass](glossary.md) — read-only once
+`Experiment` is a [frozen dataclass]({{ site.baseurl }}/docs/glossary/) — read-only once
 created. It has two parts:
 
 - `runtime` — execution settings (seed, log level, output directory).
@@ -179,7 +183,7 @@ Each accepts a `--config path/to/config.json` flag.
 ## Design principles
 
 1. **Faithful to the paper.** The math is implemented exactly as the
-   paper specifies. See [Fidelity Report](fidelity_report.md).
+   paper specifies. See [Fidelity Report]({{ site.baseurl }}/docs/fidelity_report/).
 2. **Class-based composition.** Small reusable pieces compose into
    the answer. No monolithic "solve everything" function.
 3. **Deterministic and auditable.** Same inputs → same outputs. You
@@ -224,11 +228,11 @@ hierarchy or `isinstance` check. The `kappa3_callback` argument on
 
 ## Where to look next
 
-- **[API Reference](api-reference.md)** — Every public symbol, with
+- **[API Reference]({{ site.baseurl }}/docs/api-reference/)** — Every public symbol, with
   examples.
-- **[Glossary](glossary.md)** — Plain-English definitions of every
+- **[Glossary]({{ site.baseurl }}/docs/glossary/)** — Plain-English definitions of every
   term used here.
-- **[Fidelity Report](fidelity_report.md)** — Does the code match the
+- **[Fidelity Report]({{ site.baseurl }}/docs/fidelity_report/)** — Does the code match the
   paper?
-- **[Mismatch Report](mismatch_report.md)** — Known differences
+- **[Mismatch Report]({{ site.baseurl }}/docs/mismatch_report/)** — Known differences
   between the code and the paper.

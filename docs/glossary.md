@@ -1,3 +1,7 @@
+---
+layout: page
+title: "Glossary"
+---
 # Glossary
 
 A plain-English dictionary of every term used in this documentation.

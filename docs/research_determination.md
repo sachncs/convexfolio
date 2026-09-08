@@ -1,6 +1,10 @@
+---
+layout: page
+title: "Research Determination Notes"
+---
 # Research Determination Notes
 
-> 📖 **New here?** See the [Glossary](glossary.md) for terms like
+> 📖 **New here?** See the [Glossary]({{ site.baseurl }}/docs/glossary/) for terms like
 > *variance*, *cumulant*, *alpha*.
 
 ## What is "determination status"?
@@ -81,7 +85,7 @@ contributes to the portfolio.
 
 **Status**: DETERMINED
 
-The transpose of `H`. ([Glossary: transpose](glossary.md))
+The transpose of `H`. ([Glossary: transpose]({{ site.baseurl }}/docs/glossary/))
 
 | | |
 |---|---|
@@ -212,10 +216,10 @@ Things we haven't figured out yet. Not blockers, but worth noting.
 
 ## Where to look next
 
-- **[Glossary](glossary.md)** — Plain-English definitions.
-- **[Fidelity Report](fidelity_report.md)** — Algorithm-by-algorithm
+- **[Glossary]({{ site.baseurl }}/docs/glossary/)** — Plain-English definitions.
+- **[Fidelity Report]({{ site.baseurl }}/docs/fidelity_report/)** — Algorithm-by-algorithm
   mapping from paper to code.
-- **[Mismatch Report](mismatch_report.md)** — Known places where the
+- **[Mismatch Report]({{ site.baseurl }}/docs/mismatch_report/)** — Known places where the
   code and paper diverge.
-- **[Architecture](architecture.md)** — How the package fits
+- **[Architecture]({{ site.baseurl }}/docs/architecture/)** — How the package fits
   together.

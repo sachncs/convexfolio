@@ -1,6 +1,10 @@
+---
+layout: page
+title: "Mismatch Report"
+---
 # Mismatch Report
 
-> 📖 **New here?** See the [Glossary](glossary.md) for terms like
+> 📖 **New here?** See the [Glossary]({{ site.baseurl }}/docs/glossary/) for terms like
 > *cumulant*, *tolerance*.
 
 ## What is a "mismatch"?
@@ -121,9 +125,9 @@ opening a public issue.
 
 ## Where to look next
 
-- **[Glossary](glossary.md)** — Plain-English definitions.
-- **[Fidelity Report](fidelity_report.md)** — Algorithm-by-algorithm
+- **[Glossary]({{ site.baseurl }}/docs/glossary/)** — Plain-English definitions.
+- **[Fidelity Report]({{ site.baseurl }}/docs/fidelity_report/)** — Algorithm-by-algorithm
   mapping from paper to code.
-- **[Research Determination Notes](research_determination.md)** —
+- **[Research Determination Notes]({{ site.baseurl }}/docs/research_determination/)** —
   Which quantities are well-defined vs assumed.
-- **[Architecture](architecture.md)** — How the package fits together.
+- **[Architecture]({{ site.baseurl }}/docs/architecture/)** — How the package fits together.

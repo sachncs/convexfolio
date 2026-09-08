@@ -1,10 +1,14 @@
+---
+layout: page
+title: "Tutorial: Load a Portfolio from CSV"
+---
 # Tutorial: Load a Portfolio from CSV
 
 This tutorial shows you how to take a CSV file of option data, feed it
 into Convexfolio, and get a recommended portfolio back.
 
 > 📖 **New to CSV / numpy / Python?** See the
-> [Glossary](../glossary.md).
+> [Glossary]({{ site.baseurl }}/docs/glossary/).
 
 **Time required**: ~5 minutes.
 
@@ -150,8 +154,8 @@ on more variance in exchange for higher expected returns.
 
 ## Where to look next
 
-- **[Glossary](../glossary.md)** — Plain-English definitions.
-- **[API Reference](../api-reference.md)** — All data and math
+- **[Glossary]({{ site.baseurl }}/docs/glossary/)** — Plain-English definitions.
+- **[API Reference]({{ site.baseurl }}/docs/api-reference/)** — All data and math
   classes.
-- **[Constraints tutorial](constraints.md)** — Add long-only,
+- **[Constraints tutorial]({{ site.baseurl }}/docs/tutorials/constraints/)** — Add long-only,
   position limits, and sector caps to your portfolio.

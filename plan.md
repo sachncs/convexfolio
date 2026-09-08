@@ -1,3 +1,7 @@
+---
+layout: page
+title: "Production-Readiness Plan"
+---
 # Production-Readiness Plan — `convexfolio`
 
 **Repository:** `/Users/sachin/repo/convexfolio`

@@ -1,9 +1,13 @@
+---
+layout: page
+title: "Release Process"
+---
 # Release Process
 
 How a new version of Convexfolio gets published.
 
 > 📖 **New to releasing software?** See the
-> [Glossary](glossary.md) for terms like *commit*, *tag*, *SemVer*.
+> [Glossary]({{ site.baseurl }}/docs/glossary/) for terms like *commit*, *tag*, *SemVer*.
 
 ---
 
@@ -51,7 +55,7 @@ Convexfolio uses SemVer.
 ## What is a git tag?
 
 A "tag" is a named pointer to a specific commit. Tags are how
-software marks releases in version control. ([Glossary: tag](glossary.md))
+software marks releases in version control. ([Glossary: tag]({{ site.baseurl }}/docs/glossary/))
 
 ```bash
 git tag v0.2.1                  # tag the current commit as v0.2.1
@@ -212,9 +216,9 @@ For critical bug fixes:
 
 ## Where to look next
 
-- **[Glossary](glossary.md)** — Every term used here.
+- **[Glossary]({{ site.baseurl }}/docs/glossary/)** — Every term used here.
 - **[CHANGELOG.md](../CHANGELOG.md)** — The changelog itself.
-- **[Architecture](architecture.md)** — How the package fits
+- **[Architecture]({{ site.baseurl }}/docs/architecture/)** — How the package fits
   together.
-- **[Deployment](deployment.md)** — How to run the released
+- **[Deployment]({{ site.baseurl }}/docs/deployment/)** — How to run the released
   version in production.

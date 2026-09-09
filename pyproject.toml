@@ -1,0 +1,77 @@
+[build-system]
+requires = ["setuptools==84.0.0", "wheel==0.48.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "convexfolio"
+version = "1.0.0"
+description = "Convexfolio — option portfolio optimizer (paper-faithful baseline + extensible package API). Not investment advice."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+authors = [
+  {name = "Sachin <sachncs@gmail.com>"}
+]
+keywords = [
+  "portfolio-optimization",
+  "option-pricing",
+  "risk-management",
+  "cvar",
+  "quantitative-finance",
+  "optimization",
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Financial and Insurance Industry",
+  "Intended Audience :: Science/Research",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Office/Business :: Financial",
+  "Topic :: Scientific/Engineering :: Mathematics",
+  "Typing :: Typed",
+]
+dependencies = [
+  "numpy==2.5.2",
+  "scipy==1.18.1",
+  "pyyaml==6.0.3",
+  "datasets==5.0.1",
+  "matplotlib==3.11.1",
+  "pytest-benchmark==5.3.0",
+  "py-cpuinfo==9.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/sachncs/convexfolio"
+Repository = "https://github.com/sachncs/convexfolio"
+Issues = "https://github.com/sachncs/convexfolio/issues"
+Changelog = "https://github.com/sachncs/convexfolio/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+dev = [
+  "pytest==9.1.1",
+  "mypy==2.3.1",
+  "ruff==0.16.5",
+]
+
+[project.scripts]
+convexfolio = "convexfolio.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["convexfolio*"]
+exclude = ["tests*", "scripts*", "build*", "dist*", "*.egg-info*"]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "C4", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unused_ignores = true
+ignore_missing_imports = true

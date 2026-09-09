@@ -1,0 +1,65 @@
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Logs
+*.log
+logs/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Cache
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.python-version
+
+# Testing
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# Sphinx
+docs/_build/
+
+# Jekyll / GitHub Pages build output
+_site/
+
+# Distribution
+MANIFEST
+
+# Artifacts (generated outputs)
+site/artifacts/*.json
+!site/artifacts/.gitkeep

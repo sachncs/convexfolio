@@ -1,0 +1,4 @@
+# CODEOWNERS for sachncs/convexfolio
+# All paths default to the project owner. Override per-path below if needed.
+
+* sachncs@gmail.com

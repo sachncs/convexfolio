@@ -9,9 +9,11 @@ permalink: /:title/
 # Site presentation lives in the `site/` folder. GitHub Pages loads this file
 # only from the repository root, so _config.yml must stay here while the
 # includes, layouts and assets are configured to their new locations.
+# Assets live at the repo root (assets/) so Jekyll publishes them verbatim
+# at /assets/ on the live site — `assets_dir` is not set because Jekyll 3.10
+# on github-pages ignores it for non-underscored source paths.
 includes_dir: site/includes
 layouts_dir: site/layouts
-assets_dir: site/assets
 
 # Apply the branded `page` layout to every Markdown page by default.
 # Pages that opt into their own layout (e.g. the homepage) keep theirs.

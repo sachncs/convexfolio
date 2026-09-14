@@ -19,6 +19,12 @@ defaults:
 # Site source is this directory; _includes, _layouts, assets, docs all live
 # here. _config.yml itself must live at the Jekyll source root, which on
 # GitHub Pages is the directory we hand to the build action.
+#
+# The github-pages gem auto-applies the `minima` theme unless overridden.
+# We bring our own layouts and styles, so we explicitly opt out — leaving
+# the theme blank disables the default.
+theme: null
+
 plugins:
   - jekyll-feed
   - jekyll-seo-tag

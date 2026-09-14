@@ -1,0 +1,23 @@
+---
+layout: default
+---
+<article class="doc">
+  <div class="doc-masthead">
+    <div class="doc-eyebrow">
+      <a href="{{ site.baseurl }}/docs/">Documentation</a>
+      {% if page.url contains '/docs/tutorials/' %}
+        <span class="doc-eyebrow-sep" aria-hidden="true">/</span>
+        <a href="{{ site.baseurl }}/docs/tutorials/">Tutorials</a>
+      {% endif %}
+    </div>
+    <div class="doc-title-row">
+      <h1 class="doc-h1">{{ page.title | default: site.title | escape }}</h1>
+      {% if page.description %}
+        <p class="doc-lede">{{ page.description | escape }}</p>
+      {% endif %}
+    </div>
+  </div>
+  <div class="doc-body">
+    {{ content }}
+  </div>
+</article>

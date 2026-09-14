@@ -1,0 +1,39 @@
+title: "Convexfolio"
+tagline: "Optimal Option Portfolios for Skew-Elliptical t Returns"
+description: "Convexfolio is an open-source Python library that finds the lowest-risk way to split money across a set of options — solved deterministically, from the terminal or Python."
+baseurl: "/convexfolio"
+url: "https://sachncs.github.io"
+logo: "/assets/logo.svg"
+show_downloads: false
+permalink: pretty
+timezone: "UTC"
+
+# Default layout for all pages. Individual pages may override with their
+# own `layout` in front matter (e.g. the homepage uses `home`).
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: page
+
+# Site source is this directory; _includes, _layouts, assets, docs all live
+# here. _config.yml itself must live at the Jekyll source root, which on
+# GitHub Pages is the directory we hand to the build action.
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# Keep the published site lean: never serve the Python source tree, tests,
+# build outputs, or CI files as static content. Layouts/includes are
+# underscore-prefixed and excluded automatically; we also exclude the
+# package's runtime report directory.
+exclude:
+  - artifacts
+  - ".gitkeep"
+  - "node_modules"
+  - "package.json"
+  - "package-lock.json"
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - "*.log"

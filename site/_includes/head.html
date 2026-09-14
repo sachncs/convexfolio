@@ -1,0 +1,24 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#05070D" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F5F7FB" media="(prefers-color-scheme: light)">
+<title>{% capture t %}{{ page.title | default: '' | escape }}{% endcapture %}{% if t and t != site.title %}{{ t }} · {{ site.title | escape }}{% else %}{{ site.title | escape }} · {{ site.tagline | default: 'Open-source portfolio optimisation' | escape }}{% endif %}</title>
+<meta name="description" content="{{ page.description | default: site.description | strip_html | normalize_whitespace | truncate: 160 | escape }}">
+<link rel="canonical" href="{{ site.url }}{{ site.baseurl }}{{ page.url | replace:'index.html','' }}">
+<link rel="icon" type="image/svg+xml" href="{{ site.baseurl }}/assets/favicon.svg">
+<link rel="apple-touch-icon" href="{{ site.baseurl }}/assets/favicon.svg">
+<meta name="color-scheme" content="light dark">
+
+<meta property="og:type" content="{% if page.layout == 'home' %}website{% else %}article{% endif %}">
+<meta property="og:site_name" content="{{ site.title | escape }}">
+<meta property="og:title" content="{% capture t %}{{ page.title | default: '' | escape }}{% endcapture %}{% if t and t != site.title %}{{ t }} · {{ site.title | escape }}{% else %}{{ site.title | escape }} — {{ site.tagline | default: site.description | strip_html | truncate: 80 | escape }}{% endif %}">
+<meta property="og:description" content="{{ page.description | default: site.description | strip_html | normalize_whitespace | truncate: 200 | escape }}">
+<meta property="og:url" content="{{ site.url }}{{ site.baseurl }}{{ page.url | replace:'index.html','' }}">
+<meta property="og:image" content="{{ site.url }}{{ site.baseurl }}/assets/logo.svg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{% capture t %}{{ page.title | default: '' | escape }}{% endcapture %}{% if t and t != site.title %}{{ t }} · {{ site.title | escape }}{% else %}{{ site.title | escape }} — {{ site.tagline | default: site.description | strip_html | truncate: 80 | escape }}{% endif %}">
+<meta name="twitter:description" content="{{ page.description | default: site.description | strip_html | normalize_whitespace | truncate: 200 | escape }}">
+<meta name="twitter:image" content="{{ site.url }}{{ site.baseurl }}/assets/logo.svg">
+
+<link rel="preload" href="{{ site.baseurl }}/assets/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{ site.baseurl }}/assets/css/site.css">

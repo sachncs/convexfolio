@@ -1,0 +1,47 @@
+<header class="nav" id="topnav" role="banner">
+  <div class="nav-inner">
+    <a class="nav-brand" href="{{ site.baseurl }}/" aria-label="{{ site.title }} home">
+      <span class="nav-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="28" height="28" focusable="false">
+          <defs>
+            <linearGradient id="navmarkg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#0B1526"/><stop offset="1" stop-color="#17436E"/>
+            </linearGradient>
+          </defs>
+          <rect width="32" height="32" rx="8" fill="url(#navmarkg)"/>
+          <path d="M18.2 12.2 Q24.6 27.5 29.1 14.5" fill="none" stroke="#2DD4BF" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="24.3" cy="20.5" r="1.5" fill="#F5B04B"/>
+          <text x="15.5" y="20" text-anchor="middle" dominant-baseline="central"
+                font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
+                font-size="17" font-weight="800" letter-spacing="-0.4" fill="#FFFFFF">C</text>
+        </svg>
+      </span>
+      <span class="nav-word">convexfolio</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Primary">
+      <a href="{{ site.baseurl }}/docs/">Docs</a>
+      <a href="{{ site.baseurl }}/docs/getting-started/">Get started</a>
+      <a href="{{ site.baseurl }}/docs/api-reference/">API</a>
+      <a href="https://arxiv.org/abs/2601.07991v2" rel="noopener" target="_blank">Paper</a>
+      <a href="https://github.com/sachncs/convexfolio" rel="noopener" target="_blank">GitHub</a>
+    </nav>
+
+    <div class="nav-actions">
+      <a class="btn btn-sm btn-primary" href="{{ site.baseurl }}/docs/getting-started/">Install</a>
+      <button class="nav-burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="nav-mobile" id="mobile-menu" hidden>
+    <a href="{{ site.baseurl }}/docs/">Docs</a>
+    <a href="{{ site.baseurl }}/docs/getting-started/">Get started</a>
+    <a href="{{ site.baseurl }}/docs/api-reference/">API reference</a>
+    <a href="{{ site.baseurl }}/docs/faq/">FAQ</a>
+    <a href="https://arxiv.org/abs/2601.07991v2" rel="noopener" target="_blank">Research paper</a>
+    <a href="https://github.com/sachncs/convexfolio" rel="noopener" target="_blank">GitHub ↗</a>
+    <a class="btn btn-primary btn-block" href="{{ site.baseurl }}/docs/getting-started/">Get started</a>
+  </div>
+</header>

@@ -1,0 +1,378 @@
+---
+layout: default
+---
+
+<!-- ========================= HERO ========================= -->
+<section class="hero" aria-labelledby="hero-title">
+  <div class="hero-bg" aria-hidden="true">
+    <div class="hero-grid"></div>
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-orb hero-orb-3"></div>
+    <div class="hero-vignette"></div>
+  </div>
+
+  <div class="hero-inner">
+    <div class="hero-copy">
+      <span class="eyebrow">
+        <span class="eyebrow-dot"></span>
+        Open-source · Python 3.12+ · MIT
+      </span>
+      <h1 id="hero-title" class="hero-title">
+        The lowest-risk way
+        <br><span class="hero-title-accent">to split money across options.</span>
+      </h1>
+      <p class="hero-sub">
+        Convexfolio takes your prices, expected payoffs, and a risk model —
+        and returns the exact budget split that minimises your risk.
+        Deterministic, reproducible, and built on the closed-form math of
+        <a href="https://arxiv.org/abs/2601.07991v2" rel="noopener" target="_blank">arXiv:2601.07991</a>.
+      </p>
+
+      <div class="hero-cta">
+        <a class="btn btn-primary btn-lg" href="{{ site.baseurl }}/docs/getting-started/">
+          Get started — it's free
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 8h9M8.5 4l4 4-4 4" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a class="btn btn-ghost-light btn-lg" href="https://github.com/sachncs/convexfolio" rel="noopener" target="_blank">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.34c-2.22.48-2.69-1.07-2.69-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.22.82 1.22.82.72 1.23 1.88.87 2.34.66.07-.52.28-.87.51-1.07-1.77-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.01.08-2.11 0 0 .67-.22 2.2.82a7.66 7.66 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.91.08 2.11.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.74.54 1.49v2.21c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          View on GitHub
+        </a>
+      </div>
+
+      <div class="hero-meta">
+        <code class="hero-install"><span>$</span> pip install convexfolio</code>
+        <span class="dot" aria-hidden="true">·</span>
+        <span>Deterministic to the bit</span>
+        <span class="dot" aria-hidden="true">·</span>
+        <span>No tracking. No analytics.</span>
+      </div>
+    </div>
+
+    <div class="hero-product">
+      <div class="hero-window">
+        <div class="hero-window-bar">
+          <span class="hero-window-dots">
+            <i></i><i></i><i></i>
+          </span>
+          <span class="hero-window-title">convexfolio — print-report</span>
+          <span class="hero-window-dots right">
+            <i class="placeholder"></i>
+          </span>
+        </div>
+        <div class="hero-window-body">
+          <div class="hero-window-row">
+            <pre class="term"><code><span class="t-prompt">$</span> <span class="t-cmd" data-typer>convexfolio --command print-report</span><span class="t-caret"></span>
+<span class="t-out">{</span>
+<span class="t-out k">  "method"</span><span class="t-out">: </span><span class="t-out s">"variance"</span><span class="t-out">,</span>
+<span class="t-out k">  "weights"</span><span class="t-out">: { </span><span class="t-out s">"A"</span><span class="t-out">: </span><span class="t-out n">0.4200</span><span class="t-out">, </span><span class="t-out s">"B"</span><span class="t-out">: </span><span class="t-out n">0.5800</span><span class="t-out"> },</span>
+<span class="t-out k">  "cost_check"</span><span class="t-out">: </span><span class="t-out n">1.0000</span><span class="t-out">,</span>
+<span class="t-out k">  "deterministic"</span><span class="t-out">: </span><span class="t-out s">true</span>
+<span class="t-out">}</span></code></pre>
+            <div class="hero-window-spark" aria-hidden="true">
+              <svg viewBox="0 0 320 120" preserveAspectRatio="none" width="100%" height="100%">
+                <defs>
+                  <linearGradient id="spark-fill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#2DD4BF" stop-opacity=".40"/>
+                    <stop offset="1" stop-color="#2DD4BF" stop-opacity="0"/>
+                  </linearGradient>
+                  <linearGradient id="spark-line" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stop-color="#2DD4BF"/>
+                    <stop offset="1" stop-color="#F5B04B"/>
+                  </linearGradient>
+                </defs>
+                <g stroke="rgba(255,255,255,.06)" stroke-width="1">
+                  <line x1="0" y1="30" x2="320" y2="30"/>
+                  <line x1="0" y1="60" x2="320" y2="60"/>
+                  <line x1="0" y1="90" x2="320" y2="90"/>
+                </g>
+                <path d="M0 92 Q40 86 60 70 T120 50 Q160 40 200 52 T280 72 Q300 78 320 68" fill="none" stroke="url(#spark-line)" stroke-width="2.4" stroke-linecap="round" class="spark-line"/>
+                <path d="M0 92 Q40 86 60 70 T120 50 Q160 40 200 52 T280 72 Q300 78 320 68 L320 120 L0 120 Z" fill="url(#spark-fill)" class="spark-area"/>
+                <circle cx="200" cy="52" r="4" fill="#F5B04B" class="spark-dot"/>
+              </svg>
+            </div>
+          </div>
+          <div class="hero-spark-caption">
+            <span>Risk vs. weight</span>
+            <span class="hero-spark-min">Optimum ●</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-float hero-float-a">
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 8l4 4 8-9" stroke="#2DD4BF" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        CFVaR₂ closed form
+      </div>
+      <div class="hero-float hero-float-b">
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 1.5l5.5 3v7L8 14.5 2.5 11.5v-7L8 1.5z" stroke="#F5B04B" stroke-width="1.4" fill="none" stroke-linejoin="round"/><circle cx="8" cy="8" r="1.6" fill="#F5B04B"/></svg>
+        Deterministic
+      </div>
+    </div>
+  </div>
+
+  <div class="trustbar" aria-label="Built on">
+    <div class="trustbar-inner">
+      <span class="trustbar-label">Built on</span>
+      <div class="trustbar-row">
+        <span class="trust-pill">Research</span>
+        <span class="trust-sep">·</span>
+        <span class="trust-pill">arXiv&nbsp;2601.07991</span>
+        <span class="trust-sep">·</span>
+        <span class="trust-pill">SciPy SLSQP</span>
+        <span class="trust-sep">·</span>
+        <span class="trust-pill">Pure Python</span>
+        <span class="trust-sep">·</span>
+        <span class="trust-pill">MIT</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= METRICS ========================= -->
+<section class="metrics" aria-labelledby="metrics-title">
+  <h2 id="metrics-title" class="sr-only">By the numbers</h2>
+  <div class="metrics-inner">
+    <div class="metric reveal">
+      <div class="metric-value"><span class="counter" data-to="3" data-suffix="">0</span></div>
+      <div class="metric-label">Risk measures</div>
+      <div class="metric-sub">Variance, CFVaR₂, CFVaR₃</div>
+    </div>
+    <div class="metric reveal" data-delay="1">
+      <div class="metric-value"><span class="counter" data-to="2" data-suffix="">0</span></div>
+      <div class="metric-label">Closed-form solvers</div>
+      <div class="metric-sub">Exact answers, no iteration</div>
+    </div>
+    <div class="metric reveal" data-delay="2">
+      <div class="metric-value"><span class="counter" data-to="100" data-suffix="%">0</span></div>
+      <div class="metric-label">Reproducible</div>
+      <div class="metric-sub">Byte-identical outputs</div>
+    </div>
+    <div class="metric reveal" data-delay="3">
+      <div class="metric-value"><span class="counter" data-to="1" data-suffix="">0</span></div>
+      <div class="metric-label">Command to run</div>
+      <div class="metric-sub">From install to report</div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= PRODUCT OVERVIEW ========================= -->
+<section class="overview" aria-labelledby="overview-title">
+  <div class="section-head reveal">
+    <span class="eyebrow eyebrow-dark"><span class="eyebrow-dot"></span>Product</span>
+    <h2 id="overview-title" class="section-title">One question. An exact answer.</h2>
+    <p class="section-sub">Three first-class solvers, each tuned for a different definition of "risk". Pick the one that matches the math you're trying to do — or let Convexfolio compare all of them in one run.</p>
+  </div>
+
+  <div class="overview-grid">
+    <article class="risk-card risk-card-variance reveal">
+      <div class="risk-icon" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="22" height="22"><path d="M3 22 L9 14 L14 19 L21 8 L29 18" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="21" cy="8" r="1.6" fill="currentColor"/></svg>
+      </div>
+      <h3>Variance</h3>
+      <p>The classical measure: minimise how wildly your portfolio value bounces around under the chosen precision matrix. Closed-form, instantaneous, well understood.</p>
+      <code class="risk-pill">Closed form · O(n³)</code>
+    </article>
+
+    <article class="risk-card risk-card-cfvar2 reveal" data-delay="1">
+      <div class="risk-icon" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="22" height="22"><path d="M4 26 Q12 6 16 14 T28 6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/><circle cx="22" cy="10" r="1.6" fill="currentColor"/></svg>
+      </div>
+      <h3>CFVaR₂</h3>
+      <p>A sharper, faster risk measure with an exact formula — no iteration, no approximation. Drop-in for the variance minimiser when you want a tighter tail.</p>
+      <code class="risk-pill">Closed form · exact</code>
+    </article>
+
+    <article class="risk-card risk-card-cfvar3 reveal" data-delay="2">
+      <div class="risk-icon" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="22" height="22"><path d="M3 24 Q10 20 14 22 T22 12 T29 8" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/><circle cx="29" cy="8" r="1.8" fill="currentColor"/><circle cx="22" cy="12" r="1.4" fill="currentColor"/></svg>
+      </div>
+      <h3>CFVaR₃</h3>
+      <p>The most accurate measure in the family. Solved numerically with SciPy's SLSQP under the same deterministic guarantees as the closed-form solvers.</p>
+      <code class="risk-pill">Numerical · SLSQP</code>
+    </article>
+  </div>
+</section>
+
+<!-- ========================= HOW IT WORKS ========================= -->
+<section class="how" aria-labelledby="how-title">
+  <div class="how-inner">
+    <div class="how-copy">
+      <span class="eyebrow eyebrow-dark"><span class="eyebrow-dot"></span>How it works</span>
+      <h2 id="how-title" class="section-title">Define. Solve. Verify.</h2>
+      <p class="section-sub">A tiny, well-typed Python surface. Point Convexfolio at your prices, expected payoffs, and a precision matrix — then choose a risk measure. The optimiser returns the exact budget split that minimises risk.</p>
+
+      <ol class="how-steps">
+        <li class="how-step reveal">
+          <span class="how-step-num">01</span>
+          <div>
+            <h4>Define your problem</h4>
+            <p>Prices, expected payoffs, and a precision matrix — JSON, YAML, or straight from Python. No proprietary schemas.</p>
+          </div>
+        </li>
+        <li class="how-step reveal" data-delay="1">
+          <span class="how-step-num">02</span>
+          <div>
+            <h4>Choose a risk measure</h4>
+            <p>Variance, CFVaR₂, or CFVaR₃ — or run all three and pick the best fit. Convexfolio returns weights that minimise the chosen measure exactly.</p>
+          </div>
+        </li>
+        <li class="how-step reveal" data-delay="2">
+          <span class="how-step-num">03</span>
+          <div>
+            <h4>Verify and adapt</h4>
+            <p>Every run is byte-identical to the previous one. Spot-check the report, then plug the same primitive into backtests and constraints.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="how-code reveal">
+      <div class="code-card">
+        <div class="code-card-bar">
+          <span class="code-lang">python</span>
+          <button class="code-copy" type="button" data-copy="import numpy as np
+from convexfolio import Variance, Minimize
+
+precision = np.array([[2.0, 0.1],
+                      [0.1, 1.5]])
+costs = np.array([0.60, 0.40])
+
+weights = Minimize(Variance(precision), costs).value
+print(weights)">
+            <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><rect x="4" y="4" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M11 4V3a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h1" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/></svg>
+            <span>Copy</span>
+          </button>
+        </div>
+<pre><code><span class="k">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="k">from</span> <span class="nn">convexfolio</span> <span class="k">import</span> <span class="n">Variance</span><span class="p">,</span> <span class="n">Minimize</span>
+
+<span class="c"># Two options · $0.60 and $0.40 · precision matrix below.</span>
+<span class="n">precision</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">],</span>
+                      <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">]])</span>
+<span class="n">costs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.60</span><span class="p">,</span> <span class="mf">0.40</span><span class="p">])</span>
+
+<span class="c"># Find the lowest-risk budget split.</span>
+<span class="n">weights</span> <span class="o">=</span> <span class="n">Minimize</span><span class="p">(</span><span class="n">Variance</span><span class="p">(</span><span class="n">precision</span><span class="p">),</span> <span class="n">costs</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+<span class="k">print</span><span class="p">(</span><span class="n">weights</span><span class="p">)</span>   <span class="c"># → [1.0591, 0.9113]</span></code></pre>
+        <div class="code-card-foot">
+          <span class="code-out-label">stdout</span>
+          <code>[1.0591133 0.91133005]</code>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= FEATURES ========================= -->
+<section class="features" aria-labelledby="features-title">
+  <div class="section-head section-head-center reveal">
+    <span class="eyebrow eyebrow-dark"><span class="eyebrow-dot"></span>Features</span>
+    <h2 id="features-title" class="section-title">Built for serious work.</h2>
+    <p class="section-sub">A small, focused API. Every feature is documented, tested, and verified against the math.</p>
+  </div>
+
+  <div class="features-grid">
+    <article class="feature reveal">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 7"/><path d="M21 3v4h-4"/><path d="M21 12a9 9 0 0 1-15 6.7L3 17"/><path d="M3 21v-4h4"/></svg>
+      </div>
+      <h3>Deterministic by design</h3>
+      <p>Same inputs always give byte-identical outputs. A built-in determinism check makes it auditable, not just claimed.</p>
+    </article>
+
+    <article class="feature reveal" data-delay="1">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/></svg>
+      </div>
+      <h3>Terminal-first</h3>
+      <p>Run reports in a single command — <code>convexfolio --command print-report</code>. No Python required for the common path.</p>
+    </article>
+
+    <article class="feature reveal" data-delay="2">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg>
+      </div>
+      <h3>JSON / YAML config</h3>
+      <p>Describe constraints and settings in a plain text file. Keep your experiments reproducible without code check-ins.</p>
+    </article>
+
+    <article class="feature reveal">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v13"/><path d="M4 19h16"/><path d="M8 12h8M8 8h8M8 16h5"/></svg>
+      </div>
+      <h3>Research-grade math</h3>
+      <p>Implements the closed-form results of <a href="https://arxiv.org/abs/2601.07991v2" rel="noopener" target="_blank">arXiv:2601.07991</a> with a published fidelity report.</p>
+    </article>
+
+    <article class="feature reveal" data-delay="1">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3M14 5l-4 14"/></svg>
+      </div>
+      <h3>Python API</h3>
+      <p>Variance, CFVaR₂, CFVaR₃, Minimize, Backtest, Constraints. Import a primitive, get a result — no ceremony.</p>
+    </article>
+
+    <article class="feature reveal" data-delay="2">
+      <div class="feature-icon">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>
+      </div>
+      <h3>Backtests & constraints</h3>
+      <p>Multi-period rebalancing with transaction costs. Sector caps, position limits, and leverage bounds when you need them.</p>
+    </article>
+  </div>
+</section>
+
+<!-- ========================= ADOPTION ========================= -->
+<section class="adoption" aria-labelledby="adoption-title">
+  <div class="adoption-inner">
+    <div class="adoption-copy reveal">
+      <span class="eyebrow eyebrow-dark"><span class="eyebrow-dot"></span>Adoption</span>
+      <h2 id="adoption-title" class="section-title">Free forever. Built in the open.</h2>
+      <p class="section-sub">Convexfolio is MIT-licensed research software. No paid tiers, no telemetry, no signup. Install it once and it stays yours.</p>
+
+      <div class="adoption-chips">
+        <span class="adoption-chip"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 1.5l5.5 3v7L8 14.5 2.5 11.5v-7L8 1.5z"/></svg> MIT Licensed</span>
+        <span class="adoption-chip"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 8h10M8 3v10"/></svg> Python 3.12+</span>
+        <span class="adoption-chip"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6"/><path d="M3 8h10"/></svg> SciPy-powered</span>
+        <span class="adoption-chip"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 8l4-4 4 4 4-4M2 13h12"/></svg> Docker ready</span>
+      </div>
+
+      <p class="adoption-note">Read the research, study the implementation, fork it, ship it. Always verify outputs against independent models and current market data — Convexfolio's outputs are illustrative, not investment advice.</p>
+    </div>
+
+    <div class="adoption-install reveal" data-delay="1">
+      <div class="install-card">
+        <div class="install-tabs" role="tablist">
+          <button type="button" class="install-tab is-active" data-tab="pip" role="tab" aria-selected="true">pip</button>
+          <button type="button" class="install-tab" data-tab="docker" role="tab" aria-selected="false">Docker</button>
+          <button type="button" class="install-tab" data-tab="source" role="tab" aria-selected="false">From source</button>
+        </div>
+        <div class="install-panels">
+          <pre class="install-panel is-active" data-panel="pip"><code><span class="t-prompt">$</span> <span class="t-cmd">pip install convexfolio</span>
+<span class="t-out">Successfully installed convexfolio-1.0.0</span></code></pre>
+          <pre class="install-panel" data-panel="docker" hidden><code><span class="t-prompt">$</span> <span class="t-cmd">docker run --rm ghcr.io/sachncs/convexfolio \
+    --command print-report</span>
+<span class="t-out">{ "method": "variance", … }</span></code></pre>
+          <pre class="install-panel" data-panel="source" hidden><code><span class="t-prompt">$</span> <span class="t-cmd">git clone https://github.com/sachncs/convexfolio
+cd convexfolio
+python3 -m venv .venv && source .venv/bin/activate
+pip install -e '.[dev]'</span>
+<span class="t-out">Ready to develop.</span></code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================= FINAL CTA ========================= -->
+<section class="finalcta" aria-labelledby="finalcta-title">
+  <div class="finalcta-bg" aria-hidden="true"></div>
+  <div class="finalcta-inner reveal">
+    <h2 id="finalcta-title" class="finalcta-title">Optimise your next allocation.</h2>
+    <p class="finalcta-sub">Install Convexfolio, point it at a portfolio, and read the report. Fifteen minutes from <code style="color:inherit;background:rgba(255,255,255,.08);padding:1px 6px;border-radius:5px">pip install</code> to a solved split.</p>
+    <div class="finalcta-cta">
+      <a class="btn btn-primary btn-lg" href="{{ site.baseurl }}/docs/getting-started/">Get started</a>
+      <a class="btn btn-ghost-light btn-lg" href="https://github.com/sachncs/convexfolio" rel="noopener" target="_blank">View on GitHub</a>
+    </div>
+  </div>
+</section>

@@ -50,7 +50,7 @@ You, even if:
 
 If you can install Python and type commands into a terminal, you can
 use Convexfolio. When the docs use a word you don't know, look it up
-in the [Glossary](docs/glossary.md).
+in the [Glossary](site/docs/glossary.md).
 
 If you've used Python before, you'll be productive in five minutes.
 
@@ -59,17 +59,17 @@ If you've used Python before, you'll be productive in five minutes.
 ## What can it do?
 
 - **Variance minimisation** — Finds weights that minimise how wildly
-  your portfolio value bounces around. ([Glossary: variance](docs/glossary.md))
+  your portfolio value bounces around. ([Glossary: variance](site/docs/glossary.md))
 - **CFVaR2 (closed-form)** — A faster, smarter risk measure with an
-  exact formula. ([Glossary: CFVaR](docs/glossary.md))
+  exact formula. ([Glossary: CFVaR](site/docs/glossary.md))
 - **CFVaR3 (numerical)** — A more accurate risk measure, solved
-  numerically. ([Glossary: SLSQP](docs/glossary.md))
+  numerically. ([Glossary: SLSQP](site/docs/glossary.md))
 - **Deterministic execution** — Same inputs always give same
-  outputs. ([Glossary: determinism](docs/glossary.md))
+  outputs. ([Glossary: determinism](site/docs/glossary.md))
 - **Command-line tool** — Run reports from the terminal without
-  writing Python. ([Glossary: CLI](docs/glossary.md))
+  writing Python. ([Glossary: CLI](site/docs/glossary.md))
 - **JSON / YAML configuration** — Tweak settings in a plain text
-  file. ([Glossary: JSON](docs/glossary.md))
+  file. ([Glossary: JSON](site/docs/glossary.md))
 
 ---
 
@@ -118,7 +118,7 @@ servers or when you can't (or don't want to) install Python locally.
 
 A "virtual environment" is an isolated Python sandbox that keeps this
 package's stuff from interfering with your other Python projects.
-([Glossary: virtual environment](docs/glossary.md))
+([Glossary: virtual environment](site/docs/glossary.md))
 
 ```bash
 # 1. Download the code
@@ -155,7 +155,7 @@ convexfolio --command print-report
 You'll see a long JSON blob print to your terminal. That JSON is a
 **report** describing a sample portfolio that Convexfolio analysed.
 Don't worry about understanding it yet — we'll walk through it in the
-[Getting Started guide](docs/getting-started.md).
+[Getting Started guide](site/docs/getting-started.md).
 
 You can also generate a JSON file instead of printing to the screen:
 
@@ -202,7 +202,7 @@ matter — what matters is that Convexfolio found the lowest-risk
 combination.
 
 The full walk-through with explanations of every line lives in
-[Getting Started](docs/getting-started.md).
+[Getting Started](site/docs/getting-started.md).
 
 ---
 
@@ -247,27 +247,27 @@ What each field means:
 
 ## Where to go next
 
-- **[Getting Started](docs/getting-started.md)** — A complete
+- **[Getting Started](site/docs/getting-started.md)** — A complete
   beginner's walk-through, building your first portfolio step by step.
-- **[FAQ](docs/faq.md)** — Common questions answered in plain
+- **[FAQ](site/docs/faq.md)** — Common questions answered in plain
   English.
-- **[Glossary](docs/glossary.md)** — Every technical term, defined.
-- **[API Reference](docs/api-reference.md)** — The full list of
+- **[Glossary](site/docs/glossary.md)** — Every technical term, defined.
+- **[API Reference](site/docs/api-reference.md)** — The full list of
   classes and functions, with examples. Bookmark this once you start
   writing real code.
-- **[Architecture](docs/architecture.md)** — How the package is put
+- **[Architecture](site/docs/architecture.md)** — How the package is put
   together, for the curious.
 
 For operators / maintainers:
 
-- **[Deployment](docs/deployment.md)** — Run Convexfolio on a server.
-- **[Release process](docs/release.md)** — How new versions get
+- **[Deployment](site/docs/deployment.md)** — Run Convexfolio on a server.
+- **[Release process](site/docs/release.md)** — How new versions get
   published.
-- **[Fidelity report](docs/fidelity_report.md)** — Does the code
-  match the paper?
-- **[Research determination](docs/research_determination.md)** —
+- **[Fidelity report](site/docs/fidelity_report.md)** — Does the code match the
+  paper?
+- **[Research determination](site/docs/research_determination.md)** —
   Which math quantities are well-defined vs assumed.
-- **[Mismatch report](docs/mismatch_report.md)** — Known
+- **[Mismatch report](site/docs/mismatch_report.md)** — Known
   differences between the package and the paper.
 
 ---

@@ -56,6 +56,7 @@ docs/_build/
 
 # Jekyll / GitHub Pages build output
 _site/
+site/_site/
 
 # Distribution
 MANIFEST

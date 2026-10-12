@@ -190,6 +190,47 @@ If you want a fancy release page on GitHub:
 
 ---
 
+## Rollback and recovery
+
+Releases and deployments are immutable records. Do not delete or force-move a
+published tag to make a rollback look like a new release.
+
+### Package rollback
+
+The previous stable package remains available as the `v1.0.0` GitHub release.
+Pin the application to that release while the v2 issue is investigated:
+
+```bash
+python -m pip install \
+  https://github.com/sachncs/convexfolio/releases/download/v1.0.0/convexfolio-1.0.0-py3-none-any.whl
+```
+
+Confirm the installed version and run the CLI smoke test before restoring
+service:
+
+```bash
+convexfolio --version
+convexfolio --command print-report > /tmp/convexfolio-rollback-report.json
+```
+
+### Pages rollback
+
+GitHub Pages deploys from `master`. For a site regression, identify the last
+known-good commit that still contains the Astro site, create a recovery branch
+from it, and merge a reviewed pull request into `master`:
+
+```bash
+git switch -c recovery/site <known-good-commit>
+git push -u origin recovery/site
+```
+
+After the merge, the Pages workflow runs automatically. Verify the deployed
+homepage and `/docs/architecture/` route before closing the incident. A
+package rollback to `v1.0.0` is separate: that tag predates the Astro site and
+must not be treated as an automatic Pages rollback target.
+
+---
+
 ## Hotfix process
 
 For critical bug fixes:

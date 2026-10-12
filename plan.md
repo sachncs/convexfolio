@@ -78,7 +78,8 @@ Completed in the current working tree:
   builds and smoke-tests the CLI image; package metadata no longer claims
   Production/Stable.
 - Python 3.13 was reproduced locally with the documented development install:
-  181 tests passed, 3 optional plotting tests skipped, Ruff and Mypy passed.
+  189 tests passed, with Ruff, Mypy, coverage, and release metadata checks
+  passing.
 - All 34 fenced Python documentation blocks compile, the canonical
   getting-started example and CSV/constraints/backtesting tutorial workflows
   execute in the test suite, and the process-pool

@@ -86,7 +86,7 @@ explanation.
 - [ ] **Build succeeds.** `python -m build` — should produce
       `dist/convexfolio-X.Y.Z-py3-none-any.whl` and
       `dist/convexfolio-X.Y.Z.tar.gz`.
-- [ ] **Site builds.** From `site/`, run `bundle exec jekyll build`.
+- [ ] **Site builds.** From `site/`, run `npm ci && npm run check && npm run build`.
 - [ ] **Links and site invariants pass.** Run `python scripts/check_docs.py`
       and `python scripts/check_site.py`.
 

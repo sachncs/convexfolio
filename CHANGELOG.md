@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `.validate()` methods.
 - Polymorphic risk, constraint, and optimizer contracts with structured
   diagnostics and typed solver errors.
-- Coverage, documentation-link, site-invariant, and Jekyll build checks in CI.
+- Coverage, documentation-link, site-invariant, and Astro build checks in CI.
 - Migration guidance for the validated API and optional dependency groups.
 
 ### Changed

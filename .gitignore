@@ -54,7 +54,7 @@ coverage.xml
 # Sphinx
 docs/_build/
 
-# Jekyll / GitHub Pages build output
+# GitHub Pages build output
 _site/
 site/_site/
 

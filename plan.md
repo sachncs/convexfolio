@@ -37,7 +37,8 @@ Completed in the current working tree:
 - Reproducible Python 3.12–3.14 environment, pinned development tooling,
   CI matrix, and build smoke test.
 - `Vector` and `Matrix` validated read-only value objects with explicit
-  `.copy()` and `.validate()` methods; no semi-private array helper API.
+  `.copy()` and `.validate()` methods; no semi-private application helpers
+  remain in the public package surface.
 - Configuration, input, price, matrix, alpha, constraint, and numerical
   validation with typed domain errors.
 - ABC-based polymorphic risk, constraint, and optimizer contracts with
@@ -55,9 +56,9 @@ Completed in the current working tree:
   rather than marketing language.
 - Report output has a `2.0` schema version and the process-parallel report path
   is covered by tests.
-- Local quality verification now passes at 182 tests, 92.14% combined coverage,
-  package/branch coverage thresholds, Ruff, Mypy, wheel installation, and CLI
-  smoke test.
+- Local quality verification now passes at 186 tests, 92.55% combined
+  coverage, 94.50% package coverage, package/branch coverage thresholds, Ruff,
+  Mypy, wheel installation, and CLI smoke test.
 - Astro type-checks and builds 18 routes. A live preview audit verified the
   homepage and documentation navigation, then caught and fixed the GitHub
   Pages base-path separator bug.
@@ -76,20 +77,22 @@ Completed in the current working tree:
   Production/Stable.
 - Python 3.13 was reproduced locally with the documented development install:
   181 tests passed, 3 optional plotting tests skipped, Ruff and Mypy passed.
-- All 35 fenced Python documentation blocks compile, and the canonical
-  getting-started example executes in the test suite.
+- All 35 fenced Python documentation blocks compile, the canonical
+  getting-started example executes in the test suite, and the process-pool
+  worker is exposed as the documented `reproduce_once` function rather than
+  a semi-private underscored helper.
 
 Still required before declaring the plan complete:
 
-- Add independent numerical reference, failure-injection, documentation-example,
-  and clean-wheel installation tests where coverage gaps remain.
-- Verify remaining public interfaces and examples with contract tests; the
-  data-source and backtest-engine ABCs are now public and exercised.
-- Verify documentation links/examples and build the Astro site in CI.
-- Run a rendered browser audit at 320px, 768px, and 1440px, including
-  contrast, reduced motion, focus, overflow, and console-error checks.
-- Complete release/migration/changelog/rollback documentation and a clean
-  machine reproduction before release.
+- Broaden execution testing for longer, multi-step documentation tutorials;
+  all 35 Python blocks compile, but fragmented snippets are not all intended
+  to execute independently.
+- Obtain confirmation from the hosted GitHub Actions runners; local checks
+  cover the configured CI commands but cannot prove remote runner state.
+- Complete the release-gate actions that require an actual v2 release event:
+  publish versioned artifacts, validate GitHub Pages deployment, and exercise
+  the documented rollback path. The release/migration/changelog guidance is
+  present, but publication has not been requested or performed.
 
 ## 2. Original issue inventory
 
@@ -199,8 +202,9 @@ validation, Hugging Face transient retries, and optional plotting test
 isolation.
 
 Still open or requiring stronger evidence: broader documentation-example
-execution beyond the canonical examples and CI confirmation on the hosted
-runners. These remain explicit release gates below.
+execution beyond the canonical examples, hosted-runner CI confirmation, and
+the release-event checks that cannot be performed without publishing v2.
+These remain explicit release gates below.
 
 ## 3. Target architecture
 

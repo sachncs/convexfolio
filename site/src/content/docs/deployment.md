@@ -99,7 +99,7 @@ sudo -u convexfolio crontab -e
 
 Add a line:
 
-```cron
+```text
 # Run every day at 2:00 AM
 0 2 * * * cd /opt/convexfolio && .venv/bin/convexfolio --config config/config.json --command reproduce-report >> /var/log/convexfolio.log 2>&1
 ```
@@ -229,7 +229,7 @@ that's:
 
 A common pattern: timestamp the output directory:
 
-```cron
+```text
 0 2 * * * cd /opt/convexfolio && \
     mkdir -p "site/artifacts/$(date +\%Y-\%m-\%d)" && \
     sed -i "s|output_directory.*|output_directory: \"site/artifacts/$(date +\%Y-\%m-\%d)\"|" config/config.json && \
@@ -254,7 +254,7 @@ few are useful:
 To set them in systemd, add `Environment=KEY=value` lines under
 `[Service]`. To set them in cron, prefix the command:
 
-```cron
+```text
 0 2 * * * OPTIONS_PARALLEL_THRESHOLD=8 /opt/convexfolio/.venv/bin/convexfolio ...
 ```
 

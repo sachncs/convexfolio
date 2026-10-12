@@ -56,7 +56,7 @@ Completed in the current working tree:
   rather than marketing language.
 - Report output has a `2.0` schema version and the process-parallel report path
   is covered by tests.
-- Local quality verification now passes at 186 tests, 92.55% combined
+- Local quality verification now passes at 193 tests, 92.55% combined
   coverage, 94.50% package coverage, package/branch coverage thresholds, Ruff,
   Mypy, wheel installation, and CLI smoke test.
 - Astro type-checks and builds 18 routes. A live preview audit verified the

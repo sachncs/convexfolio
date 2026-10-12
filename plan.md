@@ -47,8 +47,9 @@ Completed in the current working tree:
   marked-to-market backtests, and expanded CLI/domain tests.
 - Optional dependency groups for plotting, Hugging Face ingestion, and
   benchmarks; core package installation no longer pulls them in.
-- Accessible site interaction updates, a restrained blue visual system,
-  truthful homepage claims, and a dependency-free site invariant check.
+- Accessible site interaction updates, a restrained editorial green/cream
+  visual system, truthful homepage claims, and a dependency-free site
+  invariant check.
 - Jekyll has been removed. Astro now owns the homepage, documentation shell,
   Markdown content collection, static build, and GitHub Pages artifact.
 - Documentation tone was revised toward direct technical language: claims are
@@ -74,6 +75,16 @@ Completed in the current working tree:
   page-level console errors.
 - Lighthouse accessibility is 100/100 on the local Astro preview, including a
   passing WCAG color-contrast audit.
+- The marketing homepage has been visually redesigned around inspectability:
+  an editorial hero, truthful local solver demo, signal strip, principles,
+  workflow, scope notice, and responsive CTA hierarchy.
+- The logo and favicon now use one custom geometric mark: an open C, a convex
+  arc, and a single data-point dot in the site palette; the old glossy blue
+  gradient mark has been removed.
+- The architecture page now renders a responsive semantic flow graph rather
+  than a fenced ASCII diagram. The graph exposes the input/configuration,
+  domain-contract, polymorphic strategy, and diagnostics/report boundaries,
+  with an ordered reading fallback.
 - Release CI now runs the Python/site quality gate; the container workflow
   builds and smoke-tests the CLI image; package metadata no longer claims
   Production/Stable.
@@ -411,6 +422,12 @@ Gate:
 - Reduced-motion mode disables nonessential animation.
 - Lighthouse accessibility score is at least 95.
 - Homepage claims and examples match the v2 implementation.
+- The header logo and favicon are the same visual system and remain legible at
+  32px and 16px-equivalent rendering sizes.
+- The architecture “big picture” is an actual responsive graph in the
+  rendered page; no ASCII/Markdown flowchart is used for that primary view.
+- Production preview has 100/100 Lighthouse accessibility, best practices,
+  and SEO scores, with no failed audits and no browser console errors.
 
 ### Phase 8 — Release and rollback
 

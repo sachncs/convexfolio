@@ -6,6 +6,15 @@ on:
   pull_request:
 
 jobs:
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Check site invariants
+        run: python scripts/check_site.py
+
   test:
     runs-on: ubuntu-latest
     strategy:

@@ -20,20 +20,29 @@
   const burger = document.querySelector('.nav-burger');
   const mobile = document.getElementById('mobile-menu');
   if (burger && mobile) {
+    const closeMenu = () => {
+      mobile.setAttribute('hidden', '');
+      burger.setAttribute('aria-expanded', 'false');
+    };
     burger.addEventListener('click', () => {
       const open = !mobile.hasAttribute('hidden');
       if (open) {
-        mobile.setAttribute('hidden', '');
-        burger.setAttribute('aria-expanded', 'false');
+        closeMenu();
       } else {
         mobile.removeAttribute('hidden');
         burger.setAttribute('aria-expanded', 'true');
+        mobile.querySelector('a')?.focus();
       }
     });
     mobile.addEventListener('click', (e) => {
       if (e.target.tagName === 'A') {
-        mobile.setAttribute('hidden', '');
-        burger.setAttribute('aria-expanded', 'false');
+        closeMenu();
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !mobile.hasAttribute('hidden')) {
+        closeMenu();
+        burger.focus();
       }
     });
   }
@@ -70,7 +79,7 @@
       i += 1;
       typer.textContent = text.slice(0, i);
       if (i < text.length) {
-        setTimeout(step, 22 + Math.random() * 28);
+        setTimeout(step, 28);
       }
     };
     setTimeout(step, 380);
@@ -87,11 +96,12 @@
         el.textContent = (Number.isInteger(to) ? to : to.toFixed(0)) + suffix;
         return;
       }
+      const initial = parseFloat(el.textContent) || 0;
       const start = performance.now();
       const tick = (now) => {
         const t = Math.min(1, (now - start) / dur);
         const eased = 1 - Math.pow(1 - t, 3);
-        const value = to * eased;
+        const value = initial + (to - initial) * eased;
         const display = Number.isInteger(to) ? Math.round(value) : value.toFixed(0);
         el.textContent = display + suffix;
         if (t < 1) requestAnimationFrame(tick);
@@ -120,17 +130,20 @@
   document.querySelectorAll('[data-copy]').forEach((btn) => {
     btn.addEventListener('click', async () => {
       const text = btn.dataset.copy;
+      const label = btn.querySelector('span');
+      if (!text || !label) return;
       try {
         await navigator.clipboard.writeText(text);
-        const original = btn.querySelector('span').textContent;
-        btn.querySelector('span').textContent = 'Copied';
+        const original = label.textContent;
+        label.textContent = 'Copied';
         btn.classList.add('is-copied');
         setTimeout(() => {
-          btn.querySelector('span').textContent = original;
+          label.textContent = original;
           btn.classList.remove('is-copied');
         }, 1500);
-      } catch (_) {
-        // ignore; clipboard unavailable
+      } catch (error) {
+        label.textContent = 'Copy failed';
+        setTimeout(() => { label.textContent = 'Copy'; }, 1800);
       }
     });
   });
@@ -139,13 +152,13 @@
   const installTabs = document.querySelectorAll('.install-tab');
   const installPanels = document.querySelectorAll('.install-panel');
   if (installTabs.length) {
-    installTabs.forEach((tab) => {
-      tab.addEventListener('click', () => {
+    const activateTab = (tab, moveFocus = false) => {
         const target = tab.dataset.tab;
         installTabs.forEach((t) => {
           const active = t === tab;
           t.classList.toggle('is-active', active);
           t.setAttribute('aria-selected', active ? 'true' : 'false');
+          t.setAttribute('tabindex', active ? '0' : '-1');
         });
         installPanels.forEach((p) => {
           const active = p.dataset.panel === target;
@@ -153,6 +166,16 @@
           if (active) p.removeAttribute('hidden');
           else p.setAttribute('hidden', '');
         });
+        if (moveFocus) tab.focus();
+    };
+    installTabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => activateTab(tab));
+      tab.addEventListener('keydown', (event) => {
+        const key = event.key;
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(key)) return;
+        event.preventDefault();
+        const nextIndex = key === 'Home' ? 0 : key === 'End' ? installTabs.length - 1 : (index + (key === 'ArrowRight' ? 1 : -1) + installTabs.length) % installTabs.length;
+        activateTab(installTabs[nextIndex], true);
       });
     });
   }

@@ -73,11 +73,11 @@ layout: default
               <svg viewBox="0 0 320 120" preserveAspectRatio="none" width="100%" height="100%">
                 <defs>
                   <linearGradient id="spark-fill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stop-color="#2DD4BF" stop-opacity=".40"/>
-                    <stop offset="1" stop-color="#2DD4BF" stop-opacity="0"/>
+                    <stop offset="0" stop-color="#4F7CFF" stop-opacity=".32"/>
+                    <stop offset="1" stop-color="#4F7CFF" stop-opacity="0"/>
                   </linearGradient>
                   <linearGradient id="spark-line" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0" stop-color="#2DD4BF"/>
+                    <stop offset="0" stop-color="#4F7CFF"/>
                     <stop offset="1" stop-color="#F5B04B"/>
                   </linearGradient>
                 </defs>
@@ -100,7 +100,7 @@ layout: default
       </div>
 
       <div class="hero-float hero-float-a">
-        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 8l4 4 8-9" stroke="#2DD4BF" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M2 8l4 4 8-9" stroke="#4F7CFF" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
         CFVaR₂ closed form
       </div>
       <div class="hero-float hero-float-b">
@@ -133,22 +133,22 @@ layout: default
   <h2 id="metrics-title" class="sr-only">By the numbers</h2>
   <div class="metrics-inner">
     <div class="metric reveal">
-      <div class="metric-value"><span class="counter" data-to="3" data-suffix="">0</span></div>
+      <div class="metric-value"><span class="counter" data-to="3" data-suffix="">3</span></div>
       <div class="metric-label">Risk measures</div>
       <div class="metric-sub">Variance, CFVaR₂, CFVaR₃</div>
     </div>
     <div class="metric reveal" data-delay="1">
-      <div class="metric-value"><span class="counter" data-to="2" data-suffix="">0</span></div>
+      <div class="metric-value"><span class="counter" data-to="2" data-suffix="">2</span></div>
       <div class="metric-label">Closed-form solvers</div>
       <div class="metric-sub">Exact answers, no iteration</div>
     </div>
     <div class="metric reveal" data-delay="2">
-      <div class="metric-value"><span class="counter" data-to="100" data-suffix="%">0</span></div>
+      <div class="metric-value"><span class="counter" data-to="100" data-suffix="%">100%</span></div>
       <div class="metric-label">Reproducible</div>
-      <div class="metric-sub">Byte-identical outputs</div>
+      <div class="metric-sub">Same inputs, same result</div>
     </div>
     <div class="metric reveal" data-delay="3">
-      <div class="metric-value"><span class="counter" data-to="1" data-suffix="">0</span></div>
+      <div class="metric-value"><span class="counter" data-to="1" data-suffix="">1</span></div>
       <div class="metric-label">Command to run</div>
       <div class="metric-sub">From install to report</div>
     </div>
@@ -220,7 +220,7 @@ layout: default
           <span class="how-step-num">03</span>
           <div>
             <h4>Verify and adapt</h4>
-            <p>Every run is byte-identical to the previous one. Spot-check the report, then plug the same primitive into backtests and constraints.</p>
+          <p>Validated inputs and explicit diagnostics make runs repeatable. Spot-check the report, then plug the same primitive into backtests and constraints.</p>
           </div>
         </li>
       </ol>
@@ -277,7 +277,7 @@ print(weights)">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 7"/><path d="M21 3v4h-4"/><path d="M21 12a9 9 0 0 1-15 6.7L3 17"/><path d="M3 21v-4h4"/></svg>
       </div>
       <h3>Deterministic by design</h3>
-      <p>Same inputs always give byte-identical outputs. A built-in determinism check makes it auditable, not just claimed.</p>
+      <p>Same validated inputs produce repeatable results. Diagnostics make each run auditable, not just claimed.</p>
     </article>
 
     <article class="feature reveal" data-delay="1">
@@ -342,18 +342,18 @@ print(weights)">
 
     <div class="adoption-install reveal" data-delay="1">
       <div class="install-card">
-        <div class="install-tabs" role="tablist">
-          <button type="button" class="install-tab is-active" data-tab="pip" role="tab" aria-selected="true">pip</button>
-          <button type="button" class="install-tab" data-tab="docker" role="tab" aria-selected="false">Docker</button>
-          <button type="button" class="install-tab" data-tab="source" role="tab" aria-selected="false">From source</button>
+        <div class="install-tabs" role="tablist" aria-label="Installation methods">
+          <button id="install-tab-pip" type="button" class="install-tab is-active" data-tab="pip" role="tab" aria-selected="true" aria-controls="install-panel-pip" tabindex="0">pip</button>
+          <button id="install-tab-docker" type="button" class="install-tab" data-tab="docker" role="tab" aria-selected="false" aria-controls="install-panel-docker" tabindex="-1">Docker</button>
+          <button id="install-tab-source" type="button" class="install-tab" data-tab="source" role="tab" aria-selected="false" aria-controls="install-panel-source" tabindex="-1">From source</button>
         </div>
         <div class="install-panels">
-          <pre class="install-panel is-active" data-panel="pip"><code><span class="t-prompt">$</span> <span class="t-cmd">pip install convexfolio</span>
+          <pre id="install-panel-pip" class="install-panel is-active" data-panel="pip" role="tabpanel" aria-labelledby="install-tab-pip"><code><span class="t-prompt">$</span> <span class="t-cmd">pip install convexfolio</span>
 <span class="t-out">Successfully installed convexfolio-1.0.0</span></code></pre>
-          <pre class="install-panel" data-panel="docker" hidden><code><span class="t-prompt">$</span> <span class="t-cmd">docker run --rm ghcr.io/sachncs/convexfolio \
+          <pre id="install-panel-docker" class="install-panel" data-panel="docker" role="tabpanel" aria-labelledby="install-tab-docker" hidden><code><span class="t-prompt">$</span> <span class="t-cmd">docker run --rm ghcr.io/sachncs/convexfolio \
     --command print-report</span>
 <span class="t-out">{ "method": "variance", … }</span></code></pre>
-          <pre class="install-panel" data-panel="source" hidden><code><span class="t-prompt">$</span> <span class="t-cmd">git clone https://github.com/sachncs/convexfolio
+          <pre id="install-panel-source" class="install-panel" data-panel="source" role="tabpanel" aria-labelledby="install-tab-source" hidden><code><span class="t-prompt">$</span> <span class="t-cmd">git clone https://github.com/sachncs/convexfolio
 cd convexfolio
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e '.[dev]'</span>

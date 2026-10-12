@@ -8,6 +8,7 @@ package must be installed (``pip install -e .``) for these to find
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import os
 import subprocess
@@ -20,6 +21,9 @@ import pytest
 
 from convexfolio.cli import backtest_command, ingest_command, main, plot_command
 from convexfolio.config import Experiment, Runtime
+
+PLOTTING_AVAILABLE = importlib.util.find_spec("matplotlib") is not None
+PLOTTING_REASON = "plot tests require the optional convexfolio[plot] extra"
 
 
 def run_cli(*args: str) -> subprocess.CompletedProcess[str]:
@@ -124,6 +128,7 @@ def test_cli_ingest_command_returns_portfolio_inputs() -> None:
     assert result.n_instruments == 5
 
 
+@pytest.mark.skipif(not PLOTTING_AVAILABLE, reason=PLOTTING_REASON)
 def test_cli_plot_weights_writes_artifact(tmp_path: Path) -> None:
     """The plotting command writes a non-empty weights image."""
     experiment = Experiment(runtime=Runtime(output_directory=str(tmp_path)))
@@ -138,6 +143,7 @@ def test_cli_plot_weights_writes_artifact(tmp_path: Path) -> None:
     assert Path(outputs[0]).stat().st_size > 0
 
 
+@pytest.mark.skipif(not PLOTTING_AVAILABLE, reason=PLOTTING_REASON)
 def test_cli_plot_all_charts_writes_artifacts(tmp_path: Path) -> None:
     """All supported chart branches produce non-empty artifacts."""
     from convexfolio.data import LoadCSV
@@ -155,6 +161,7 @@ def test_cli_plot_all_charts_writes_artifacts(tmp_path: Path) -> None:
     assert all(Path(path).stat().st_size > 0 for path in outputs)
 
 
+@pytest.mark.skipif(not PLOTTING_AVAILABLE, reason=PLOTTING_REASON)
 def test_cli_main_dispatches_plot_command(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

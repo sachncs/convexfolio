@@ -36,11 +36,25 @@ def main() -> int:
             errors.append(f"stale Jekyll/source duplicate: {path.relative_to(root)}")
 
     homepage = site / "src" / "pages" / "index.astro"
+    stylesheet = site / "public" / "site.css"
     if homepage.exists():
         text = homepage.read_text(encoding="utf-8").lower()
         for phrase in ("production ready", "lowest risk", "exact"):
             if phrase in text:
                 errors.append(f"homepage contains an unqualified claim: {phrase}")
+        homepage_text = homepage.read_text(encoding="utf-8")
+        for marker in ('id="solver-demo"', 'aria-live="polite"', "<noscript>"):
+            if marker not in homepage_text:
+                errors.append(
+                    f"homepage is missing accessibility/fallback marker: {marker}"
+                )
+    if stylesheet.exists():
+        css_text = stylesheet.read_text(encoding="utf-8")
+        for marker in (":focus-visible", "prefers-reduced-motion", "max-width: 760px"):
+            if marker not in css_text:
+                errors.append(
+                    f"stylesheet is missing responsive/accessibility marker: {marker}"
+                )
 
     if errors:
         for error in errors:

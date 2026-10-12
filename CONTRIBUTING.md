@@ -165,10 +165,10 @@ chore(deps): update scipy to 1.12
 - Use type annotations for all public functions.
 - Write Google-style docstrings for every public module, class, and function.
 - `snake_case` for functions/variables; `CapWords` for classes; lowercase single words for module names.
-- **No leading-underscore "private" names on top-level identifiers.** Public surface is declared via `__all__` in each module's top-level. Helper functions that are part of the public API keep public names. Reserved dunders (`__init__`, `__all__`, `__post_init__`, `__pycache__`, `__main__`) follow Python's own conventions. No name mangling (`__name__`) outside of Python-mandated slots.
+- **Use descriptive public names.** Do not encode visibility through a forest of semi-private leading-underscore helpers. If an operation is part of a reusable domain concept, give that concept a public method or class. `Vector.copy()`, `Vector.validate()`, `Matrix.copy()`, and `Matrix.validate()` are the canonical array contracts. Reserved dunders (`__init__`, `__all__`, `__post_init__`, `__pycache__`, `__main__`) follow Python's own conventions.
 - **No math shorthand as identifier names.** `g1`, `g2`, `q`, `eps_star`, `nu`, `sigma`, `omega`, `theta`, `m`, `x`, `z`, `psi`, `tau`, `kappa3` (alone) are forbidden as variable names. Use full descriptive words (`loss_gradient`, `constraint_gradient`, `precision_matrix`, `optimal_epsilon`, `degrees_of_freedom`, `covariance`, `skewness`, `price_drift`, `instrument_count`, `weights`, `z_score`, `dual_variable`, `tau`, `third_order_cumulant`).
 - **No `try/except` without a typed reason.** Catch only specific named exceptions (`ValueError`, `FileNotFoundError`, `json.JSONDecodeError`, `KeyError`, `TypeError`, etc.). Never `except Exception:` or bare `except:`. Let unexpected exceptions propagate.
-- **No new abstraction.** No `Builder`/`Manager`/`Factory`/`Strategy`/`Handler`/`Service`/`Helper`/`Util` suffixes. No `ABC`, no `Protocol`, no `isinstance` dispatch. Inline closure bodies where they fit; the rest are hoisted as module-level functions.
+- **Use object-oriented contracts where they clarify the domain.** Domain values own their validation and copying behavior. Risk measures, constraints, and optimizers implement the ABC contracts in `interfaces.py`, allowing polymorphic substitution without type-switching. Prefer composition and small focused classes over procedural dispatch or generic `Helper`/`Util` buckets.
 
 ### Ruff Configuration
 

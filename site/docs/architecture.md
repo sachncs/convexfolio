@@ -31,10 +31,11 @@ report. Everything else is plumbing.
                           │ loads
                           ▼
             ┌──────────────────────────┐
-            │  utils.Reproduce         │  ← the pipeline
-            │   ├─ Variance / CFVaR2   │     (the math)
-            │   ├─ Minimize / SLSQP    │
-            │   └─ Risk evaluators     │
+            │  domain + interfaces    │  ← typed contracts
+            │   ├─ Vector / Matrix     │     validated values
+            │   ├─ RiskMeasure         │     risk polymorphism
+            │   ├─ Constraint          │     residual checks
+            │   └─ Optimizer           │     solver strategies
             └─────────────┬────────────┘
                           │ produces
                           ▼
@@ -56,7 +57,12 @@ Think of the package like a small restaurant.
 |---|---|---|
 | `cli.py` | Takes commands from the terminal. | The waiter taking your order. |
 | `config.py` | Reads your settings file. | The host checking your reservation. |
-| `utils.py` | Glue code: `Logger`, `Report`, the `Reproduce` pipeline. | The kitchen manager coordinating everything. |
+| `utils.py` | Cross-cutting `Logger`, `Report`, and `Reproduce` pipeline. | The kitchen manager coordinating everything. |
+| `arrays.py` | Validated, read-only `Vector` and `Matrix` value objects with `.copy()` and `.validate()`. | Measured ingredients with a safe prep copy. |
+| `domain.py` | Problem, result, tolerance, and diagnostic value objects. | The order ticket and completed dish. |
+| `interfaces.py` | ABC contracts for risk measures, constraints, and optimizers. | The kitchen's interchangeable stations. |
+| `optimization.py` | Closed-form and SLSQP optimizer implementations. | The cooking techniques. |
+| `risk.py` | Polymorphic variance and CFVaR risk implementations. | The tasting criteria. |
 | `math.py` | All the numerical classes — risk, optimisation, section 2.4 primitives. | The kitchen itself. |
 | `backtest.py` | Multi-period rebalancing simulator. | The dining-room host tracking turnover across courses. |
 | `constraints.py` | SLSQP constraint builders (budget, long-only, sector caps). | The reservation ledger. |
@@ -161,20 +167,23 @@ You can verify with `validate-determinism`:
 convexfolio --command validate-determinism --repetitions 3
 ```
 
-This runs the pipeline three times and asserts the results are
-byte-identical.
+This runs the pipeline three times and compares the serialized reports
+for equality.
 
 ---
 
 ## The CLI
 
-The `convexfolio` command has three sub-commands:
+The `convexfolio` command has six sub-commands:
 
 | Command | What it does |
 |---|---|
 | `reproduce-report` | Run the pipeline, save the report to `output_directory/report.json`. |
 | `print-report` | Run the pipeline, print the report to the terminal. |
 | `validate-determinism` | Run the pipeline N times, verify byte-identical output. |
+| `ingest` | Read a portfolio CSV and print its shape summary. |
+| `plot` | Render selected portfolio charts. |
+| `backtest` | Run a multi-period rebalance simulation from price history. |
 
 Each accepts a `--config path/to/config.json` flag.
 
@@ -195,34 +204,27 @@ Each accepts a `--config path/to/config.json` flag.
 
 ---
 
-## Composition over inheritance
+## Object-oriented contracts and polymorphism
 
-Every solver and risk primitive in `convexfolio/` follows the same
-duck-typed contract: capture inputs in `__init__`, expose the result
-on `.value` (or a named attribute). Callers compose them like
-`Minimize(Variance(Q), c).value`, never `isinstance(x, Variance)`.
+The package uses small ABCs where callers need interchangeable behavior:
 
-There is no `isinstance` dispatch in production code. There is no
-`ABC`, no `Protocol`, no `@abstractmethod`, no `metaclass=`, and no
-deep inheritance hierarchy. `BucketWeightStat(TypedDict)` is the
-only "extends" in the tree, and TypedDict is structural typing, not
-inheritance.
+* `RiskMeasure.evaluate(problem)` provides a common risk calculation
+  contract for variance and CFVaR implementations.
+* `Constraint.residual(weights)` and `Constraint.check(weights)` provide
+  named equality and inequality checks with structured diagnostics.
+* `Optimizer.solve(problem)` lets closed-form and SLSQP implementations
+  be selected by policy rather than by a growing conditional function.
 
-Why this matters:
+`Vector` and `Matrix` are validated value objects. They are read-only at
+the boundary, own their shape/finite-value checks, and expose explicit
+`.copy()` methods when writable working storage is required. This keeps
+validation and ownership rules next to the data they protect.
 
-* **Substitutability.** Anything that exposes `.value` works.
-  `Minimize` accepts any callable that maps a weight vector to a
-  variance, not specifically `Variance`.
-* **Testability.** Each class can be constructed and asserted on in
-  isolation; no fixture graph to set up.
-* **Readability.** A reader sees the computation by reading the call
-  chain, not by chasing virtual methods.
-
-If a future change needs ad-hoc polymorphism (for example, a custom
-solver that does not fit the `Q + c` shape), reach for a
-`Callable[[FloatArray], float]` parameter rather than a class
-hierarchy or `isinstance` check. The `kappa3_callback` argument on
-`CFVaR3Numerical` is the canonical example of this pattern.
+The design favors shallow inheritance, composition, and descriptive names:
+new implementations should satisfy an existing contract before adding a
+new abstraction. Failures should use the typed domain exceptions in
+`errors.py`, and optimizer results should preserve iterations, messages,
+and constraint diagnostics for callers.
 
 ---
 

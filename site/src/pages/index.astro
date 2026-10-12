@@ -1,5 +1,6 @@
 ---
 import SiteLayout from "../layouts/SiteLayout.astro";
+const base = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
 ---
 <SiteLayout title="Convexfolio" description="Validated, constrained portfolio optimisation in Python.">
   <section class="hero">
@@ -7,7 +8,7 @@ import SiteLayout from "../layouts/SiteLayout.astro";
     <h1>Portfolio optimisation you can inspect.</h1>
     <p class="lede">Convexfolio is research software for constrained portfolio experiments. Inputs are validated, solver outcomes are checked, and failures stay visible.</p>
     <div class="actions">
-      <a class="button primary" href={`${import.meta.env.BASE_URL}docs/getting-started/`}>Read the guide</a>
+      <a class="button primary" href={`${base}docs/getting-started/`}>Read the guide</a>
       <a class="button secondary" href="https://github.com/sachncs/convexfolio">View the source</a>
     </div>
   </section>
@@ -19,5 +20,5 @@ import SiteLayout from "../layouts/SiteLayout.astro";
       <article><span class="number">03</span><h3>Composable design</h3><p>Risk measures, constraints, and optimisers are public ABC contracts with interchangeable implementations.</p></article>
     </div>
   </section>
-  <section class="notice"><p><strong>Scope:</strong> Convexfolio does not place trades, connect to brokerages, or provide financial advice.</p><a href={`${import.meta.env.BASE_URL}docs/faq/`}>Understand the limits →</a></section>
+  <section class="notice"><p><strong>Scope:</strong> Convexfolio does not place trades, connect to brokerages, or provide financial advice.</p><a href={`${base}docs/faq/`}>Understand the limits →</a></section>
 </SiteLayout>

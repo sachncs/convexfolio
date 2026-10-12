@@ -63,6 +63,7 @@ The API is grouped by responsibility and exported via ``__all__``:
     * :class:`Report` — determinism report over repeated runs
 """
 
+from convexfolio.arrays import Matrix, Vector
 from convexfolio.config import (
     Experiment,
     Load,
@@ -175,6 +176,7 @@ __all__ = [
     "Logger",
     "Loss",
     "Minimize",
+    "Matrix",
     "InfeasibleProblemError",
     "LeverageConstraint",
     "LongOnlyConstraint",
@@ -202,6 +204,7 @@ __all__ = [
     "TolerancePolicy",
     "Validate",
     "ValidationError",
+    "Vector",
     "Variance",
     "VarianceRisk",
     "ClosedFormVarianceOptimizer",

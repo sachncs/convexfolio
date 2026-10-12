@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from convexfolio import PortfolioInputs, ValidationError
+from convexfolio import Matrix, PortfolioInputs, ValidationError, Vector
 from convexfolio.constraints import (
     bounds,
     fun_of,
@@ -27,6 +27,14 @@ def test_portfolio_inputs_copy_arrays() -> None:
     original = inputs.cost_vector.copy()
     inputs.cost_vector[0] = 99.0
     assert np.array_equal(inputs.cost_vector[1:], original[1:])
+
+
+def test_value_objects_expose_copy_and_validate() -> None:
+    """Vectors and matrices own their validation and copy behavior."""
+    vector = Vector([1.0, 2.0]).validate("weights")
+    matrix = Matrix([[2.0, 0.0], [0.0, 1.0]]).validate("precision_matrix")
+    assert isinstance(vector.copy(), Vector)
+    assert isinstance(matrix.copy(), Matrix)
 
 
 @pytest.mark.parametrize(

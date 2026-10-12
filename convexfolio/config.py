@@ -22,14 +22,10 @@ from pathlib import Path
 import numpy as np
 import yaml
 
+from convexfolio.arrays import Matrix, Vector
 from convexfolio.errors import ValidationError
 from convexfolio.types import FloatArray
-from convexfolio.validation import (
-    copy_float_vector,
-    copy_positive_definite_matrix,
-    validate_portfolio_dimensions,
-    validate_positive_values,
-)
+from convexfolio.validation import validate_portfolio_dimensions
 
 
 @dataclass(frozen=True)
@@ -78,12 +74,9 @@ class PortfolioInputs:
 
     def __post_init__(self) -> None:
         """Copy and validate all portfolio arrays at construction time."""
-        expected_payoff = copy_float_vector(self.expected_payoff, "expected_payoff")
-        cost_vector = copy_float_vector(self.cost_vector, "cost_vector")
-        precision_matrix = copy_positive_definite_matrix(
-            self.precision_matrix, "precision_matrix"
-        )
-        validate_positive_values(cost_vector, "cost_vector")
+        expected_payoff = Vector(self.expected_payoff).validate("expected_payoff")
+        cost_vector = Vector(self.cost_vector).validate("cost_vector", positive=True)
+        precision_matrix = Matrix(self.precision_matrix).validate("precision_matrix")
         validate_portfolio_dimensions(
             expected_payoff, cost_vector, precision_matrix
         )

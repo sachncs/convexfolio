@@ -56,7 +56,7 @@ Completed in the current working tree:
   rather than marketing language.
 - Report output has a `2.0` schema version and the process-parallel report path
   is covered by tests.
-- Local quality verification now passes at 193 tests, 92.55% combined
+- Local quality verification now passes at 196 tests, 92.55% combined
   coverage, 94.50% package coverage, package/branch coverage thresholds, Ruff,
   Mypy, wheel installation, and CLI smoke test.
 - Astro type-checks and builds 18 routes. A live preview audit verified the
@@ -77,22 +77,21 @@ Completed in the current working tree:
   Production/Stable.
 - Python 3.13 was reproduced locally with the documented development install:
   181 tests passed, 3 optional plotting tests skipped, Ruff and Mypy passed.
-- All 35 fenced Python documentation blocks compile, the canonical
-  getting-started example executes in the test suite, and the process-pool
+- All 34 fenced Python documentation blocks compile, the canonical
+  getting-started example and CSV/constraints/backtesting tutorial workflows
+  execute in the test suite, and the process-pool
   worker is exposed as the documented `reproduce_once` function rather than
   a semi-private underscored helper.
 
 Still required before declaring the plan complete:
 
-- Broaden execution testing for longer, multi-step documentation tutorials;
-  all 35 Python blocks compile, but fragmented snippets are not all intended
-  to execute independently.
 - Obtain confirmation from the hosted GitHub Actions runners; local checks
   cover the configured CI commands but cannot prove remote runner state.
 - Complete the release-gate actions that require an actual v2 release event:
   publish versioned artifacts, validate GitHub Pages deployment, and exercise
-  the documented rollback path. The release/migration/changelog guidance is
-  present, but publication has not been requested or performed.
+  the documented rollback path. The repository is now versioned as `2.0.0`
+  and has a release-ready changelog/checklist; publication has not been
+  requested or performed.
 
 ## 2. Original issue inventory
 
@@ -201,8 +200,7 @@ toolchain security, immutable GitHub Action references, matrix conditioning
 validation, Hugging Face transient retries, and optional plotting test
 isolation.
 
-Still open or requiring stronger evidence: broader documentation-example
-execution beyond the canonical examples, hosted-runner CI confirmation, and
+Still open or requiring stronger evidence: hosted-runner CI confirmation and
 the release-event checks that cannot be performed without publishing v2.
 These remain explicit release gates below.
 

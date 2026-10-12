@@ -78,8 +78,8 @@ explanation.
 
 ### Code quality
 
-- [ ] **All tests pass.** `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q`
-      — 22 tests should all say `passed`.
+- [ ] **All tests pass.** Run the coverage-enabled command from CI; the suite
+      must pass the 90% package and critical-module branch gates.
 - [ ] **No type errors.** `mypy convexfolio` — should print
       `Success: no issues found`.
 - [ ] **No lint errors.** `ruff check convexfolio tests scripts benchmarks`
@@ -87,6 +87,9 @@ explanation.
 - [ ] **Build succeeds.** `python -m build` — should produce
       `dist/convexfolio-X.Y.Z-py3-none-any.whl` and
       `dist/convexfolio-X.Y.Z.tar.gz`.
+- [ ] **Site builds.** From `site/`, run `bundle exec jekyll build`.
+- [ ] **Links and site invariants pass.** Run `python scripts/check_docs.py`
+      and `python scripts/check_site.py`.
 
 ### Documentation
 

@@ -232,6 +232,8 @@ and constraint diagnostics for callers.
 
 - **[API Reference]({{ site.baseurl }}/docs/api-reference/)** — Every public symbol, with
   examples.
+- **[Migration guide]({{ site.baseurl }}/docs/migration/)** — Upgrade from the earlier
+  helper-based API.
 - **[Glossary]({{ site.baseurl }}/docs/glossary/)** — Plain-English definitions of every
   term used here.
 - **[Fidelity Report]({{ site.baseurl }}/docs/fidelity_report/)** — Does the code match the

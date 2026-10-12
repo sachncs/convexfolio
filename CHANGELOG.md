@@ -11,6 +11,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Validated `Vector` and `Matrix` value objects with explicit `.copy()` and
+  `.validate()` methods.
+- Polymorphic risk, constraint, and optimizer contracts with structured
+  diagnostics and typed solver errors.
+- Coverage, documentation-link, site-invariant, and Jekyll build checks in CI.
+- Migration guidance for the validated API and optional dependency groups.
+
+### Changed
+- Backtests now mark holdings to market between rebalances and reject
+  constraint-violating fallback weights.
+- Core installation no longer includes plotting, Hugging Face, or benchmark
+  dependencies.
+- Site claims and support policy now match the tested implementation.
+
 ## [1.0.0] - 2026-09-08
 
 First production-stable release. The public API established in

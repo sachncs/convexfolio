@@ -88,6 +88,9 @@ Completed in the current working tree:
 - Package metadata, citation metadata, README installation instructions, and
   the changelog identify the locally verified breaking release as `2.0.0`; an
   annotated local `v2.0.0` tag points at this snapshot.
+- The previous stable baseline is recoverable locally through an annotated
+  `v1.0.0` tag at commit `8f266d0`, which carries the matching historical
+  `1.0.0` metadata and changelog.
 
 Still required before declaring the plan complete:
 

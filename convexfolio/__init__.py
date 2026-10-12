@@ -134,7 +134,7 @@ from convexfolio.math import (
     Score,
     Variance,
 )
-from convexfolio.optimization import ClosedFormVarianceOptimizer
+from convexfolio.optimization import ClosedFormVarianceOptimizer, SlsqpOptimizer
 from convexfolio.risk import CFVaR2Risk, CFVaR3Risk, VarianceRisk
 from convexfolio.utils import Logger, Report, Reproduce
 
@@ -198,6 +198,7 @@ __all__ = [
     "Runtime",
     "Score",
     "SolverFailureError",
+    "SlsqpOptimizer",
     "SummariseResults",
     "Summary",
     "SyntheticPortfolio",

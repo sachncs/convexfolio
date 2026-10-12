@@ -28,6 +28,7 @@ class Constraint(ABC):
     """Interface for a portfolio feasibility constraint."""
 
     name: str
+    kind: str
 
     @abstractmethod
     def residual(self, weights: np.ndarray) -> float:

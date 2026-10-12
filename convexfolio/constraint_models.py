@@ -12,6 +12,7 @@ class BudgetConstraint(Constraint):
     """Require the weighted cost vector to equal one."""
 
     name = "budget"
+    kind = "equality"
 
     def __init__(self, cost_vector: np.ndarray) -> None:
         costs = np.array(cost_vector, dtype=float, copy=True)
@@ -33,6 +34,7 @@ class LongOnlyConstraint(Constraint):
     """Require every portfolio weight to be non-negative."""
 
     name = "long_only"
+    kind = "inequality"
 
     def residual(self, weights: np.ndarray) -> float:
         """Return the smallest weight, which must be non-negative."""
@@ -46,6 +48,7 @@ class PositionLimitConstraint(Constraint):
     """Require each absolute position to stay below a limit."""
 
     name = "position_limit"
+    kind = "inequality"
 
     def __init__(self, maximum: float) -> None:
         if not np.isfinite(maximum) or maximum < 0.0:
@@ -64,6 +67,7 @@ class LeverageConstraint(Constraint):
     """Require total absolute exposure to stay below a limit."""
 
     name = "leverage"
+    kind = "inequality"
 
     def __init__(self, maximum: float) -> None:
         if not np.isfinite(maximum) or maximum < 0.0:

@@ -16,6 +16,7 @@ Two composable classes drive the load + validate cycle:
 """
 
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -198,29 +199,77 @@ class Load:
         Returns:
             The loaded :class:`Experiment`.
         """
-        config = Experiment() if self.path is None else self._from_file()
+        config = Experiment() if self.path is None else self.load_file()
         Validate(config)
         return config
 
-    def _from_file(self) -> Experiment:
+    def load_file(self) -> Experiment:
+        """Load, validate, and construct an experiment from ``self.path``."""
         path = self.path
         if path is None:
-            raise ValueError("Load._from_file called without a path")
+            raise ValidationError("Load.load_file called without a path")
         input_path = Path(path)
         suffix = input_path.suffix.lower()
         if suffix in {".yaml", ".yml"}:
             raw_config = yaml.safe_load(input_path.read_text(encoding="utf-8"))
         else:
             raw_config = json.loads(input_path.read_text(encoding="utf-8"))
+
+        if not isinstance(raw_config, Mapping):
+            raise ValidationError("config root must be a mapping")
+        unknown_config_keys = set(raw_config) - {"runtime", "optimization", "inputs"}
+        if unknown_config_keys:
+            raise ValidationError(
+                "unknown config keys: " + ", ".join(sorted(unknown_config_keys))
+            )
+
         raw_runtime = raw_config.get("runtime", {})
+        if not isinstance(raw_runtime, Mapping):
+            raise ValidationError("runtime must be a mapping")
+        runtime_values = dict(raw_runtime)
+        if "output_dir" in runtime_values and "output_directory" not in runtime_values:
+            runtime_values["output_directory"] = runtime_values.pop("output_dir")
+        unknown_runtime_keys = set(runtime_values) - {
+            "seed",
+            "log_level",
+            "output_directory",
+        }
+        if unknown_runtime_keys:
+            raise ValidationError(
+                "unknown runtime keys: " + ", ".join(sorted(unknown_runtime_keys))
+            )
+
         raw_optimization = raw_config.get("optimization", {})
-        if "output_dir" in raw_runtime and "output_directory" not in raw_runtime:
-            raw_runtime["output_directory"] = raw_runtime.pop("output_dir")
-        runtime = Runtime(**raw_runtime)
-        optimization = Optimization(**raw_optimization)
+        if not isinstance(raw_optimization, Mapping):
+            raise ValidationError("optimization must be a mapping")
+        optimization_values = dict(raw_optimization)
+        unknown_optimization_keys = set(optimization_values) - {
+            "alpha",
+            "method",
+            "enforce_nu_greater_than_six",
+        }
+        if unknown_optimization_keys:
+            raise ValidationError(
+                "unknown optimization keys: "
+                + ", ".join(sorted(unknown_optimization_keys))
+            )
+
+        runtime = Runtime(**runtime_values)
+        optimization = Optimization(**optimization_values)
         raw_inputs = raw_config.get("inputs")
         portfolio_inputs: PortfolioInputs | None = None
         if raw_inputs is not None:
+            if not isinstance(raw_inputs, Mapping):
+                raise ValidationError("inputs must be a mapping")
+            unknown_input_keys = set(raw_inputs) - {
+                "expected_payoff",
+                "cost_vector",
+                "precision_matrix",
+            }
+            if unknown_input_keys:
+                raise ValidationError(
+                    "unknown inputs keys: " + ", ".join(sorted(unknown_input_keys))
+                )
             portfolio_inputs = PortfolioInputs(
                 expected_payoff=np.asarray(raw_inputs["expected_payoff"], dtype=float),
                 cost_vector=np.asarray(raw_inputs["cost_vector"], dtype=float),

@@ -122,3 +122,32 @@ def test_load_config_invalid_json_raises(tmp_path: Path) -> None:
     bad.write_text("not valid json {", encoding="utf-8")
     with pytest.raises(json.JSONDecodeError):
         Load(str(bad))()
+
+
+def test_load_config_rejects_unknown_keys(tmp_path: Path) -> None:
+    """Unknown fields are reported instead of silently ignored."""
+    config_file = tmp_path / "unknown.json"
+    config_file.write_text('{"runtime": {"mystery": true}}', encoding="utf-8")
+    with pytest.raises(ValueError, match="unknown runtime keys"):
+        Load(str(config_file))()
+
+
+def test_load_config_rejects_non_mapping_root(tmp_path: Path) -> None:
+    """A list or scalar cannot be interpreted as configuration."""
+    config_file = tmp_path / "list.json"
+    config_file.write_text("[]", encoding="utf-8")
+    with pytest.raises(ValueError, match="config root"):
+        Load(str(config_file))()
+
+
+def test_load_file_does_not_mutate_input_mapping(tmp_path: Path) -> None:
+    """Legacy output_dir handling is performed on a copy."""
+    config_file = tmp_path / "alias.json"
+    config_file.write_text(
+        '{"runtime": {"output_dir": "reports"}}', encoding="utf-8"
+    )
+    loader = Load(str(config_file))
+    loader.load_file()
+    assert config_file.read_text(encoding="utf-8") == (
+        '{"runtime": {"output_dir": "reports"}}'
+    )

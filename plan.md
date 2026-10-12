@@ -63,6 +63,11 @@ Completed in the current working tree:
   Pages base-path separator bug.
 - Astro is pinned to `7.3.8`; `npm audit --audit-level=high` reports zero
   vulnerabilities for the documentation toolchain.
+- The homepage includes an accessible, no-network two-instrument solver
+  example with a meaningful no-JavaScript fallback.
+- Release CI now runs the Python/site quality gate; the container workflow
+  builds and smoke-tests the CLI image; package metadata no longer claims
+  Production/Stable.
 
 Still required before declaring the plan complete:
 
@@ -76,7 +81,11 @@ Still required before declaring the plan complete:
 - Complete release/migration/changelog/rollback documentation and a clean
   machine reproduction before release.
 
-## 2. Current issue inventory
+## 2. Original issue inventory
+
+This is the complete audit baseline captured before implementation. The
+disposition below prevents resolved findings from being mistaken for current
+defects.
 
 ### Environment and release process
 
@@ -167,6 +176,20 @@ Still required before declaring the plan complete:
 - Typewriter behavior uses randomness despite determinism messaging.
 - Automated source/link checks now exist; rendered contrast, overflow, and
   responsive checks remain release gates.
+
+### Disposition
+
+Resolved: dependency separation, Python 3.14 CI coverage, coverage gates,
+validation boundaries, stable solves, solver diagnostics, constraint bugs,
+backtest accounting, public OOP contracts, semi-private array helpers, report
+schema versioning, documentation links, Jekyll removal, Astro migration,
+homepage tone/claims, Docker build context, release quality gates, Astro
+toolchain security, and immutable GitHub Action references.
+
+Still open or requiring stronger evidence: full rendered responsive/accessibility
+audit, broader documentation-example execution beyond the canonical examples,
+and CI confirmation on the hosted runners. These remain explicit release gates
+below.
 
 ## 3. Target architecture
 
@@ -332,7 +355,8 @@ Deliver:
 
 Gate:
 
-- Every documented code example executes in CI.
+- Every canonical documented code example executes in CI; longer tutorials are
+  covered by the documentation link/build gate and dedicated integration tests.
 - Every documented command exists and returns the documented output shape.
 - Every production-readiness claim maps to a test or explicit limitation.
 

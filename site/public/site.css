@@ -1195,6 +1195,13 @@ main.layout-page { background: var(--bg); min-height: 70vh; }
 .number { color: var(--brand); font: 700 .8rem 'JetBrains Mono', monospace; }
 .notice { display: flex; justify-content: space-between; gap: 20px; align-items: center; margin-bottom: 72px; padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--brand-soft); }
 .notice p { margin: 0; }
+.demo { width: min(var(--container-narrow), calc(100% - 2 * var(--gutter))); margin: 20px auto 72px; padding: 44px 0; border-top: 1px solid var(--line); }
+.demo-copy { max-width: 680px; color: var(--text-2); }
+.solver-demo { display: grid; grid-template-columns: repeat(2, minmax(0, 180px)) auto; gap: 14px; align-items: end; margin-top: 26px; }
+.solver-demo label { display: grid; gap: 7px; color: var(--text-2); font-size: .9rem; font-weight: 650; }
+.solver-demo input { width: 100%; min-height: 44px; padding: 0 10px; color: var(--text); border: 1px solid var(--line-2); border-radius: 7px; background: var(--paper); font: inherit; }
+.solver-output { grid-column: 1 / -1; padding: 14px 16px; color: var(--brand-ink); background: var(--brand-soft); border-radius: 8px; font-weight: 700; }
+.demo-note { color: var(--text-2); }
 .site-footer { display: flex; justify-content: space-between; gap: 20px; padding: 28px 0 44px; border-top: 1px solid var(--line); color: var(--muted); font-size: .88rem; }
 .docs { padding-bottom: 70px; }
 .doc-page { display: grid; grid-template-columns: 210px minmax(0, 760px); gap: clamp(32px, 7vw, 96px); padding-top: 64px; }
@@ -1221,4 +1228,6 @@ main.layout-page { background: var(--bg); min-height: 70vh; }
   .doc-nav { position: static; display: flex; flex-wrap: wrap; gap: 8px 14px; padding: 14px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); }
   .doc-nav .eyebrow { flex-basis: 100%; margin: 0; }
   .notice, .site-footer { align-items: flex-start; flex-direction: column; }
+  .solver-demo { grid-template-columns: 1fr; align-items: stretch; }
+  .solver-output { grid-column: auto; }
 }

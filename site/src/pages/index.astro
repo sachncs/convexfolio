@@ -20,5 +20,33 @@ const base = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL :
       <article><span class="number">03</span><h3>Composable design</h3><p>Risk measures, constraints, and optimisers are public ABC contracts with interchangeable implementations.</p></article>
     </div>
   </section>
+  <section class="demo" aria-labelledby="demo-title">
+    <div class="section-heading"><p class="eyebrow">A constrained example</p><h2 id="demo-title">Change the prices. See the budget move.</h2></div>
+    <p class="demo-copy">This is the same two-instrument variance example used in the getting-started guide. It is a local calculation: no market data, network request, or investment recommendation is involved.</p>
+    <form id="solver-demo" class="solver-demo">
+      <label>Instrument A price <input id="price-a" type="number" min="0.01" step="0.01" value="0.60" /></label>
+      <label>Instrument B price <input id="price-b" type="number" min="0.01" step="0.01" value="0.40" /></label>
+      <button class="button primary" type="submit">Recalculate</button>
+      <output id="solver-output" class="solver-output" aria-live="polite">A: 64.0% · B: 36.0% of the $1 budget.</output>
+    </form>
+    <noscript><p class="demo-note">JavaScript is disabled. The documented Python example remains available in the <a href={`${base}docs/getting-started/`}>getting-started guide</a>.</p></noscript>
+  </section>
   <section class="notice"><p><strong>Scope:</strong> Convexfolio does not place trades, connect to brokerages, or provide financial advice.</p><a href={`${base}docs/faq/`}>Understand the limits →</a></section>
 </SiteLayout>
+
+<script is:inline>
+  const form = document.querySelector("#solver-demo");
+  const output = document.querySelector("#solver-output");
+  form?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const priceA = Number(document.querySelector("#price-a")?.value);
+    const priceB = Number(document.querySelector("#price-b")?.value);
+    if (!Number.isFinite(priceA) || !Number.isFinite(priceB) || priceA <= 0 || priceB <= 0) {
+      output.textContent = "Enter two positive finite prices.";
+      return;
+    }
+    const denominator = priceA * priceA + priceB * priceB;
+    const allocationA = (priceA * priceA) / denominator;
+    output.textContent = `A: ${(allocationA * 100).toFixed(1)}% · B: ${((1 - allocationA) * 100).toFixed(1)}% of the $1 budget.`;
+  });
+</script>

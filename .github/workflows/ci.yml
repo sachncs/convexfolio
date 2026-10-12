@@ -18,6 +18,17 @@ jobs:
       - name: Check local documentation links
         run: python scripts/check_docs.py
 
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: site
+
+      - name: Build Jekyll site
+        working-directory: site
+        run: bundle exec jekyll build --destination ../_site
+
   test:
     runs-on: ubuntu-latest
     strategy:

@@ -43,11 +43,14 @@ class CFVaR2Risk(RiskMeasure):
 
     def evaluate(self, weights: np.ndarray) -> RiskEvaluation:
         """Return the second-order CFVaR value."""
+        values = np.asarray(weights, dtype=float)
+        if values.shape != self.inputs.cost_vector.shape:
+            raise ValidationError("weights do not match portfolio dimensions")
         value = CFVaR2nd(
             alpha=self.alpha,
             expected_payoff=self.inputs.expected_payoff,
             precision_matrix=self.inputs.precision_matrix,
-            weights=np.asarray(weights, dtype=float),
+            weights=values,
         ).value
         if not np.isfinite(value):
             raise ValidationError("CFVaR2 evaluation was not finite")

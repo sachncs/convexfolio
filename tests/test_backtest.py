@@ -80,6 +80,23 @@ def test_load_price_history_csv_rejects_empty(tmp_dir: Path) -> None:
         load_price_history_csv(csv_path)
 
 
+@pytest.mark.parametrize(
+    ("content", "message"),
+    [
+        ("timestamp,A,A\n1,1,2\n2,1,2\n", "unique"),
+        ("timestamp,A\n1\n2,1,2\n", "match"),
+        ("timestamp,A\n,1\n", "timestamp"),
+    ],
+)
+def test_load_price_history_csv_rejects_malformed_rows(
+    tmp_dir: Path, content: str, message: str
+) -> None:
+    csv_path = tmp_dir / "malformed.csv"
+    csv_path.write_text(content, encoding="utf-8")
+    with pytest.raises(ValueError, match=message):
+        load_price_history_csv(csv_path)
+
+
 def test_load_price_history_csv_missing_file() -> None:
     with pytest.raises(FileNotFoundError):
         load_price_history_csv("/nonexistent/path.csv")
@@ -159,6 +176,14 @@ def test_run_backtest_rejects_zero_rebalance_frequency(history: PriceHistory) ->
         BacktestConfig(portfolio_inputs=inputs, rebalance_frequency=0)
 
 
+def test_backtest_config_rejects_invalid_cost_and_alpha() -> None:
+    inputs = SyntheticPortfolio(3, 8.0, 7)()
+    with pytest.raises(ValidationError, match="transaction_cost_bps"):
+        BacktestConfig(portfolio_inputs=inputs, transaction_cost_bps=-1.0)
+    with pytest.raises(ValidationError, match="alpha"):
+        BacktestConfig(portfolio_inputs=inputs, alpha=0.5)
+
+
 def test_run_backtest_json_safe_summary(history: PriceHistory) -> None:
     inputs = SyntheticPortfolio(5, 8.0, 7)()
     cfg = BacktestConfig(portfolio_inputs=inputs, rebalance_frequency=2)
@@ -198,4 +223,67 @@ def test_price_history_rejects_non_positive_prices() -> None:
         PriceHistory(
             timestamps=np.array(["t0"]),
             prices=np.array([[0.0]]),
+        )
+
+
+def test_price_history_rejects_mismatched_rows() -> None:
+    with pytest.raises(ValidationError, match="one row per timestamp"):
+        PriceHistory(
+            timestamps=np.array(["t0", "t1"]),
+            prices=np.array([[1.0]]),
+        )
+
+
+def test_tolerated_solver_failure_uses_budget_feasible_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    inputs = PortfolioInputs(
+        expected_payoff=np.array([0.1, 0.1]),
+        cost_vector=np.array([1.0, 1.0]),
+        precision_matrix=np.eye(2),
+    )
+    history = PriceHistory(
+        timestamps=np.array(["t0", "t1"]),
+        prices=np.array([[1.0, 1.0], [2.0, 2.0]]),
+    )
+
+    def fail_solver(*args, **kwargs):
+        raise RuntimeError("synthetic solver failure")
+
+    monkeypatch.setattr("convexfolio.backtest.CFVaR3Numerical", fail_solver)
+    result = run_backtest(
+        history,
+        BacktestConfig(
+            portfolio_inputs=inputs,
+            tolerate_solver_failure=True,
+            transaction_cost_bps=0.0,
+        ),
+    )
+    assert result.portfolio_value[-1] == pytest.approx(2.0)
+    assert np.allclose(result.weights[0] * history.prices[0], 0.5)
+
+
+def test_tolerated_solver_failure_rejects_invalid_extra_constraint(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    inputs = SyntheticPortfolio(2, 8.0, 7)()
+    history = PriceHistory(
+        timestamps=np.array(["t0", "t1"]),
+        prices=np.ones((2, 2)),
+    )
+
+    def fail_solver(*args, **kwargs):
+        raise RuntimeError("synthetic solver failure")
+
+    monkeypatch.setattr("convexfolio.backtest.CFVaR3Numerical", fail_solver)
+    with pytest.raises(RuntimeError, match="violated"):
+        run_backtest(
+            history,
+            BacktestConfig(
+                portfolio_inputs=inputs,
+                tolerate_solver_failure=True,
+                extra_constraints=(
+                    {"type": "ineq", "fun": lambda weights: -1.0},
+                ),
+            ),
         )

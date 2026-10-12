@@ -24,7 +24,7 @@ import numpy as np
 
 from convexfolio import CFVaR3Numerical, CFVaR3Objective
 from convexfolio.config import PortfolioInputs
-from convexfolio.constraints import SLSQPLambda, long_only_inequalities
+from convexfolio.constraints import SLSQPLambda, fun_of, long_only_inequalities
 from convexfolio.errors import ValidationError
 
 
@@ -90,13 +90,27 @@ def load_price_history_csv(path: str | Path) -> PriceHistory:
         header = next(reader, None)
         if header is None:
             raise ValueError("CSV file has no header row")
+        if not header or any(not column.strip() for column in header):
+            raise ValueError("CSV header must contain non-empty column names")
         if header[0] != "timestamp":
             raise ValueError(
                 f"first CSV column must be 'timestamp' (got {header[0]!r})"
             )
+        if len(header) < 2 or len(set(header)) != len(header):
+            raise ValueError(
+                "CSV header must contain unique timestamp and price columns"
+            )
         timestamps: list[str] = []
         rows: list[list[float]] = []
         for row in reader:
+            if not row or not any(cell.strip() for cell in row):
+                continue
+            if len(row) != len(header):
+                raise ValueError(
+                    "CSV data rows must match the header column count"
+                )
+            if not row[0].strip():
+                raise ValueError("CSV timestamp values must be non-empty")
             timestamps.append(row[0])
             rows.append([float(v) for v in row[1:]])
     if not rows:
@@ -220,16 +234,11 @@ def run_backtest(history: PriceHistory, config: BacktestConfig) -> BacktestResul
             current_value = float(np.dot(holdings, current_prices))
             if not np.isfinite(current_value) or current_value <= 0.0:
                 raise RuntimeError(f"portfolio value became invalid at t={t}")
-            current_weights = holdings / current_value
+            current_weights = holdings * current_prices / current_value
         if rebalance_now:
-            if t == 0:
-                implied_inputs = scale_inputs_for_prices(
-                    initial_inputs, initial_inputs.cost_vector, current_prices
-                )
-            else:
-                implied_inputs = scale_inputs_for_prices(
-                    initial_inputs, initial_inputs.cost_vector, current_prices
-                )
+            implied_inputs = scale_inputs_for_prices(
+                initial_inputs, initial_inputs.cost_vector, current_prices
+            )
             try:
                 objective = CFVaR3Objective(
                     alpha=config.alpha,
@@ -252,11 +261,22 @@ def run_backtest(history: PriceHistory, config: BacktestConfig) -> BacktestResul
             except (ValueError, RuntimeError) as exc:
                 if not config.tolerate_solver_failure:
                     raise RuntimeError(f"rebalance at t={t} failed: {exc}") from exc
-                w = current_weights if t > 0 else (1.0 / current_prices)
+                w = (
+                    current_weights / current_prices
+                    if t > 0
+                    else np.full(n_instruments, 1.0 / n_instruments) / current_prices
+                )
                 if not np.isclose(float(w @ current_prices), 1.0, atol=1e-8):
                     raise RuntimeError(
                         f"fallback weights were not budget-feasible at t={t}"
                     ) from exc
+                for constraint in config.extra_constraints:
+                    residual = float(fun_of(constraint)(w))
+                    if not np.isfinite(residual) or residual < -1e-8:
+                        raise RuntimeError(
+                            "fallback weights violated a configured "
+                            f"constraint at t={t}"
+                        ) from exc
             target_allocations = w * current_prices
             turnover_fraction = (
                 float(np.sum(np.abs(target_allocations - current_weights)))

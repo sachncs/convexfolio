@@ -12,7 +12,14 @@ import json
 import os
 import subprocess
 import sys
+from argparse import Namespace
+from dataclasses import replace
 from pathlib import Path
+
+import pytest
+
+from convexfolio.cli import backtest_command, ingest_command, plot_command
+from convexfolio.config import Experiment, Runtime
 
 
 def run_cli(*args: str) -> subprocess.CompletedProcess[str]:
@@ -109,3 +116,36 @@ def test_cli_print_report_runs() -> None:
         f"stderr={result.stderr!r}, stdout={result.stdout[:500]!r}"
     )
     json.loads(result.stdout)  # must be valid JSON
+
+
+def test_cli_ingest_command_returns_portfolio_inputs() -> None:
+    """The programmatic ingest command uses the real CSV loader."""
+    result = ingest_command(Namespace(path="tests/fixtures/sample_portfolio.csv"))
+    assert result.n_instruments == 5
+
+
+def test_cli_plot_weights_writes_artifact(tmp_path: Path) -> None:
+    """The plotting command writes a non-empty weights image."""
+    experiment = Experiment(runtime=Runtime(output_directory=str(tmp_path)))
+    # Plotting requires explicit inputs; use the same deterministic fixture
+    # construction as the public data loader.
+    from convexfolio.data import LoadCSV
+
+    inputs = LoadCSV("tests/fixtures/sample_portfolio.csv")()
+    experiment = replace(experiment, inputs=inputs)
+    outputs = plot_command(Namespace(chart="weights"), experiment)
+    assert len(outputs) == 1
+    assert Path(outputs[0]).stat().st_size > 0
+
+
+def test_cli_backtest_command_requires_path() -> None:
+    """Backtest reports a useful error when no price CSV is supplied."""
+    with pytest.raises(SystemExit, match="--path is required"):
+        backtest_command(
+            Namespace(
+                path=None,
+                config=None,
+                rebalance_frequency=1,
+                transaction_cost_bps=5.0,
+            )
+        )

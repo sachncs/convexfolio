@@ -32,6 +32,11 @@ from convexfolio.math import (
 )
 
 
+def _reproduce_once(config: Experiment) -> dict[str, object]:
+    """Run one reproduction in a process-pool-safe top-level function."""
+    return Reproduce(config)()
+
+
 def synthetic_kappa3_from_seed(
     seed: int,
     expected_payoff: np.ndarray,
@@ -298,6 +303,8 @@ class Report:
         reference: Reference report (the first run).
     """
 
+    schema_version = "2.0"
+
     def __init__(
         self,
         config: Experiment,
@@ -328,6 +335,7 @@ class Report:
         self.seed: int = config.runtime.seed
         self.reference: dict[str, object] = results[0]
         self.summary: dict[str, object] = {
+            "schema_version": self.schema_version,
             "deterministic": self.all_match,
             "repetitions": repetitions,
             "seed": self.seed,
@@ -365,7 +373,7 @@ class Report:
         if repetitions >= parallel_threshold:
             with ProcessPoolExecutor() as executor:
                 results = list(
-                    executor.map(lambda c: Reproduce(c)(), [config] * repetitions)
+                    executor.map(_reproduce_once, [config] * repetitions)
                 )
         else:
             results = [Reproduce(config)() for _ in range(repetitions)]

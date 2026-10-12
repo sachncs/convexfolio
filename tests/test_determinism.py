@@ -17,6 +17,7 @@ def test_pipeline_is_deterministic_given_same_seed() -> None:
     assert report.repetitions == 3
     assert len(report.results) == 3
     assert report.all_match is True
+    assert report.summary["schema_version"] == "2.0"
 
 
 def test_report_from_reproduce_serialises_summary() -> None:
@@ -27,6 +28,16 @@ def test_report_from_reproduce_serialises_summary() -> None:
     assert "deterministic" in report.summary
     assert "seed" in report.summary
     assert "repetitions" in report.summary
+    assert report.summary["schema_version"] == Report.schema_version
+
+
+def test_report_parallel_repetitions_are_process_safe(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The parallel path uses a picklable worker function."""
+    monkeypatch.setenv("OPTIONS_PARALLEL_THRESHOLD", "2")
+    report = Report.from_reproduce(Experiment(), repetitions=2)
+    assert report.deterministic is True
 
 
 def test_report_from_reproduce_rejects_single_repetition() -> None:

@@ -1,0 +1,29 @@
+---
+import { getCollection, render } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+import SiteLayout from "../../layouts/SiteLayout.astro";
+
+type DocEntry = CollectionEntry<"docs">;
+
+export async function getStaticPaths() {
+  const entries: DocEntry[] = await getCollection("docs");
+  return entries.map((entry: DocEntry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props as { entry: DocEntry };
+const { Content } = await render(entry);
+const title = entry.data.title ?? entry.id.split("/").at(-1)?.replaceAll("-", " ") ?? "Documentation";
+---
+<SiteLayout title={title} description="Convexfolio documentation.">
+  <article class="doc-page">
+    <aside class="doc-nav" aria-label="Documentation navigation">
+      <p class="eyebrow">Documentation</p>
+      <a href={`${import.meta.env.BASE_URL}docs/getting-started/`}>Getting started</a>
+      <a href={`${import.meta.env.BASE_URL}docs/api-reference/`}>API reference</a>
+      <a href={`${import.meta.env.BASE_URL}docs/architecture/`}>Architecture</a>
+      <a href={`${import.meta.env.BASE_URL}docs/faq/`}>FAQ</a>
+      <a href={`${import.meta.env.BASE_URL}docs/migration/`}>Migration</a>
+    </aside>
+    <div class="prose"><Content /></div>
+  </article>
+</SiteLayout>

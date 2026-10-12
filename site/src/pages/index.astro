@@ -1,0 +1,23 @@
+---
+import SiteLayout from "../layouts/SiteLayout.astro";
+---
+<SiteLayout title="Convexfolio" description="Validated, constrained portfolio optimisation in Python.">
+  <section class="hero">
+    <p class="eyebrow">Python · NumPy · SciPy</p>
+    <h1>Portfolio optimisation you can inspect.</h1>
+    <p class="lede">Convexfolio is research software for constrained portfolio experiments. Inputs are validated, solver outcomes are checked, and failures stay visible.</p>
+    <div class="actions">
+      <a class="button primary" href={`${import.meta.env.BASE_URL}docs/getting-started/`}>Read the guide</a>
+      <a class="button secondary" href="https://github.com/sachncs/convexfolio">View the source</a>
+    </div>
+  </section>
+  <section class="principles" aria-labelledby="principles-title">
+    <div class="section-heading"><p class="eyebrow">What the project guarantees</p><h2 id="principles-title">Small, explicit contracts.</h2></div>
+    <div class="card-grid">
+      <article><span class="number">01</span><h3>Validated values</h3><p><code>Vector</code> and <code>Matrix</code> own their data, expose <code>.copy()</code>, and validate through <code>.validate()</code>.</p></article>
+      <article><span class="number">02</span><h3>Visible failure</h3><p>Infeasible constraints, invalid inputs, and solver failures raise typed errors with diagnostics.</p></article>
+      <article><span class="number">03</span><h3>Composable design</h3><p>Risk measures, constraints, and optimisers are public ABC contracts with interchangeable implementations.</p></article>
+    </div>
+  </section>
+  <section class="notice"><p><strong>Scope:</strong> Convexfolio does not place trades, connect to brokerages, or provide financial advice.</p><a href={`${import.meta.env.BASE_URL}docs/faq/`}>Understand the limits →</a></section>
+</SiteLayout>

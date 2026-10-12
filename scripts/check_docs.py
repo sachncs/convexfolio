@@ -18,15 +18,15 @@ def link_target(raw_target: str) -> str:
 
 
 def candidate_paths(root: Path, source: Path, target: str) -> list[Path]:
-    """Return possible source files for a repository or Jekyll target."""
+    """Return possible source files for repository or Astro targets."""
     if target.startswith("/"):
         relative = target.lstrip("/")
         if relative == "":
-            return [root / "site" / "index.html", root / "site" / "index.md"]
+            return [root / "site" / "src" / "pages" / "index.astro"]
         if relative.startswith("docs/"):
             document = relative.removeprefix("docs/").strip("/") or "index"
-            return [root / "site" / "docs" / f"{document}.md"]
-        return [root / "site" / relative]
+            return [root / "site" / "src" / "content" / "docs" / f"{document}.md"]
+        return [root / "site" / "src" / "pages" / relative]
     resolved = (source.parent / target).resolve()
     return [resolved]
 
@@ -35,8 +35,8 @@ def main() -> int:
     """Check local Markdown and HTML links."""
     root = Path(__file__).resolve().parents[1]
     sources = [root / "README.md", root / "CONTRIBUTING.md"]
-    sources.extend((root / "site").rglob("*.md"))
-    sources.extend((root / "site").rglob("*.html"))
+    sources.extend((root / "site" / "src").rglob("*.md"))
+    sources.extend((root / "site" / "src").rglob("*.html"))
     errors: list[str] = []
     for source in sources:
         text = source.read_text(encoding="utf-8")

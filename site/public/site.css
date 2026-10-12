@@ -1,6 +1,6 @@
 /* =============================================================
    Convexfolio — design system
-   Apple-inspired restraint, premium SaaS feel.
+   Calm, technical, documentation-first interface.
    ============================================================= */
 
 /* ─────────────────────────────── fonts */
@@ -9,14 +9,14 @@
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: url('../fonts/InterVariable.woff2') format('woff2-variations');
+  src: url('./assets/InterVariable.woff2') format('woff2-variations');
 }
 @font-face {
   font-family: 'JetBrains Mono';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('../fonts/JetBrainsMono-Regular.woff2') format('woff2');
+  src: url('./assets/JetBrainsMono-Regular.woff2') format('woff2');
 }
 
 /* ─────────────────────────────── tokens */
@@ -1162,4 +1162,63 @@ main.layout-page { background: var(--bg); min-height: 70vh; }
     scroll-behavior: auto !important;
   }
   .reveal { opacity: 1; transform: none; }
+}
+
+/* Astro documentation shell */
+.site-header, .site-footer, .hero, .principles, .notice, .doc-page {
+  width: min(var(--container), calc(100% - 2 * var(--gutter)));
+  margin-inline: auto;
+}
+.site-header {
+  min-height: 76px; display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--line); gap: 24px;
+}
+.site-header nav { display: flex; gap: 22px; align-items: center; }
+.site-header nav a { color: var(--text-2); font-size: .94rem; font-weight: 600; }
+.site-header nav a.active, .site-header nav a:hover { color: var(--brand-deep); }
+.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--text); font-weight: 750; letter-spacing: -.02em; }
+.brand img { width: 30px; height: 30px; }
+.hero { padding: clamp(72px, 12vw, 144px) 0 110px; max-width: 900px; }
+.eyebrow { color: var(--brand-deep); font: 700 .76rem/1.2 'JetBrains Mono', monospace; letter-spacing: .12em; text-transform: uppercase; }
+.hero h1 { max-width: 800px; margin: 20px 0; font-size: clamp(3rem, 8vw, 6.6rem); line-height: .98; letter-spacing: -.075em; }
+.lede { max-width: 680px; color: var(--text-2); font-size: clamp(1.12rem, 2vw, 1.35rem); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+.button { display: inline-flex; align-items: center; min-height: 46px; padding: 0 18px; border: 1px solid var(--line-2); border-radius: 8px; font-weight: 700; }
+.button.primary { color: white; background: var(--brand-deep); border-color: var(--brand-deep); }
+.button.secondary { color: var(--text); background: var(--paper); }
+.principles { padding: 64px 0; border-top: 1px solid var(--line); }
+.section-heading h2 { margin: 10px 0 34px; font-size: clamp(2rem, 4vw, 3.2rem); letter-spacing: -.05em; }
+.card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.card-grid article { min-height: 220px; padding: 24px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+.card-grid h3 { margin: 34px 0 8px; font-size: 1.2rem; }
+.card-grid p, .notice { color: var(--text-2); }
+.number { color: var(--brand); font: 700 .8rem 'JetBrains Mono', monospace; }
+.notice { display: flex; justify-content: space-between; gap: 20px; align-items: center; margin-bottom: 72px; padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--brand-soft); }
+.notice p { margin: 0; }
+.site-footer { display: flex; justify-content: space-between; gap: 20px; padding: 28px 0 44px; border-top: 1px solid var(--line); color: var(--muted); font-size: .88rem; }
+.docs { padding-bottom: 70px; }
+.doc-page { display: grid; grid-template-columns: 210px minmax(0, 760px); gap: clamp(32px, 7vw, 96px); padding-top: 64px; }
+.doc-nav { position: sticky; top: 24px; align-self: start; display: grid; gap: 10px; padding-top: 8px; }
+.doc-nav a { color: var(--text-2); font-size: .92rem; }
+.doc-nav a:hover { color: var(--brand-deep); }
+.prose { min-width: 0; }
+.prose h1 { margin-top: 0; font-size: clamp(2.3rem, 5vw, 4rem); letter-spacing: -.06em; line-height: 1.04; }
+.prose h2 { margin-top: 2.2em; font-size: 1.75rem; letter-spacing: -.035em; }
+.prose h3 { margin-top: 1.8em; font-size: 1.25rem; }
+.prose p, .prose li { color: var(--text-2); }
+.prose pre { overflow-x: auto; padding: 18px; border-radius: var(--radius); background: var(--code-bg); }
+.prose pre code { color: var(--code-text); }
+.prose :not(pre) > code { padding: .15em .35em; color: var(--brand-ink); background: var(--brand-soft); border-radius: 4px; }
+.prose table { display: block; overflow-x: auto; border-collapse: collapse; }
+.prose th, .prose td { padding: 10px 14px; border: 1px solid var(--line); text-align: left; }
+.prose th { background: var(--paper-2); }
+@media (max-width: 760px) {
+  .site-header { min-height: 64px; }
+  .site-header nav { gap: 12px; }
+  .site-header nav a:last-child { display: none; }
+  .hero { padding-top: 72px; }
+  .card-grid, .doc-page { grid-template-columns: 1fr; }
+  .doc-nav { position: static; display: flex; flex-wrap: wrap; gap: 8px 14px; padding: 14px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); }
+  .doc-nav .eyebrow { flex-basis: 100%; margin: 0; }
+  .notice, .site-footer { align-items: flex-start; flex-direction: column; }
 }

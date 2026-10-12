@@ -1,0 +1,15 @@
+{
+  "name": "convexfolio-docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "check": "astro check"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.4",
+    "astro": "5.14.1",
+    "typescript": "5.9.3"
+  }
+}

@@ -253,7 +253,7 @@ mypy convexfolio
 
 ### How do I submit a change?
 
-See [CONTRIBUTING.md](../../CONTRIBUTING.md) for the full workflow.
+See [CONTRIBUTING.md](../../../../CONTRIBUTING.md) for the full workflow.
 
 ---
 
@@ -261,5 +261,5 @@ See [CONTRIBUTING.md](../../CONTRIBUTING.md) for the full workflow.
 
 - **Bug reports / feature requests:** [GitHub Issues](https://github.com/sachncs/convexfolio/issues)
 - **Questions / discussion:** [GitHub Discussions](https://github.com/sachncs/convexfolio/discussions)
-- **Security issues:** See [SECURITY.md](../../SECURITY.md) — please
+- **Security issues:** See [SECURITY.md](../../../../SECURITY.md) — please
   don't open a public issue for security problems.

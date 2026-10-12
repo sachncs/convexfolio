@@ -1,0 +1,35 @@
+---
+const { title = "Convexfolio documentation", description = "Validated portfolio optimisation in Python." } = Astro.props;
+const path = Astro.url.pathname;
+const isDocs = path.includes("/docs");
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <link rel="icon" href={`${import.meta.env.BASE_URL}assets/favicon.svg`} />
+    <title>{title} · Convexfolio</title>
+    <link rel="stylesheet" href={`${import.meta.env.BASE_URL}site.css`} />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href={`${import.meta.env.BASE_URL}`} aria-label="Convexfolio home">
+        <img src={`${import.meta.env.BASE_URL}assets/logo.svg`} alt="" width="30" height="30" />
+        <span>Convexfolio</span>
+      </a>
+      <nav aria-label="Primary navigation">
+        <a class:list={{ active: isDocs }} href={`${import.meta.env.BASE_URL}docs/`}>Documentation</a>
+        <a href="https://github.com/sachncs/convexfolio">GitHub</a>
+      </nav>
+    </header>
+    <main class:list={{ docs: isDocs }}>
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <span>Convexfolio · research software for constrained portfolio optimisation</span>
+      <a href={`${import.meta.env.BASE_URL}docs/faq/`}>FAQ</a>
+    </footer>
+  </body>
+</html>

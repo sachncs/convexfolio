@@ -334,12 +334,18 @@ class CFVaR2nd:
         weights: FloatArray,
     ) -> None:
         shapes(expected_payoff, precision_matrix, weights)
+        if not np.isfinite(alpha) or not 0.0 < alpha < 1.0:
+            raise ValueError("alpha must satisfy 0 < alpha < 1")
         self.alpha = alpha
         self.expected_payoff = expected_payoff
         self.precision_matrix = precision_matrix
         self.weights = weights
         z_alpha = norm.ppf(alpha)
         variance_value = Quadratic(precision_matrix, weights).value
+        if not np.isfinite(variance_value) or variance_value <= 0.0:
+            raise ValueError("portfolio variance must be positive and finite")
+        if not np.isfinite(z_alpha):
+            raise ValueError("alpha must produce a finite normal quantile")
         self.value = float(
             -Expect(expected_payoff, weights).value - z_alpha * np.sqrt(variance_value)
         )
@@ -371,6 +377,10 @@ class CFVaR3rd:
         cumulant: float,
     ) -> None:
         shapes(expected_payoff, precision_matrix, weights)
+        if not np.isfinite(alpha) or not 0.0 < alpha < 1.0:
+            raise ValueError("alpha must satisfy 0 < alpha < 1")
+        if not np.isfinite(cumulant):
+            raise ValueError("cumulant must be finite")
         self.alpha = alpha
         self.expected_payoff = expected_payoff
         self.precision_matrix = precision_matrix
@@ -378,6 +388,10 @@ class CFVaR3rd:
         self.cumulant = cumulant
         z_alpha = norm.ppf(alpha)
         variance_value = Quadratic(precision_matrix, weights).value
+        if not np.isfinite(variance_value) or variance_value <= 0.0:
+            raise ValueError("portfolio variance must be positive and finite")
+        if not np.isfinite(z_alpha):
+            raise ValueError("alpha must produce a finite normal quantile")
         skewness_correction = (z_alpha**2 - 1.0) / 6.0 * (cumulant / variance_value)
         self.value = float(
             -Expect(expected_payoff, weights).value
@@ -402,9 +416,13 @@ class Minimize:
     def __init__(self, variance: Variance, cost_vector: FloatArray) -> None:
         self.variance = variance
         self.cost_vector = cost_vector
-        precision_inverse = np.linalg.inv(variance.precision_matrix)
-        denominator = float(cost_vector.T @ precision_inverse @ cost_vector)
-        self.value = (precision_inverse @ cost_vector) / denominator
+        inverse_times_cost = np.linalg.solve(
+            variance.precision_matrix, cost_vector
+        )
+        denominator = float(cost_vector.T @ inverse_times_cost)
+        if not np.isfinite(denominator) or denominator <= 0.0:
+            raise ValueError("variance problem has an invalid normalization")
+        self.value = inverse_times_cost / denominator
 
 
 class Loss:
@@ -511,12 +529,13 @@ class OptimalEpsilon:
         if not np.isfinite(z_score):
             raise ValueError("Could not compute normal quantile")
 
-        precision_inverse = np.linalg.inv(precision_matrix)
         constraint_matrix = np.vstack([expected_payoff.T, cost_vector.T])
-        projection = (
-            precision_inverse
-            @ constraint_matrix.T
-            @ np.linalg.inv(constraint_matrix @ precision_inverse @ constraint_matrix.T)
+        precision_inverse_times_constraints = np.linalg.solve(
+            precision_matrix, constraint_matrix.T
+        )
+        constraint_gram = constraint_matrix @ precision_inverse_times_constraints
+        projection = precision_inverse_times_constraints @ np.linalg.solve(
+            constraint_gram, np.eye(constraint_gram.shape[0])
         )
 
         loss_gradient = projection[:, 0]
@@ -595,14 +614,14 @@ class CFVaR2Closed:
             cost_vector=cost_vector,
             precision_matrix=precision_matrix,
         ).value
-        precision_inverse = np.linalg.inv(precision_matrix)
         constraint_matrix = np.vstack([expected_payoff.T, cost_vector.T])
         dual_variable = np.array([epsilon_star, 1.0], dtype=float)
-        left_factor = precision_inverse @ constraint_matrix.T
-        right_factor = (
-            np.linalg.inv(constraint_matrix @ precision_inverse @ constraint_matrix.T)
-            @ dual_variable
+        precision_inverse_times_constraints = np.linalg.solve(
+            precision_matrix, constraint_matrix.T
         )
+        constraint_gram = constraint_matrix @ precision_inverse_times_constraints
+        left_factor = precision_inverse_times_constraints
+        right_factor = np.linalg.solve(constraint_gram, dual_variable)
         self.value = left_factor @ right_factor
 
 

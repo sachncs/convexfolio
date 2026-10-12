@@ -52,8 +52,12 @@ class Matrix(np.ndarray):
         copied = np.asarray(self, dtype=float).copy(order=order)
         return cast(Matrix, copied.view(Matrix))
 
-    def validate(self, name: str = "matrix") -> Matrix:
-        """Validate finiteness, symmetry, and positive definiteness in place."""
+    def validate(
+        self, name: str = "matrix", max_condition_number: float = 1e12
+    ) -> Matrix:
+        """Validate structure, positive definiteness, and conditioning."""
+        if not np.isfinite(max_condition_number) or max_condition_number <= 1.0:
+            raise ValidationError("max_condition_number must be greater than 1")
         if not np.all(np.isfinite(self)):
             raise ValidationError(f"{name} must contain only finite values")
         if not np.allclose(self, self.T, rtol=1e-10, atol=1e-12):
@@ -64,6 +68,12 @@ class Matrix(np.ndarray):
             raise ValidationError(f"{name} could not be factorised") from exc
         if float(np.min(eigenvalues)) <= 0.0:
             raise ValidationError(f"{name} must be positive definite")
+        condition_number = float(np.linalg.cond(self))
+        if not np.isfinite(condition_number) or condition_number > max_condition_number:
+            raise ValidationError(
+                f"{name} is too ill-conditioned "
+                f"(condition number {condition_number:.3g})"
+            )
         return self
 
 

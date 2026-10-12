@@ -1,11 +1,10 @@
 ---
-layout: page
 title: "Frequently Asked Questions"
 ---
 # Frequently Asked Questions
 
 Common questions, answered without jargon. If a word confuses you,
-look it up in the [Glossary]({{ site.baseurl }}/docs/glossary/).
+look it up in the [Glossary](/convexfolio/docs/glossary/).
 
 ---
 
@@ -24,9 +23,9 @@ don't need to read the paper to use the package.
 
 ### I'm new to Python / finance / both. Can I still use this?
 
-Yes. Start with the [Getting Started]({{ site.baseurl }}/docs/getting-started/) guide. It
+Yes. Start with the [Getting Started](/convexfolio/docs/getting-started/) guide. It
 walks you through everything from "what's a terminal?" to "what do
-the numbers mean?". The [Glossary]({{ site.baseurl }}/docs/glossary/) defines every term
+the numbers mean?". The [Glossary](/convexfolio/docs/glossary/) defines every term
 you'll encounter.
 
 ### What Python versions work?
@@ -51,7 +50,7 @@ not a live-trading or investment-advice system. Convexfolio:
 The demo uses synthetic data and the numerical model still needs
 independent validation against your data and controls. To use
 Convexfolio with real options, feed in your own market data — see
-[Mismatch Report]({{ site.baseurl }}/docs/mismatch_report/).
+[Mismatch Report](/convexfolio/docs/mismatch_report/).
 
 ---
 
@@ -68,7 +67,7 @@ pip install -e '.[dev,plot,hf-data]'
 ```
 
 That's five commands. The full explanation is in
-[Getting Started]({{ site.baseurl }}/docs/getting-started/#step-3--install-convexfolio).
+[Getting Started](/convexfolio/docs/getting-started/#step-3--install-convexfolio).
 
 ### What does the package need to run?
 
@@ -114,7 +113,7 @@ weights = Minimize(Variance(precision_matrix), cost_vector).value
 print(weights)
 ```
 
-That's it. See [Getting Started]({{ site.baseurl }}/docs/getting-started/#step-5--run-it-from-python)
+That's it. See [Getting Started](/convexfolio/docs/getting-started/#step-5--run-it-from-python)
 for the line-by-line walkthrough.
 
 ### What's the difference between Variance and CFVaR?

@@ -1,10 +1,9 @@
 ---
-layout: page
 title: "Research Determination Notes"
 ---
 # Research Determination Notes
 
-> 📖 **New here?** See the [Glossary]({{ site.baseurl }}/docs/glossary/) for terms like
+> 📖 **New here?** See the [Glossary](/convexfolio/docs/glossary/) for terms like
 > *variance*, *cumulant*, *alpha*.
 
 ## What is "determination status"?
@@ -85,7 +84,7 @@ contributes to the portfolio.
 
 **Status**: DETERMINED
 
-The transpose of `H`. ([Glossary: transpose]({{ site.baseurl }}/docs/glossary/))
+The transpose of `H`. ([Glossary: transpose](/convexfolio/docs/glossary/))
 
 | | |
 |---|---|
@@ -216,10 +215,10 @@ Things we haven't figured out yet. Not blockers, but worth noting.
 
 ## Where to look next
 
-- **[Glossary]({{ site.baseurl }}/docs/glossary/)** — Plain-English definitions.
-- **[Fidelity Report]({{ site.baseurl }}/docs/fidelity_report/)** — Algorithm-by-algorithm
+- **[Glossary](/convexfolio/docs/glossary/)** — Plain-English definitions.
+- **[Fidelity Report](/convexfolio/docs/fidelity_report/)** — Algorithm-by-algorithm
   mapping from paper to code.
-- **[Mismatch Report]({{ site.baseurl }}/docs/mismatch_report/)** — Known places where the
+- **[Mismatch Report](/convexfolio/docs/mismatch_report/)** — Known places where the
   code and paper diverge.
-- **[Architecture]({{ site.baseurl }}/docs/architecture/)** — How the package fits
+- **[Architecture](/convexfolio/docs/architecture/)** — How the package fits
   together.

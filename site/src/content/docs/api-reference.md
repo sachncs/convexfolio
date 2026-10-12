@@ -1,5 +1,4 @@
 ---
-layout: page
 title: "API Reference"
 ---
 # API Reference
@@ -7,8 +6,8 @@ title: "API Reference"
 Every public symbol in Convexfolio, with examples.
 
 > 📖 **New to Python or finance?** Start with
-> [Getting Started]({{ site.baseurl }}/docs/getting-started/) and the
-> [Glossary]({{ site.baseurl }}/docs/glossary/). Come back here once you can read a
+> [Getting Started](/convexfolio/docs/getting-started/) and the
+> [Glossary](/convexfolio/docs/glossary/). Come back here once you can read a
 > simple Python script.
 >
 > **Looking for the 30-second version?** Jump to

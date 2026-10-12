@@ -1,10 +1,9 @@
 ---
-layout: page
 title: "Fidelity Report"
 ---
 # Fidelity Report
 
-> 📖 **New here?** See the [Glossary]({{ site.baseurl }}/docs/glossary/) for terms like
+> 📖 **New here?** See the [Glossary](/convexfolio/docs/glossary/) for terms like
 > *variance*, *CFVaR*, *precision matrix*.
 
 ## What does "fidelity" mean?
@@ -145,7 +144,7 @@ numerical fallback if roots fail.
 The pipeline in `Reproduce` uses synthetic data when run without
 `experiment.inputs`. Real-market replication requires
 data-specific integration. See
-[Mismatch Report]({{ site.baseurl }}/docs/mismatch_report/).
+[Mismatch Report](/convexfolio/docs/mismatch_report/).
 
 ### Numerical Precision
 
@@ -166,7 +165,7 @@ implementations. We haven't done a head-to-head comparison.
 
 ## Testing coverage
 
-Every algorithm above has a unit test. ([Glossary: pytest]({{ site.baseurl }}/docs/glossary/))
+Every algorithm above has a unit test. ([Glossary: pytest](/convexfolio/docs/glossary/))
 
 | File | What it tests |
 |---|---|
@@ -186,9 +185,9 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q
 
 ## Where to look next
 
-- **[Glossary]({{ site.baseurl }}/docs/glossary/)** — Plain-English definitions.
-- **[Mismatch Report]({{ site.baseurl }}/docs/mismatch_report/)** — Detailed list of known
+- **[Glossary](/convexfolio/docs/glossary/)** — Plain-English definitions.
+- **[Mismatch Report](/convexfolio/docs/mismatch_report/)** — Detailed list of known
   differences between code and paper.
-- **[Research Determination Notes]({{ site.baseurl }}/docs/research_determination/)** —
+- **[Research Determination Notes](/convexfolio/docs/research_determination/)** —
   Which quantities are well-defined vs assumed.
-- **[Architecture]({{ site.baseurl }}/docs/architecture/)** — How the package fits together.
+- **[Architecture](/convexfolio/docs/architecture/)** — How the package fits together.

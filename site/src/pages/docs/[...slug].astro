@@ -7,7 +7,14 @@ type DocEntry = CollectionEntry<"docs">;
 
 export async function getStaticPaths() {
   const entries: DocEntry[] = await getCollection("docs");
-  return entries.map((entry: DocEntry) => ({ params: { slug: entry.id }, props: { entry } }));
+  return entries.map((entry: DocEntry) => {
+    const slug = entry.id === "index"
+      ? ""
+      : entry.id.endsWith("/index")
+        ? entry.id.slice(0, -6)
+        : entry.id;
+    return { params: { slug: slug || undefined }, props: { entry } };
+  });
 }
 
 const { entry } = Astro.props as { entry: DocEntry };

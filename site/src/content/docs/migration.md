@@ -1,5 +1,4 @@
 ---
-layout: page
 title: "Migration to the validated API"
 ---
 # Migration to the validated API

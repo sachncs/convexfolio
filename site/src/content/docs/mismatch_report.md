@@ -1,10 +1,9 @@
 ---
-layout: page
 title: "Mismatch Report"
 ---
 # Mismatch Report
 
-> 📖 **New here?** See the [Glossary]({{ site.baseurl }}/docs/glossary/) for terms like
+> 📖 **New here?** See the [Glossary](/convexfolio/docs/glossary/) for terms like
 > *cumulant*, *tolerance*.
 
 ## What is a "mismatch"?
@@ -125,9 +124,9 @@ opening a public issue.
 
 ## Where to look next
 
-- **[Glossary]({{ site.baseurl }}/docs/glossary/)** — Plain-English definitions.
-- **[Fidelity Report]({{ site.baseurl }}/docs/fidelity_report/)** — Algorithm-by-algorithm
+- **[Glossary](/convexfolio/docs/glossary/)** — Plain-English definitions.
+- **[Fidelity Report](/convexfolio/docs/fidelity_report/)** — Algorithm-by-algorithm
   mapping from paper to code.
-- **[Research Determination Notes]({{ site.baseurl }}/docs/research_determination/)** —
+- **[Research Determination Notes](/convexfolio/docs/research_determination/)** —
   Which quantities are well-defined vs assumed.
-- **[Architecture]({{ site.baseurl }}/docs/architecture/)** — How the package fits together.
+- **[Architecture](/convexfolio/docs/architecture/)** — How the package fits together.

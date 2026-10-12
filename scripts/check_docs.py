@@ -21,6 +21,8 @@ def candidate_paths(root: Path, source: Path, target: str) -> list[Path]:
     """Return possible source files for repository or Astro targets."""
     if target.startswith("/"):
         relative = target.lstrip("/")
+        if relative.startswith("convexfolio/"):
+            relative = relative.removeprefix("convexfolio/")
         if relative == "":
             return [root / "site" / "src" / "pages" / "index.astro"]
         if relative.startswith("docs/"):

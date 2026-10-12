@@ -1,5 +1,4 @@
 ---
-layout: page
 title: "Getting Started"
 ---
 # Getting Started
@@ -14,7 +13,7 @@ By the end of this guide you'll have:
 No prior knowledge required. Every command is explained.
 
 > 📖 **Stuck on a word?** Look it up in the
-> [Glossary]({{ site.baseurl }}/docs/glossary/). It defines every term used here.
+> [Glossary](/convexfolio/docs/glossary/). It defines every term used here.
 
 ---
 
@@ -278,7 +277,7 @@ recommendation.
 |---|---|---|
 | `command not found: convexfolio` | The sandbox isn't active or install failed. | Run `source .venv/bin/activate`, then `pip install -e '.[dev]'`. |
 | `ModuleNotFoundError: No module named 'convexfolio'` | Same as above. | Re-activate and re-install. |
-| `RuntimeError: Optimisation failed` | The math didn't converge. Usually because the inputs are extreme. | Try less extreme values; see [FAQ]({{ site.baseurl }}/docs/faq/). |
+| `RuntimeError: Optimisation failed` | The math didn't converge. Usually because the inputs are extreme. | Try less extreme values; see [FAQ](/convexfolio/docs/faq/). |
 | `JSONDecodeError` | The config file isn't valid JSON. | Check the file for missing commas, unclosed brackets. |
 
 ---
@@ -287,8 +286,8 @@ recommendation.
 
 You now know the basics. Where to go next:
 
-- **[FAQ]({{ site.baseurl }}/docs/faq/)** — Common questions.
-- **[Glossary]({{ site.baseurl }}/docs/glossary/)** — All the technical terms.
-- **[API Reference]({{ site.baseurl }}/docs/api-reference/)** — Every class and function,
+- **[FAQ](/convexfolio/docs/faq/)** — Common questions.
+- **[Glossary](/convexfolio/docs/glossary/)** — All the technical terms.
+- **[API Reference](/convexfolio/docs/api-reference/)** — Every class and function,
   with examples.
-- **[Architecture]({{ site.baseurl }}/docs/architecture/)** — How the pieces fit together.
+- **[Architecture](/convexfolio/docs/architecture/)** — How the pieces fit together.

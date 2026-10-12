@@ -1,5 +1,4 @@
 ---
-layout: page
 title: "Deployment"
 ---
 # Deployment
@@ -8,7 +7,7 @@ How to run Convexfolio on a server so it works automatically — once a
 day, on a schedule, or behind a Docker container.
 
 > 📖 **New to servers?** See the
-> [Glossary]({{ site.baseurl }}/docs/glossary/) for terms like `systemd`, `cron`, `Docker`.
+> [Glossary](/convexfolio/docs/glossary/) for terms like `systemd`, `cron`, `Docker`.
 
 ---
 
@@ -124,7 +123,7 @@ You should see `report.json` written after the first run.
 ## Option 2 — systemd (for one-off or boot-time runs)
 
 `systemd` is Linux's built-in service manager. It's how every Linux
-daemon runs. ([Glossary: systemd]({{ site.baseurl }}/docs/glossary/))
+daemon runs. ([Glossary: systemd](/convexfolio/docs/glossary/))
 
 ### Step 1 — install the package
 
@@ -154,7 +153,7 @@ StandardError=journal
 WantedBy=multi-user.target
 ```
 
-Format: standard systemd unit file. ([Glossary: systemd]({{ site.baseurl }}/docs/glossary/))
+Format: standard systemd unit file. ([Glossary: systemd](/convexfolio/docs/glossary/))
 
 ### Step 3 — enable and run
 
@@ -176,7 +175,7 @@ sudo journalctl -u convexfolio -n 50
 ## Option 3 — Docker (for portability)
 
 Docker packages Convexfolio + its dependencies into one image that
-runs the same on every machine. ([Glossary: Docker]({{ site.baseurl }}/docs/glossary/))
+runs the same on every machine. ([Glossary: Docker](/convexfolio/docs/glossary/))
 
 ### Step 1 — write the Dockerfile
 
@@ -214,7 +213,7 @@ docker run --rm \
 
 For a scheduled Docker run, you'd typically combine this with cron on
 the host (yes, you can have cron run `docker run ...`) or use a
-container orchestrator like Kubernetes. ([Glossary: Docker]({{ site.baseurl }}/docs/glossary/))
+container orchestrator like Kubernetes. ([Glossary: Docker](/convexfolio/docs/glossary/))
 
 ---
 
@@ -316,8 +315,8 @@ chmod 777 ./site/artifacts    # or chown to match the container's user
 
 ## Where to look next
 
-- **[Glossary]({{ site.baseurl }}/docs/glossary/)** — Every term used here.
-- **[Release process]({{ site.baseurl }}/docs/release/)** — How to publish a new version
+- **[Glossary](/convexfolio/docs/glossary/)** — Every term used here.
+- **[Release process](/convexfolio/docs/release/)** — How to publish a new version
   after fixing things in production.
-- **[Architecture]({{ site.baseurl }}/docs/architecture/)** — How the package is put
+- **[Architecture](/convexfolio/docs/architecture/)** — How the package is put
   together.

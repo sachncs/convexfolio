@@ -17,8 +17,10 @@ from convexfolio.backtest import (
     load_price_history_csv,
     run_backtest,
 )
+from convexfolio.config import PortfolioInputs
 from convexfolio.constraints import long_only_inequalities
 from convexfolio.data import SyntheticPortfolio
+from convexfolio.errors import ValidationError
 
 
 @pytest.fixture()
@@ -45,7 +47,7 @@ def history() -> PriceHistory:
 
 
 def test_price_history_properties() -> None:
-    prices = np.zeros((3, 4))
+    prices = np.ones((3, 4))
     h = PriceHistory(timestamps=np.array(["a", "b", "c"]), prices=prices)
     assert h.n_timestamps == 3
     assert h.n_instruments == 4
@@ -153,9 +155,8 @@ def test_run_backtest_with_long_only_constraints(history: PriceHistory) -> None:
 
 def test_run_backtest_rejects_zero_rebalance_frequency(history: PriceHistory) -> None:
     inputs = SyntheticPortfolio(5, 8.0, 7)()
-    cfg = BacktestConfig(portfolio_inputs=inputs, rebalance_frequency=0)
     with pytest.raises(ValueError, match="rebalance_frequency must be >= 1"):
-        run_backtest(history, cfg)
+        BacktestConfig(portfolio_inputs=inputs, rebalance_frequency=0)
 
 
 def test_run_backtest_json_safe_summary(history: PriceHistory) -> None:
@@ -171,3 +172,30 @@ def test_run_backtest_first_value_is_one(history: PriceHistory) -> None:
     cfg = BacktestConfig(portfolio_inputs=inputs, rebalance_frequency=1)
     result = run_backtest(history, cfg)
     assert result.portfolio_value[0] == pytest.approx(1.0, abs=1e-9)
+
+
+def test_run_backtest_marks_portfolio_to_market() -> None:
+    """Held positions change portfolio value when prices move."""
+    inputs = PortfolioInputs(
+        expected_payoff=np.array([0.1, 0.1]),
+        cost_vector=np.array([1.0, 1.0]),
+        precision_matrix=np.eye(2),
+    )
+    history = PriceHistory(
+        timestamps=np.array(["t0", "t1"]),
+        prices=np.array([[1.0, 1.0], [2.0, 2.0]]),
+    )
+    result = run_backtest(
+        history,
+        BacktestConfig(portfolio_inputs=inputs, transaction_cost_bps=0.0),
+    )
+    assert result.portfolio_value[-1] == pytest.approx(2.0)
+
+
+def test_price_history_rejects_non_positive_prices() -> None:
+    """Price histories cannot contain zero or negative prices."""
+    with pytest.raises(ValidationError, match="positive"):
+        PriceHistory(
+            timestamps=np.array(["t0"]),
+            prices=np.array([[0.0]]),
+        )

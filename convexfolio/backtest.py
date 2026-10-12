@@ -24,7 +24,8 @@ import numpy as np
 
 from convexfolio import CFVaR3Numerical, CFVaR3Objective
 from convexfolio.config import PortfolioInputs
-from convexfolio.constraints import SLSQPLambda
+from convexfolio.constraints import SLSQPLambda, long_only_inequalities
+from convexfolio.errors import ValidationError
 
 
 @dataclass(frozen=True)
@@ -38,6 +39,25 @@ class PriceHistory:
 
     timestamps: np.ndarray
     prices: np.ndarray
+
+    def __post_init__(self) -> None:
+        """Copy and validate timestamps and strictly positive prices."""
+        timestamps = np.array(self.timestamps, copy=True)
+        prices = np.array(self.prices, dtype=float, copy=True)
+        if timestamps.ndim != 1 or timestamps.size == 0:
+            raise ValidationError(
+                "timestamps must be a non-empty one-dimensional array"
+            )
+        if prices.ndim != 2 or prices.shape[0] != timestamps.shape[0]:
+            raise ValidationError(
+                "prices must be two-dimensional with one row per timestamp"
+            )
+        if prices.shape[1] == 0 or not np.all(np.isfinite(prices)):
+            raise ValidationError("prices must contain finite instrument values")
+        if np.any(prices <= 0.0):
+            raise ValidationError("prices must contain only positive values")
+        object.__setattr__(self, "timestamps", timestamps)
+        object.__setattr__(self, "prices", prices)
 
     @property
     def n_timestamps(self) -> int:
@@ -116,6 +136,20 @@ class BacktestConfig:
         default_factory=tuple
     )
 
+    def __post_init__(self) -> None:
+        """Validate simulation and solver configuration."""
+        if self.rebalance_frequency < 1:
+            raise ValidationError("rebalance_frequency must be >= 1")
+        if (
+            not np.isfinite(self.transaction_cost_bps)
+            or self.transaction_cost_bps < 0.0
+        ):
+            raise ValidationError(
+                "transaction_cost_bps must be finite and non-negative"
+            )
+        if not np.isfinite(self.alpha) or not 0.0 < self.alpha < 0.5:
+            raise ValidationError("alpha must satisfy 0 < alpha < 0.5")
+
 
 @dataclass(frozen=True)
 class BacktestResult:
@@ -171,20 +205,30 @@ def run_backtest(history: PriceHistory, config: BacktestConfig) -> BacktestResul
     turnover = np.zeros(n_timestamps, dtype=float)
     cumulative_costs = np.zeros(n_timestamps, dtype=float)
 
-    previous_weights = np.zeros(n_instruments, dtype=float)
+    holdings = np.zeros(n_instruments, dtype=float)
     initial_inputs = config.portfolio_inputs
 
     cost_per_unit = float(config.transaction_cost_bps) / 10_000.0
 
     for t in range(n_timestamps):
         rebalance_now = t == 0 or t % int(config.rebalance_frequency) == 0
+        current_prices = history.prices[t]
+        if t == 0:
+            current_value = 1.0
+            current_weights = np.zeros(n_instruments, dtype=float)
+        else:
+            current_value = float(np.dot(holdings, current_prices))
+            if not np.isfinite(current_value) or current_value <= 0.0:
+                raise RuntimeError(f"portfolio value became invalid at t={t}")
+            current_weights = holdings / current_value
         if rebalance_now:
             if t == 0:
-                initial_prices = history.prices[0]
-                implied_inputs = initial_inputs
+                implied_inputs = scale_inputs_for_prices(
+                    initial_inputs, initial_inputs.cost_vector, current_prices
+                )
             else:
                 implied_inputs = scale_inputs_for_prices(
-                    initial_inputs, initial_prices, history.prices[t]
+                    initial_inputs, initial_inputs.cost_vector, current_prices
                 )
             try:
                 objective = CFVaR3Objective(
@@ -200,35 +244,38 @@ def run_backtest(history: PriceHistory, config: BacktestConfig) -> BacktestResul
                         / float(implied_inputs.cost_vector @ implied_inputs.cost_vector)
                     ),
                     objective_callable=objective,
-                    extra_constraints=config.extra_constraints,
+                        extra_constraints=(
+                            *long_only_inequalities(n_instruments),
+                            *config.extra_constraints,
+                        ),
                 ).value
             except (ValueError, RuntimeError) as exc:
                 if not config.tolerate_solver_failure:
                     raise RuntimeError(f"rebalance at t={t} failed: {exc}") from exc
-                w = (
-                    previous_weights
-                    if (
-                        previous_weights.any()
-                        and np.isclose(
-                            float(previous_weights @ implied_inputs.cost_vector),
-                            1.0,
-                            atol=1e-6,
-                        )
-                    )
-                    else (1.0 / implied_inputs.cost_vector)
-                )
-            delta = w - previous_weights
-            cost = cost_per_unit * float(np.sum(np.abs(delta)))
-            if t > 0:
-                portfolio_value[t] = portfolio_value[t - 1] * (1.0 - cost)
-                turnover[t] = float(np.sum(np.abs(delta)))
-                cumulative_costs[t] = cumulative_costs[t - 1] + cost
+                w = current_weights if t > 0 else (1.0 / current_prices)
+                if not np.isclose(float(w @ current_prices), 1.0, atol=1e-8):
+                    raise RuntimeError(
+                        f"fallback weights were not budget-feasible at t={t}"
+                    ) from exc
+            target_allocations = w * current_prices
+            turnover_fraction = (
+                float(np.sum(np.abs(target_allocations - current_weights)))
+                if t > 0
+                else 0.0
+            )
+            cost = cost_per_unit * turnover_fraction
+            if cost >= 1.0:
+                raise RuntimeError(f"transaction cost consumed portfolio at t={t}")
+            portfolio_value[t] = current_value * (1.0 - cost)
+            turnover[t] = turnover_fraction
+            cumulative_costs[t] = (
+                cumulative_costs[t - 1] + cost if t > 0 else 0.0
+            )
+            holdings = portfolio_value[t] * w
             weights_matrix[t] = w
-            previous_weights = w
         else:
-            weights_matrix[t] = previous_weights
-            if t > 0:
-                portfolio_value[t] = portfolio_value[t - 1]
+            portfolio_value[t] = current_value
+            weights_matrix[t] = current_weights
 
     summary = {
         "n_timestamps": n_timestamps,
@@ -275,6 +322,16 @@ def scale_inputs_for_prices(
     """
     base_prices = np.asarray(base_prices, dtype=float)
     current_prices = np.asarray(current_prices, dtype=float)
+    if (
+        base_prices.ndim != 1
+        or current_prices.shape != base_prices.shape
+        or base_prices.shape != base.cost_vector.shape
+    ):
+        raise ValidationError("price vectors must match the portfolio dimensions")
+    if not np.all(np.isfinite(base_prices)) or not np.all(np.isfinite(current_prices)):
+        raise ValidationError("price vectors must contain only finite values")
+    if np.any(base_prices <= 0.0) or np.any(current_prices <= 0.0):
+        raise ValidationError("price vectors must contain only positive values")
     ratio = current_prices / base_prices
     return PortfolioInputs(
         expected_payoff=base.expected_payoff * ratio,

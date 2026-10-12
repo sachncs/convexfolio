@@ -61,6 +61,8 @@ Completed in the current working tree:
 - Astro type-checks and builds 18 routes. A live preview audit verified the
   homepage and documentation navigation, then caught and fixed the GitHub
   Pages base-path separator bug.
+- Astro is pinned to `7.3.8`; `npm audit --audit-level=high` reports zero
+  vulnerabilities for the documentation toolchain.
 
 Still required before declaring the plan complete:
 

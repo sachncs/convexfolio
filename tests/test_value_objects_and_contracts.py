@@ -76,6 +76,12 @@ def test_matrix_validation_reports_each_failure_mode(
         Matrix([[1.0]]).validate()
 
 
+def test_matrix_validation_rejects_ill_conditioned_values() -> None:
+    """Numerical inputs with unstable solves fail at the value boundary."""
+    with pytest.raises(ValidationError, match="ill-conditioned"):
+        Matrix(np.diag([1.0, 1e-13])).validate()
+
+
 def test_constraint_models_expose_named_residuals() -> None:
     values = np.array([1.0, 1.0])
     assert BudgetConstraint(np.array([0.6, 0.4])).residual(values) == pytest.approx(0)

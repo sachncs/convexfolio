@@ -91,6 +91,14 @@ Completed in the current working tree:
 - Python 3.13 was reproduced locally with the documented development install:
   189 tests passed, with Ruff, Mypy, coverage, and release metadata checks
   passing.
+- The full CI command sequence was rerun from the current checkout: 189 tests
+  passed, 7 benchmark cases passed, documentation checks compiled 34 Python
+  blocks, the Astro dependency install was clean, and the Astro build emitted
+  no diagnostics or unsupported syntax-highlighting warnings.
+- A freshly built `convexfolio-2.0.0-py3-none-any.whl` installed into a clean
+  Python 3.13 virtual environment and the installed CLI emitted a parseable
+  report with the expected `config`, `inputs`, `outputs`, and `uncertainty`
+  sections.
 - All 34 fenced Python documentation blocks compile, the canonical
   getting-started example and CSV/constraints/backtesting tutorial workflows
   execute in the test suite, and the process-pool

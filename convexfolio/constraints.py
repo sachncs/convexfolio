@@ -23,7 +23,7 @@ import numpy as np
 
 from convexfolio.errors import ValidationError
 from convexfolio.types import FloatArray
-from convexfolio.validation import _copy_vector
+from convexfolio.validation import copy_float_vector
 
 SLSQPLambda = Callable[[np.ndarray], float]
 SLSQPConstraint = dict[str, str | SLSQPLambda]
@@ -75,7 +75,7 @@ def budget(cost_vector: FloatArray) -> SLSQPConstraint:
     Returns:
         A SciPy SLSQP constraint dict enforcing the budget.
     """
-    validated_costs = _copy_vector(cost_vector, "cost_vector")
+    validated_costs = copy_float_vector(cost_vector, "cost_vector")
     if np.any(validated_costs <= 0.0):
         raise ValidationError("cost_vector must contain only positive values")
     bound_fun: SLSQPLambda = partial(budget_residual, validated_costs)
@@ -128,7 +128,7 @@ def inequality(coefficients: FloatArray, limit: float) -> SLSQPConstraint:
     Returns:
         A SciPy SLSQP constraint dict.
     """
-    validated_coefficients = _copy_vector(coefficients, "coefficients")
+    validated_coefficients = copy_float_vector(coefficients, "coefficients")
     if not np.isfinite(limit):
         raise ValidationError("constraint limit must be finite")
     ineq_fun: SLSQPLambda = partial(

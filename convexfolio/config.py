@@ -25,10 +25,10 @@ import yaml
 from convexfolio.errors import ValidationError
 from convexfolio.types import FloatArray
 from convexfolio.validation import (
-    _copy_square_matrix,
-    _copy_vector,
-    _validate_matching_dimensions,
-    _validate_positive_vector,
+    copy_float_vector,
+    copy_positive_definite_matrix,
+    validate_portfolio_dimensions,
+    validate_positive_values,
 )
 
 
@@ -78,13 +78,13 @@ class PortfolioInputs:
 
     def __post_init__(self) -> None:
         """Copy and validate all portfolio arrays at construction time."""
-        expected_payoff = _copy_vector(self.expected_payoff, "expected_payoff")
-        cost_vector = _copy_vector(self.cost_vector, "cost_vector")
-        precision_matrix = _copy_square_matrix(
+        expected_payoff = copy_float_vector(self.expected_payoff, "expected_payoff")
+        cost_vector = copy_float_vector(self.cost_vector, "cost_vector")
+        precision_matrix = copy_positive_definite_matrix(
             self.precision_matrix, "precision_matrix"
         )
-        _validate_positive_vector(cost_vector, "cost_vector")
-        _validate_matching_dimensions(
+        validate_positive_values(cost_vector, "cost_vector")
+        validate_portfolio_dimensions(
             expected_payoff, cost_vector, precision_matrix
         )
         object.__setattr__(self, "expected_payoff", expected_payoff)

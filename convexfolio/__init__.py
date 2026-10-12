@@ -71,7 +71,20 @@ from convexfolio.config import (
     Runtime,
     Validate,
 )
+from convexfolio.constraint_models import (
+    BudgetConstraint,
+    LeverageConstraint,
+    LongOnlyConstraint,
+    PositionLimitConstraint,
+)
 from convexfolio.data import LoadCSV, Summary, SyntheticPortfolio
+from convexfolio.domain import (
+    ConstraintResult,
+    OptimizationProblem,
+    OptimizationResult,
+    RiskEvaluation,
+    TolerancePolicy,
+)
 from convexfolio.errors import (
     ConvexfolioError,
     InfeasibleProblemError,
@@ -120,10 +133,13 @@ from convexfolio.math import (
     Score,
     Variance,
 )
+from convexfolio.optimization import ClosedFormVarianceOptimizer
+from convexfolio.risk import CFVaR2Risk, CFVaR3Risk, VarianceRisk
 from convexfolio.utils import Logger, Report, Reproduce
 
 __all__ = [
     "Bilinear",
+    "BudgetConstraint",
     "BucketWeightStat",
     "BuildPortfolioInputs",
     "CFVaR2Closed",
@@ -131,12 +147,15 @@ __all__ = [
     "CFVaR3Numerical",
     "CFVaR3Objective",
     "CFVaR3rd",
+    "CFVaR2Risk",
+    "CFVaR3Risk",
     "ConvexfolioError",
     "CSVFileSource",
     "Compute",
     "Cross",
     "CrossSectionResult",
     "CrossSectionRunner",
+    "ConstraintResult",
     "Cumulant",
     "Curvature",
     "DATASET_REPO_ID",
@@ -157,24 +176,33 @@ __all__ = [
     "Loss",
     "Minimize",
     "InfeasibleProblemError",
+    "LeverageConstraint",
+    "LongOnlyConstraint",
     "OptimalEpsilon",
+    "OptimizationProblem",
+    "OptimizationResult",
     "Optimization",
     "OptionsRow",
     "Parse",
     "PortfolioInputs",
     "PortfolioVariance",
+    "PositionLimitConstraint",
     "Quadratic",
     "QualityScore",
     "Reconstruct",
     "Report",
     "Reproduce",
+    "RiskEvaluation",
     "Runtime",
     "Score",
     "SolverFailureError",
     "SummariseResults",
     "Summary",
     "SyntheticPortfolio",
+    "TolerancePolicy",
     "Validate",
     "ValidationError",
     "Variance",
+    "VarianceRisk",
+    "ClosedFormVarianceOptimizer",
 ]

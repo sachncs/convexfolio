@@ -10,7 +10,9 @@ from convexfolio.errors import ValidationError
 from convexfolio.types import FloatArray
 
 
-def _copy_vector(value: Sequence[float] | np.ndarray, name: str) -> FloatArray:
+def copy_float_vector(
+    value: Sequence[float] | np.ndarray, name: str
+) -> FloatArray:
     """Copy and validate a finite one-dimensional float vector."""
     vector = np.array(value, dtype=float, copy=True)
     if vector.ndim != 1:
@@ -22,7 +24,7 @@ def _copy_vector(value: Sequence[float] | np.ndarray, name: str) -> FloatArray:
     return vector
 
 
-def _copy_square_matrix(
+def copy_positive_definite_matrix(
     value: Sequence[Sequence[float]] | np.ndarray, name: str
 ) -> FloatArray:
     """Copy and validate a finite symmetric positive-definite matrix."""
@@ -44,7 +46,7 @@ def _copy_square_matrix(
     return matrix
 
 
-def _validate_matching_dimensions(
+def validate_portfolio_dimensions(
     expected_payoff: FloatArray,
     cost_vector: FloatArray,
     precision_matrix: FloatArray,
@@ -61,10 +63,15 @@ def _validate_matching_dimensions(
         )
 
 
-def _validate_positive_vector(vector: FloatArray, name: str) -> None:
+def validate_positive_values(vector: FloatArray, name: str) -> None:
     """Require every value in a vector to be strictly positive."""
     if np.any(vector <= 0.0):
         raise ValidationError(f"{name} must contain only positive values")
 
 
-__all__ = []
+__all__ = [
+    "copy_float_vector",
+    "copy_positive_definite_matrix",
+    "validate_portfolio_dimensions",
+    "validate_positive_values",
+]

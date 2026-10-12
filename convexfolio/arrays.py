@@ -17,6 +17,7 @@ class Vector(np.ndarray):
         vector = np.array(values, dtype=float, copy=True)
         if vector.ndim != 1 or vector.size == 0:
             raise ValidationError("vector must be a non-empty one-dimensional array")
+        vector.flags.writeable = False
         return vector.view(cls)
 
     def copy(self, order: Literal["K", "A", "C", "F"] | None = None) -> Vector:
@@ -43,6 +44,7 @@ class Matrix(np.ndarray):
             raise ValidationError("matrix must be square")
         if matrix.shape[0] == 0:
             raise ValidationError("matrix must not be empty")
+        matrix.flags.writeable = False
         return matrix.view(cls)
 
     def copy(self, order: Literal["K", "A", "C", "F"] | None = None) -> Matrix:

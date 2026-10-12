@@ -25,7 +25,8 @@ def test_portfolio_inputs_copy_arrays() -> None:
     """Mutating caller arrays does not mutate the validated model."""
     inputs = valid_inputs()
     original = inputs.cost_vector.copy()
-    inputs.cost_vector[0] = 99.0
+    with pytest.raises(ValueError, match="read-only"):
+        inputs.cost_vector[0] = 99.0
     assert np.array_equal(inputs.cost_vector[1:], original[1:])
 
 
@@ -33,8 +34,12 @@ def test_value_objects_expose_copy_and_validate() -> None:
     """Vectors and matrices own their validation and copy behavior."""
     vector = Vector([1.0, 2.0]).validate("weights")
     matrix = Matrix([[2.0, 0.0], [0.0, 1.0]]).validate("precision_matrix")
-    assert isinstance(vector.copy(), Vector)
-    assert isinstance(matrix.copy(), Matrix)
+    vector_copy = vector.copy()
+    matrix_copy = matrix.copy()
+    assert isinstance(vector_copy, Vector)
+    assert isinstance(matrix_copy, Matrix)
+    vector_copy[0] = 3.0
+    matrix_copy[0, 0] = 3.0
 
 
 @pytest.mark.parametrize(

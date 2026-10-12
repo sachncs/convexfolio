@@ -106,26 +106,34 @@ Completed in the current working tree:
   a semi-private underscored helper.
 - Package metadata, citation metadata, README installation instructions, and
   the changelog identify the locally verified breaking release as `2.0.0`; an
-  annotated local `v2.0.0` tag points at this snapshot.
+  annotated `v2.0.0` tag points at the published release snapshot
+  `326b226`.
 - The previous stable baseline is recoverable locally through an annotated
   `v1.0.0` tag at commit `8f266d0`, which carries the matching historical
   `1.0.0` metadata and changelog.
 
-Still required before declaring the plan complete:
+Hosted completion evidence — 2026-10-12:
 
-- Obtain confirmation from the hosted GitHub Actions runners; local checks
-  cover the configured CI commands but cannot prove remote runner state.
-- Complete the release-gate actions that require an actual v2 release event:
-  publish versioned artifacts, validate GitHub Pages deployment, and exercise
-  the documented rollback path. The repository is now versioned as `2.0.0`
-  and has a release-ready changelog/checklist; publication has not been
-  requested or performed.
+- [CI run 38240361904](https://github.com/sachncs/convexfolio/actions/runs/38240361904)
+  passed on `326b226` across the site, build, Python 3.12, 3.13, and 3.14
+  jobs. The follow-up documentation-only push also passed in [CI run
+  38240647622](https://github.com/sachncs/convexfolio/actions/runs/38240647622).
+- [Release run 38240362035](https://github.com/sachncs/convexfolio/actions/runs/38240362035)
+  passed and published the immutable `v2.0.0` release with both wheel and
+  source archive assets.
+- [Pages run 38240361920](https://github.com/sachncs/convexfolio/actions/runs/38240361920)
+  passed for `326b226`; the follow-up Pages run
+  `38240647551` also passed after the rollback documentation update. The live
+  homepage, architecture graph, and release/rollback documentation routes
+  were fetched successfully from `https://sachncs.github.io/convexfolio/`.
+- Rollback evidence was exercised in a disposable clone: `v1.0.0` resolves to
+  the prior stable tag, reports package version `1.0.0`, and remains an
+  ancestor of `v2.0.0`. The release guide now documents separate package and
+  Pages recovery procedures without force-moving published tags.
 
-Hosted-state evidence: the latest visible remote CI runs were for the older
-`origin/master` commit `689624b`; those runs failed in the pre-v2 backtest
-implementation on Python 3.12/3.13, while the Pages run for that same commit
-succeeded. The current verified commits and local `v2.0.0` tag have not been
-pushed, so no hosted result is attributed to them.
+The plan gates are complete. Remaining GitHub annotations are non-failing
+platform notices about Node.js 20 action runtimes and the future Ubuntu image
+migration; they do not fail any quality gate.
 
 ## 2. Original issue inventory
 

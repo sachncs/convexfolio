@@ -3,35 +3,70 @@ import SiteLayout from "../layouts/SiteLayout.astro";
 const base = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
 ---
 <SiteLayout title="Convexfolio" description="Validated, constrained portfolio optimisation in Python.">
-  <section class="hero">
-    <p class="eyebrow">Python · NumPy · SciPy</p>
-    <h1>Portfolio optimisation you can inspect.</h1>
-    <p class="lede"><span class="wide-copy">Convexfolio is research software for constrained portfolio experiments. Inputs are validated, solver outcomes are checked, and failures stay visible.</span><span class="mobile-copy">Validated inputs. Checked solver outcomes. Visible failures.</span></p>
-    <div class="actions">
-      <a class="button primary" href={`${base}docs/getting-started/`}>Read the guide</a>
-      <a class="button secondary" href="https://github.com/sachncs/convexfolio">View the source</a>
+  <section class="hero hero-home">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="eyebrow-dot"></span>Open-source research software · v2.0.0</p>
+        <h1>Make the portfolio model earn its trust.</h1>
+        <p class="lede">Convexfolio gives constrained portfolio experiments a clear boundary: validate the inputs, solve the problem, inspect the diagnostics.</p>
+        <div class="actions">
+          <a class="button primary" href={`${base}docs/getting-started/`}>Start with the guide <span aria-hidden="true">↗</span></a>
+          <a class="button secondary" href="https://github.com/sachncs/convexfolio">Read the source <span aria-hidden="true">↗</span></a>
+        </div>
+        <p class="hero-footnote"><span class="status-dot"></span> No brokerage connection · no market-data feed · no investment advice</p>
+      </div>
+      <div class="hero-demo-wrap">
+        <div class="hero-demo-label">A tiny model, fully visible</div>
+        <div class="hero-demo" aria-label="Interactive two-instrument variance example">
+          <div class="demo-topline"><span>LOCAL SOLVER</span><span class="demo-live"><i></i> READY</span></div>
+          <div class="formula"><span>minimise</span><strong>xᵀQx</strong><em>subject to</em><strong>xᵀv = 1</strong></div>
+          <form id="solver-demo" class="solver-demo">
+            <div class="input-row">
+              <label><span>Instrument A</span><input id="price-a" type="number" min="0.01" step="0.01" value="0.60" /></label>
+              <label><span>Instrument B</span><input id="price-b" type="number" min="0.01" step="0.01" value="0.40" /></label>
+            </div>
+            <button class="button demo-button" type="submit">Recalculate <span aria-hidden="true">↗</span></button>
+            <output id="solver-output" class="solver-output" aria-live="polite">
+              <span class="output-label">$1 budget allocation</span>
+              <span class="allocation"><b style="width:64%"></b><b style="width:36%"></b></span>
+              <span class="output-values"><strong>A 64.0%</strong><strong>B 36.0%</strong></span>
+            </output>
+          </form>
+          <p class="demo-caption">Deterministic arithmetic in your browser. The Python implementation is documented in the guide.</p>
+        </div>
+        <noscript><p class="demo-note">JavaScript is disabled. The documented Python example remains available in the <a href={`${base}docs/getting-started/`}>getting-started guide</a>.</p></noscript>
+      </div>
     </div>
   </section>
-  <section class="principles" aria-labelledby="principles-title">
-    <div class="section-heading"><p class="eyebrow">What the project guarantees</p><h2 id="principles-title">Small, explicit contracts.</h2></div>
+
+  <section class="signal-strip" aria-label="Project properties">
+    <div><span class="signal-value">01</span><span>validated value objects</span></div>
+    <div><span class="signal-value">02</span><span>typed failure paths</span></div>
+    <div><span class="signal-value">03</span><span>polymorphic contracts</span></div>
+    <div><span class="signal-value">04</span><span>static documentation</span></div>
+  </section>
+
+  <section class="section principles" aria-labelledby="principles-title">
+    <div class="section-heading"><p class="eyebrow eyebrow-dark">The design stance</p><h2 id="principles-title">Useful mathematics needs useful boundaries.</h2><p class="section-intro">The library is shaped around the moments where quantitative software usually becomes difficult to trust.</p></div>
     <div class="card-grid">
-      <article><span class="number">01</span><h3>Validated values</h3><p><code>Vector</code> and <code>Matrix</code> own their data, expose <code>.copy()</code>, and validate through <code>.validate()</code>.</p></article>
-      <article><span class="number">02</span><h3>Visible failure</h3><p>Infeasible constraints, invalid inputs, and solver failures raise typed errors with diagnostics.</p></article>
-      <article><span class="number">03</span><h3>Composable design</h3><p>Risk measures, constraints, and optimisers are public ABC contracts with interchangeable implementations.</p></article>
+      <article class="principle-card"><span class="number">01 / INPUTS</span><h3>Own the data.</h3><p><code>Vector</code> and <code>Matrix</code> protect their storage and expose explicit <code>.copy()</code> and <code>.validate()</code> operations.</p><a href={`${base}docs/api-reference/`}>See the value objects <span aria-hidden="true">↗</span></a></article>
+      <article class="principle-card"><span class="number">02 / SOLVERS</span><h3>Show the failure.</h3><p>Invalid inputs, infeasible constraints, and failed numerical solves return typed, actionable diagnostics instead of a plausible-looking answer.</p><a href={`${base}docs/architecture/`}>See the contracts <span aria-hidden="true">↗</span></a></article>
+      <article class="principle-card"><span class="number">03 / SYSTEMS</span><h3>Compose the parts.</h3><p>Risk, optimisation, constraints, data sources, and backtests meet through small ABC interfaces with interchangeable implementations.</p><a href={`${base}docs/migration/`}>See the v2 shape <span aria-hidden="true">↗</span></a></article>
     </div>
   </section>
-  <section class="demo" aria-labelledby="demo-title">
-    <div class="section-heading"><p class="eyebrow">A constrained example</p><h2 id="demo-title">Change the prices. See the budget move.</h2></div>
-    <p class="demo-copy">This is the same two-instrument variance example used in the getting-started guide. It is a local calculation: no market data, network request, or investment recommendation is involved.</p>
-    <form id="solver-demo" class="solver-demo">
-      <label>Instrument A price <input id="price-a" type="number" min="0.01" step="0.01" value="0.60" /></label>
-      <label>Instrument B price <input id="price-b" type="number" min="0.01" step="0.01" value="0.40" /></label>
-      <button class="button primary" type="submit">Recalculate</button>
-      <output id="solver-output" class="solver-output" aria-live="polite">A: 64.0% · B: 36.0% of the $1 budget.</output>
-    </form>
-    <noscript><p class="demo-note">JavaScript is disabled. The documented Python example remains available in the <a href={`${base}docs/getting-started/`}>getting-started guide</a>.</p></noscript>
+
+  <section class="section workflow" aria-labelledby="workflow-title">
+    <div class="workflow-copy"><p class="eyebrow eyebrow-dark">A transparent workflow</p><h2 id="workflow-title">From raw inputs to a result you can question.</h2><p class="section-intro">Convexfolio is deliberately inspectable. Each stage has a boundary, a contract, and a testable outcome.</p><a class="text-link" href={`${base}docs/getting-started/`}>Walk through the example <span aria-hidden="true">↗</span></a></div>
+    <ol class="workflow-steps">
+      <li><span>01</span><div><strong>Validate</strong><p>Shape, finiteness, conditioning, and configuration policy.</p></div></li>
+      <li><span>02</span><div><strong>Constrain</strong><p>Budget, position, sector, and leverage rules as explicit objects.</p></div></li>
+      <li><span>03</span><div><strong>Optimise</strong><p>Closed-form and numerical strategies behind one typed interface.</p></div></li>
+      <li><span>04</span><div><strong>Report</strong><p>Diagnostics, feasibility, warnings, and a versioned result shape.</p></div></li>
+    </ol>
   </section>
-  <section class="notice"><p><strong>Scope:</strong> Convexfolio does not place trades, connect to brokerages, or provide financial advice.</p><a href={`${base}docs/faq/`}>Understand the limits →</a></section>
+
+  <section class="closing" aria-labelledby="closing-title"><div><p class="eyebrow">Build with evidence</p><h2 id="closing-title">Read the model before you run it.</h2><p>Start with the guide, inspect the API, and keep the limits visible.</p></div><a class="button primary" href={`${base}docs/`}>Explore documentation <span aria-hidden="true">↗</span></a></section>
+  <section class="notice"><p><strong>Scope:</strong> Convexfolio does not place trades, connect to brokerages, or provide financial advice.</p><a href={`${base}docs/faq/`}>Understand the limits <span aria-hidden="true">→</span></a></section>
 </SiteLayout>
 
 <script is:inline>
@@ -42,11 +77,12 @@ const base = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL :
     const priceA = Number(document.querySelector("#price-a")?.value);
     const priceB = Number(document.querySelector("#price-b")?.value);
     if (!Number.isFinite(priceA) || !Number.isFinite(priceB) || priceA <= 0 || priceB <= 0) {
-      output.textContent = "Enter two positive finite prices.";
+      output.innerHTML = '<span class="output-label">Input check</span><span class="output-error">Enter two positive finite prices.</span>';
       return;
     }
     const denominator = priceA * priceA + priceB * priceB;
     const allocationA = (priceA * priceA) / denominator;
-    output.textContent = `A: ${(allocationA * 100).toFixed(1)}% · B: ${((1 - allocationA) * 100).toFixed(1)}% of the $1 budget.`;
+    const allocationB = 1 - allocationA;
+    output.innerHTML = `<span class="output-label">$1 budget allocation</span><span class="allocation"><b style="width:${allocationA * 100}%"></b><b style="width:${allocationB * 100}%"></b></span><span class="output-values"><strong>A ${(allocationA * 100).toFixed(1)}%</strong><strong>B ${(allocationB * 100).toFixed(1)}%</strong></span>`;
   });
 </script>

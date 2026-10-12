@@ -180,7 +180,7 @@ The `convexfolio` command has six sub-commands:
 |---|---|
 | `reproduce-report` | Run the pipeline, save the report to `output_directory/report.json`. |
 | `print-report` | Run the pipeline, print the report to the terminal. |
-| `validate-determinism` | Run the pipeline N times, verify byte-identical output. |
+| `validate-determinism` | Run the pipeline N times, verify serialized reports match. |
 | `ingest` | Read a portfolio CSV and print its shape summary. |
 | `plot` | Render selected portfolio charts. |
 | `backtest` | Run a multi-period rebalance simulation from price history. |

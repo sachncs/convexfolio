@@ -19,12 +19,12 @@ layout: default
         Open-source · Python 3.12+ · MIT
       </span>
       <h1 id="hero-title" class="hero-title">
-        The lowest-risk way
+        Risk-aware allocation,
         <br><span class="hero-title-accent">to split money across options.</span>
       </h1>
       <p class="hero-sub">
         Convexfolio takes your prices, expected payoffs, and a risk model —
-        and returns the exact budget split that minimises your risk.
+        with validated inputs, solver diagnostics, and a reproducible workflow.
         Deterministic, reproducible, and built on the closed-form math of
         <a href="https://arxiv.org/abs/2601.07991v2" rel="noopener" target="_blank">arXiv:2601.07991</a>.
       </p>
@@ -140,7 +140,7 @@ layout: default
     <div class="metric reveal" data-delay="1">
       <div class="metric-value"><span class="counter" data-to="2" data-suffix="">2</span></div>
       <div class="metric-label">Closed-form solvers</div>
-      <div class="metric-sub">Exact answers, no iteration</div>
+      <div class="metric-sub">Closed-form, no iteration</div>
     </div>
     <div class="metric reveal" data-delay="2">
       <div class="metric-value"><span class="counter" data-to="100" data-suffix="%">100%</span></div>
@@ -159,7 +159,7 @@ layout: default
 <section class="overview" aria-labelledby="overview-title">
   <div class="section-head reveal">
     <span class="eyebrow eyebrow-dark"><span class="eyebrow-dot"></span>Product</span>
-    <h2 id="overview-title" class="section-title">One question. An exact answer.</h2>
+    <h2 id="overview-title" class="section-title">One question. A transparent answer.</h2>
     <p class="section-sub">Three first-class solvers, each tuned for a different definition of "risk". Pick the one that matches the math you're trying to do — or let Convexfolio compare all of them in one run.</p>
   </div>
 
@@ -178,8 +178,8 @@ layout: default
         <svg viewBox="0 0 32 32" width="22" height="22"><path d="M4 26 Q12 6 16 14 T28 6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/><circle cx="22" cy="10" r="1.6" fill="currentColor"/></svg>
       </div>
       <h3>CFVaR₂</h3>
-      <p>A sharper, faster risk measure with an exact formula — no iteration, no approximation. Drop-in for the variance minimiser when you want a tighter tail.</p>
-      <code class="risk-pill">Closed form · exact</code>
+      <p>A sharper, faster risk measure with a closed-form approximation. Use it alongside diagnostics when you want a tighter tail-oriented objective.</p>
+      <code class="risk-pill">Closed form · CFVaR₂</code>
     </article>
 
     <article class="risk-card risk-card-cfvar3 reveal" data-delay="2">
@@ -187,7 +187,7 @@ layout: default
         <svg viewBox="0 0 32 32" width="22" height="22"><path d="M3 24 Q10 20 14 22 T22 12 T29 8" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/><circle cx="29" cy="8" r="1.8" fill="currentColor"/><circle cx="22" cy="12" r="1.4" fill="currentColor"/></svg>
       </div>
       <h3>CFVaR₃</h3>
-      <p>The most accurate measure in the family. Solved numerically with SciPy's SLSQP under the same deterministic guarantees as the closed-form solvers.</p>
+      <p>A third-order approximation solved numerically with SciPy's SLSQP, with explicit convergence and constraint diagnostics.</p>
       <code class="risk-pill">Numerical · SLSQP</code>
     </article>
   </div>
@@ -199,7 +199,7 @@ layout: default
     <div class="how-copy">
       <span class="eyebrow eyebrow-dark"><span class="eyebrow-dot"></span>How it works</span>
       <h2 id="how-title" class="section-title">Define. Solve. Verify.</h2>
-      <p class="section-sub">A tiny, well-typed Python surface. Point Convexfolio at your prices, expected payoffs, and a precision matrix — then choose a risk measure. The optimiser returns the exact budget split that minimises risk.</p>
+      <p class="section-sub">A tiny, well-typed Python surface. Point Convexfolio at your prices, expected payoffs, and a precision matrix — then choose a risk measure. The optimiser returns a validated allocation and the evidence behind it.</p>
 
       <ol class="how-steps">
         <li class="how-step reveal">
@@ -213,7 +213,7 @@ layout: default
           <span class="how-step-num">02</span>
           <div>
             <h4>Choose a risk measure</h4>
-            <p>Variance, CFVaR₂, or CFVaR₃ — or run all three and pick the best fit. Convexfolio returns weights that minimise the chosen measure exactly.</p>
+            <p>Variance, CFVaR₂, or CFVaR₃ — or run all three and compare the diagnostics. Convexfolio returns weights for the chosen objective with explicit feasibility checks.</p>
           </div>
         </li>
         <li class="how-step reveal" data-delay="2">

@@ -1,6 +1,6 @@
 title: "Convexfolio"
 tagline: "Optimal Option Portfolios for Skew-Elliptical t Returns"
-description: "Convexfolio is an open-source Python library that finds the lowest-risk way to split money across a set of options — solved deterministically, from the terminal or Python."
+description: "Convexfolio is an open-source Python library for validated, diagnostic option portfolio optimisation from the terminal or Python."
 baseurl: "/convexfolio"
 url: "https://sachncs.github.io"
 logo: "/assets/logo.svg"

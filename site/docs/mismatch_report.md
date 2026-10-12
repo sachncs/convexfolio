@@ -118,7 +118,7 @@ a GitHub issue with:
   happened.
 - **Impact assessment** — how serious is this for your use case.
 
-For security issues, see [SECURITY.md](../SECURITY.md) instead of
+For security issues, see [SECURITY.md](../../SECURITY.md) instead of
 opening a public issue.
 
 ---

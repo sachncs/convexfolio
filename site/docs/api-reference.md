@@ -456,7 +456,7 @@ variance at basis vectors and pairwise sums.
 ### `Report.from_reproduce(config: Experiment, repetitions: int = 2) -> Report`
 
 **What it does:** Runs `Reproduce(config)()` repeatedly and returns
-a `Report` describing whether the runs were byte-identical. Uses a
+a `Report` describing whether the serialized runs matched. Uses a
 process pool when `repetitions ≥ OPTIONS_PARALLEL_THRESHOLD` (default
 4).
 
@@ -535,7 +535,7 @@ convexfolio --command print-report [--config CONFIG]
 
 #### `validate-determinism`
 
-Run the pipeline N times and verify the runs are byte-identical.
+Run the pipeline N times and verify the serialized reports match.
 
 ```bash
 convexfolio --command validate-determinism [--repetitions N] [--config CONFIG]

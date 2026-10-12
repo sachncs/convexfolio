@@ -217,7 +217,7 @@ For critical bug fixes:
 ## Where to look next
 
 - **[Glossary]({{ site.baseurl }}/docs/glossary/)** — Every term used here.
-- **[CHANGELOG.md](../CHANGELOG.md)** — The changelog itself.
+- **[CHANGELOG.md](../../CHANGELOG.md)** — The changelog itself.
 - **[Architecture]({{ site.baseurl }}/docs/architecture/)** — How the package fits
   together.
 - **[Deployment]({{ site.baseurl }}/docs/deployment/)** — How to run the released

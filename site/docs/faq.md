@@ -31,24 +31,26 @@ you'll encounter.
 
 ### What Python versions work?
 
-Python **3.12 or newer**. Older versions won't install. Newer
-versions (3.13+) work.
+Python **3.12, 3.13, or 3.14**. The package metadata rejects versions
+outside that tested range.
 
 ### Is this package production-ready?
 
-Yes. Convexfolio:
+It is research software with a production-oriented quality baseline,
+not a live-trading or investment-advice system. Convexfolio:
 
 - Is fully type-checked (mypy --strict).
 - Is fully lint-checked (ruff).
-- Has a deterministic test suite (pytest, 90 tests).
-- Has a benchmark suite (pytest-benchmark, 7 benchmarks).
+- Has a deterministic test suite (pytest, 171 tests locally).
+- Has a benchmark suite available through the `dev` extra.
 - Has a CI pipeline that runs on every push.
 - Uses frozen dataclasses for configuration (can't be silently
   mutated).
 - Has reproducible execution (same seed = same output).
 
-That said: **the demo uses synthetic data.** To use Convexfolio with
-real options, you'll need to feed in your own market data — see
+The demo uses synthetic data and the numerical model still needs
+independent validation against your data and controls. To use
+Convexfolio with real options, feed in your own market data — see
 [Mismatch Report]({{ site.baseurl }}/docs/mismatch_report/).
 
 ---
@@ -62,7 +64,7 @@ git clone https://github.com/sachncs/convexfolio.git
 cd convexfolio
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e '.[dev]'
+pip install -e '.[dev,plot,hf-data]'
 ```
 
 That's five commands. The full explanation is in
@@ -70,8 +72,9 @@ That's five commands. The full explanation is in
 
 ### What does the package need to run?
 
-Just two things: **NumPy** and **SciPy**. Both come with the install
-above. If you write Python that uses matrices, you've probably
+**NumPy**, **SciPy**, and **PyYAML**. They come with the core install.
+Plotting, Hugging Face ingestion, and benchmark tooling are optional
+extras. If you write Python that uses matrices, you've probably
 already heard of them.
 
 ### I'm on Windows. Do the commands change?
@@ -149,9 +152,8 @@ Valid range: between 0 and 0.5. Default: 0.05 (very cautious).
 
 ### Can I use a YAML config instead of JSON?
 
-Yes — files ending in `.yaml` or `.yml` work. Install the YAML
-support with `pip install '.[yaml]'` (it's already installed if you
-ran `pip install -e '.[dev]'`).
+Yes — files ending in `.yaml` or `.yml` work. YAML support is part of
+the core install.
 
 ### How do I make sure results are reproducible?
 
@@ -165,8 +167,8 @@ Two ways:
    convexfolio --command validate-determinism --repetitions 3
    ```
 
-   This runs the pipeline three times and asserts the results are
-   byte-identical.
+   This runs the pipeline three times and compares the serialized
+   reports for equality on the same environment and inputs.
 
 ### My numbers are weird. Did something go wrong?
 
@@ -251,7 +253,7 @@ mypy convexfolio
 
 ### How do I submit a change?
 
-See [CONTRIBUTING.md](../CONTRIBUTING.md) for the full workflow.
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) for the full workflow.
 
 ---
 
@@ -259,5 +261,5 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for the full workflow.
 
 - **Bug reports / feature requests:** [GitHub Issues](https://github.com/sachncs/convexfolio/issues)
 - **Questions / discussion:** [GitHub Discussions](https://github.com/sachncs/convexfolio/discussions)
-- **Security issues:** See [SECURITY.md](../SECURITY.md) — please
+- **Security issues:** See [SECURITY.md](../../SECURITY.md) — please
   don't open a public issue for security problems.

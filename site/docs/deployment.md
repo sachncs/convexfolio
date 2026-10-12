@@ -36,7 +36,7 @@ simplest.
 You'll need:
 
 - A Linux server (a VM, a Raspberry Pi, an AWS EC2 instance, etc.).
-- Python 3.12 or newer installed.
+- Python 3.12, 3.13, or 3.14 installed.
 - Root or sudo access (so you can install packages and write to
   system folders).
 

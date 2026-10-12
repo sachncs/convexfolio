@@ -23,7 +23,7 @@ No prior knowledge required. Every command is explained.
 Before you start, make sure you have:
 
 - **A computer** running macOS, Linux, or Windows.
-- **Python 3.12 or newer.** Type `python3 --version` in your
+- **Python 3.12, 3.13, or 3.14.** Type `python3 --version` in your
   terminal. If you see an older number or "command not found", follow
   [this guide](https://realpython.com/installing-python/).
 - **git** for downloading code. Type `git --version`. Same drill if

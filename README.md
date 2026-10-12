@@ -3,7 +3,7 @@
   <p align="center">A Python package that figures out how to spread your money across options to minimise risk.</p>
   <p align="center">
     <a href="#installation"><img src="https://img.shields.io/badge/python-3.12%20%7C%203.13-blue" alt="Python"></a>
-    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License"></a>
+    <a href="LICENSE.md"><img src="https://img.shields.io/badge/license-MIT-green" alt="License"></a>
     <a href="https://github.com/sachncs/convexfolio/releases/latest"><img src="https://img.shields.io/github/v/release/sachncs/convexfolio" alt="Latest release"></a>
     <a href="https://github.com/sachncs/convexfolio/actions"><img src="https://img.shields.io/github/actions/workflow/status/sachncs/convexfolio/ci.yml?branch=main" alt="CI"></a>
     <a href="https://github.com/sachncs/convexfolio/stargazers"><img src="https://img.shields.io/github/stars/sachncs/convexfolio" alt="Stars"></a>
@@ -12,7 +12,7 @@
 
 > **Not investment advice.** Convexfolio is research software. The
 > outputs are mathematical illustrations; verify them independently
-> before any use. See [LICENSE](LICENSE) and the disclaimer at the
+> before any use. See [LICENSE](LICENSE.md) and the disclaimer at the
 > bottom of this README.
 
 ---
@@ -75,7 +75,7 @@ If you've used Python before, you'll be productive in five minutes.
 
 ## Before you start
 
-You'll need Python **3.12 or newer** installed on your computer.
+You'll need Python **3.12, 3.13, or 3.14** installed on your computer.
 
 If you don't know what Python is or whether you have it:
 
@@ -198,8 +198,8 @@ exactly $1 across the two options.
 The actual dollars spent per option at this optimum are $0.64 on A
 and $0.36 on B (because ``0.60 × 1.0591133 = 0.6355`` and
 ``0.40 × 0.91133005 = 0.3645``). The exact dollar split doesn't
-matter — what matters is that Convexfolio found the lowest-risk
-combination.
+matter — what matters is that Convexfolio found the minimum of the
+selected variance objective under the stated budget constraint.
 
 The full walk-through with explanations of every line lives in
 [Getting Started](site/docs/getting-started.md).
@@ -288,7 +288,7 @@ open a public GitHub issue for security problems.
 
 ## License
 
-MIT — see [LICENSE](LICENSE). Use it, fork it, ship it.
+MIT — see [LICENSE](LICENSE.md). Use it, fork it, ship it.
 
 ---
 

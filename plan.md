@@ -60,8 +60,8 @@ Still required before declaring the plan complete:
 
 - Add independent numerical reference, failure-injection, documentation-example,
   and clean-wheel installation tests where coverage gaps remain.
-- Verify every public interface, including the data-source and backtest-engine
-  contracts, with contract tests.
+- Verify remaining public interfaces and examples with contract tests; the
+  data-source and backtest-engine ABCs are now public and exercised.
 - Verify documentation links/examples and build the Astro site in CI.
 - Run a rendered browser audit at 320px, 768px, and 1440px, including
   contrast, reduced motion, focus, overflow, and console-error checks.

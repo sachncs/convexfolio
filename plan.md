@@ -65,6 +65,10 @@ Completed in the current working tree:
   vulnerabilities for the documentation toolchain.
 - The homepage includes an accessible, no-network two-instrument solver
   example with a meaningful no-JavaScript fallback.
+- Chrome rendered the homepage at 320px, 768px, and 1440px viewport widths;
+  the mobile pass found and fixed content overflow, and all three renders now
+  have bounded layouts with responsive controls. The preview produced no
+  page-level console errors.
 - Release CI now runs the Python/site quality gate; the container workflow
   builds and smoke-tests the CLI image; package metadata no longer claims
   Production/Stable.

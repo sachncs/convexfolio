@@ -17,32 +17,31 @@ to modify it, contribute to it, or just satisfy your curiosity.
 The package does one job — solve a portfolio problem and produce a
 report. Everything else is plumbing.
 
-```
-            ┌──────────────────────────┐
-            │  You (Python or CLI)     │
-            └─────────────┬────────────┘
-                          │ give inputs
-                          ▼
-            ┌──────────────────────────┐
-            │  config.py               │  ← reads config.json / .yaml
-            │  + utils.Logger          │  ← prints progress
-            └─────────────┬────────────┘
-                          │ loads
-                          ▼
-            ┌──────────────────────────┐
-            │  domain + interfaces    │  ← typed contracts
-            │   ├─ Vector / Matrix     │     validated values
-            │   ├─ RiskMeasure         │     risk polymorphism
-            │   ├─ Constraint          │     residual checks
-            │   └─ Optimizer           │     solver strategies
-            └─────────────┬────────────┘
-                          │ produces
-                          ▼
-            ┌──────────────────────────┐
-            │  JSON report             │
-            │  (printed or saved)      │
-            └──────────────────────────┘
-```
+<div class="architecture-graph" aria-labelledby="architecture-graph-title">
+  <div class="architecture-graph-heading">
+    <p class="eyebrow">Runtime path</p>
+    <h3 id="architecture-graph-title">From an experiment to an auditable report</h3>
+    <p>Each boundary validates what it receives before handing control to the next stage. The strategy and risk branches are interchangeable implementations behind typed contracts.</p>
+  </div>
+  <ol class="architecture-flow">
+    <li class="architecture-node architecture-node-input"><span class="architecture-step">01</span><strong>Input boundary</strong><small>Python API or CLI<br />CSV, config, prices</small></li>
+    <li class="architecture-connector" aria-hidden="true"><span>normalise</span><i></i></li>
+    <li class="architecture-node"><span class="architecture-step">02</span><strong>Configuration</strong><small><code>Load</code> → <code>Validate</code><br />policy and reproducibility</small></li>
+    <li class="architecture-connector" aria-hidden="true"><span>construct</span><i></i></li>
+    <li class="architecture-node architecture-node-contracts"><span class="architecture-step">03</span><strong>Domain contracts</strong><small><code>Vector</code> · <code>Matrix</code><br />constraints · problem</small></li>
+    <li class="architecture-branch" aria-label="Polymorphic strategy branches">
+      <span class="architecture-branch-label">select by contract</span>
+      <div class="architecture-branch-grid">
+        <span class="architecture-branch-node"><strong>RiskMeasure</strong><small>variance · CFVaR</small></span>
+        <span class="architecture-branch-node"><strong>Optimizer</strong><small>closed-form · SLSQP</small></span>
+        <span class="architecture-branch-node"><strong>Constraint</strong><small>budget · sector · leverage</small></span>
+      </div>
+    </li>
+    <li class="architecture-connector" aria-hidden="true"><span>solve + check</span><i></i></li>
+    <li class="architecture-node architecture-node-output"><span class="architecture-step">04</span><strong>Diagnostics + report</strong><small>feasibility, warnings,<br />versioned JSON output</small></li>
+  </ol>
+  <p class="architecture-graph-fallback"><strong>Reading order:</strong> input boundary → configuration → domain contracts → risk, optimizer, and constraint implementations → diagnostics and report.</p>
+</div>
 
 You give it inputs → it solves → you get a JSON report.
 

@@ -43,14 +43,28 @@ def main() -> int:
             if phrase in text:
                 errors.append(f"homepage contains an unqualified claim: {phrase}")
         homepage_text = homepage.read_text(encoding="utf-8")
-        for marker in ('id="solver-demo"', 'aria-live="polite"', "<noscript>"):
+        for marker in (
+            'id="solver-demo"',
+            'aria-live="polite"',
+            "<noscript>",
+            'class="hero-demo"',
+            'class="signal-strip"',
+            'class="section workflow"',
+            'class="closing"',
+        ):
             if marker not in homepage_text:
                 errors.append(
                     f"homepage is missing accessibility/fallback marker: {marker}"
                 )
     if stylesheet.exists():
         css_text = stylesheet.read_text(encoding="utf-8")
-        for marker in (":focus-visible", "prefers-reduced-motion", "max-width: 760px"):
+        for marker in (
+            ":focus-visible",
+            "prefers-reduced-motion",
+            "max-width: 760px",
+            ".architecture-flow",
+            ".architecture-node",
+        ):
             if marker not in css_text:
                 errors.append(
                     f"stylesheet is missing responsive/accessibility marker: {marker}"

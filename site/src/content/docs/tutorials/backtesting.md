@@ -130,12 +130,12 @@ from convexfolio.backtest import (
     load_price_history_csv,
     run_backtest,
 )
-from convexfolio.data import synthetic_portfolio
+from convexfolio.data import SyntheticPortfolio
 
 history = load_price_history_csv("prices.csv")
-portfolio_inputs = synthetic_portfolio(
+portfolio_inputs = SyntheticPortfolio(
     n_instruments=history.n_instruments, degrees_of_freedom=8.0, seed=7
-)
+)()
 config = BacktestConfig(
     portfolio_inputs=portfolio_inputs,
     rebalance_frequency=2,

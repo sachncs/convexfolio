@@ -95,14 +95,14 @@ weights = Minimize(
     Variance(inputs.precision_matrix),
     inputs.cost_vector,
 ).value
-print(f"Recommended weights: {weights}")
+print(f"Computed weights: {weights}")
 ```
 
 You should see something like:
 
 ```
 Loaded 5 options
-Recommended weights: [0.6 0.9 0.7 0.4 1.0]
+Computed weights: [ ... ]
 ```
 
 That's the minimum-variance split. To get it as dollar amounts
@@ -147,7 +147,7 @@ on more variance in exchange for higher expected returns.
 |---|---|---|
 | `CSV missing required columns` | Header row missing one of the three columns. | Add the missing column. |
 | `CSV file has no data rows` | Empty file. | Add at least one option row. |
-| `ValueError: degrees_of_freedom must be > 1` | Wrong parameter to `synthetic_portfolio`. | Use `nu > 1`, ideally `nu > 6`. |
+| `ValueError: degrees_of_freedom must be > 2` | Invalid parameter to `SyntheticPortfolio`. | Use `degrees_of_freedom > 2`; values above 6 are a conservative choice. |
 
 ---
 

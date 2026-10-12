@@ -34,21 +34,18 @@ Three PNGs:
 
 ## Step 1 — Make sure matplotlib is installed
 
-The plot module uses matplotlib. It's an optional dependency (kept
+The CLI plotting command uses matplotlib. It is an optional dependency (kept
 out of the core wheel to keep installs small).
 
 ```bash
-pip install 'matplotlib==3.11.1'
+pip install 'matplotlib==3.11.2'
 ```
 
 Or with the project's optional extra:
 
 ```bash
-pip install '.[viz]'
+pip install 'convexfolio[plot]'
 ```
-
-(We're adding this extra in a follow-up step. For now, install
-matplotlib directly.)
 
 ---
 
@@ -112,33 +109,11 @@ convexfolio --config config.json --command plot --chart sensitivity
 
 ---
 
-## Step 4 — From Python
+## Step 4 — Use the CLI as the supported plotting interface
 
-If you want more control, call the plot functions directly:
-
-```python
-import numpy as np
-from convexfolio import Minimize, Variance
-from convexfolio.plot import weights, efficient_frontier, cfvar_sensitivity
-
-precision_matrix = np.array([
-    [2.0, 0.2, 0.2, 0.2, 0.2],
-    [0.2, 1.5, 0.15, 0.15, 0.15],
-    [0.2, 0.15, 1.2, 0.12, 0.12],
-    [0.2, 0.15, 0.12, 2.5, 0.25],
-    [0.2, 0.15, 0.12, 0.25, 1.8],
-])
-cost_vector = np.array([0.60, 0.40, 0.30, 0.80, 0.50])
-expected_payoff = np.array([0.05, 0.10, -0.02, 0.08, 0.03])
-
-# Solve.
-w = Minimize(Variance(precision_matrix), cost_vector).value
-
-# Render.
-weights(w, labels=["A", "B", "C", "D", "E"], output_path="weights.png")
-efficient_frontier(precision_matrix, cost_vector, expected_payoff, output_path="frontier.png")
-cfvar_sensitivity(precision_matrix, cost_vector, expected_payoff, output_path="cfvar_alpha.png")
-```
+Plotting is intentionally exposed through the CLI. This keeps the optional
+matplotlib dependency isolated from the core Python API and gives each chart
+the same output-directory and configuration behavior.
 
 ---
 
@@ -156,7 +131,7 @@ cfvar_sensitivity(precision_matrix, cost_vector, expected_payoff, output_path="c
 
 | Error | Cause | Fix |
 |---|---|---|
-| `ModuleNotFoundError: No module named 'matplotlib'` | Optional dep not installed. | `pip install '.[viz]'` (or just matplotlib). |
+| `ModuleNotFoundError: No module named 'matplotlib'` | Optional dep not installed. | `pip install 'convexfolio[plot]'` (or just matplotlib). |
 | Empty PNG | `precision_matrix` is singular. | Add noise: `Q + 0.1 * I`. |
 | Frontier has only one point | All alphas converged to the same weights. | Check that `expected_payoff` is non-uniform. |
 
@@ -164,7 +139,7 @@ cfvar_sensitivity(precision_matrix, cost_vector, expected_payoff, output_path="c
 
 ## Where to look next
 
-- **[API Reference](/convexfolio/docs/api-reference/)** — All plot functions.
+- **[API Reference](/convexfolio/docs/api-reference/)** — CLI and core APIs.
 - **[from-CSV tutorial](/convexfolio/docs/tutorials/from-csv/)** — Loading inputs.
 - **[Constraints tutorial](/convexfolio/docs/tutorials/constraints/)** — Adding real-world
   constraints before plotting.

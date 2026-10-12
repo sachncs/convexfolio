@@ -19,7 +19,7 @@ By the end, you'll have a portfolio with:
 1. **Long-only** — no shorting.
 2. **Position limits** — no single option gets more than 25% of the
    portfolio.
-3. **Sector caps** — no sector gets more than 50% of the portfolio.
+3. **Sector caps** — no sector gets more than 75% of the portfolio.
 
 And you'll see how each constraint changes the recommended split.
 
@@ -32,7 +32,7 @@ And you'll see how each constraint changes the recommended split.
 > team has rules:
 >
 > - No single position can be more than 25% of the portfolio.
-> - No sector can be more than 50% of the portfolio.
+> - No sector can be more than 75% of the portfolio.
 >
 > How does this change the recommended weights?
 
@@ -42,9 +42,9 @@ And you'll see how each constraint changes the recommended split.
 
 ```python
 import numpy as np
-from convexfolio.data import load_csv
+from convexfolio.data import LoadCSV
 
-inputs = load_csv("portfolio.csv")
+inputs = LoadCSV("portfolio.csv")()
 print(f"Loaded {inputs.n_instruments} options")
 ```
 
@@ -71,8 +71,8 @@ sector_map = [0, 0, 1, 1, 2]  # five options across three sectors
 
 constraints = (
     long_only_inequalities(n)
-    + position_limits_inequalities(n, max_abs_weight=0.25)
-    + sector_caps_inequalities(sector_map, max_per_sector=0.50)
+    + position_limits_inequalities(n, max_abs_weight=0.50)
+    + sector_caps_inequalities(sector_map, max_per_sector=0.75)
 )
 ```
 
@@ -80,11 +80,11 @@ Let's break that down:
 
 - `long_only_inequalities(n)` — returns ``n`` inequalities, one per
   instrument, enforcing ``x[i] >= 0``.
-- `position_limits_inequalities(n, max_abs_weight=0.25)` — returns
-  ``2n`` inequalities enforcing ``|x[i]| <= 0.25``.
-- `sector_caps_inequalities(sector_map, max_per_sector=0.50)` —
+- `position_limits_inequalities(n, max_abs_weight=0.50)` — returns
+  ``2n`` inequalities enforcing ``|x[i]| <= 0.50``.
+- `sector_caps_inequalities(sector_map, max_per_sector=0.75)` —
   returns one inequality per unique sector enforcing
-  ``sum_{i in sector} x[i] <= 0.50``.
+  ``sum_{i in sector} x[i] <= 0.75``.
 
 Tuples concatenate with `+` so you can layer constraints.
 
@@ -104,7 +104,8 @@ objective = CFVaR3Objective(
 
 weights = CFVaR3Numerical(
     cost_vector=inputs.cost_vector,
-    initial_weights=inputs.cost_vector / float(inputs.cost_vector @ inputs.cost_vector),
+    # This point satisfies the budget, long-only, position, and sector limits.
+    initial_weights=np.array([0.50, 0.25, 0.50, 0.25, 0.50]),
     objective_callable=objective,
     extra_constraints=constraints,
 ).value
@@ -120,12 +121,12 @@ constraint tuple here. The budget constraint is added automatically.
 ```python
 print(f"Weights: {weights}")
 print(f"All non-negative? {bool(np.all(weights >= -1e-8))}")
-print(f"All <= 25%? {bool(np.all(np.abs(weights) <= 0.25 + 1e-8))}")
+print(f"All <= 50%? {bool(np.all(np.abs(weights) <= 0.50 + 1e-8))}")
 print(f"Budget holds? {np.isclose(float(weights @ inputs.cost_vector), 1.0)}")
 for sector in sorted(set(sector_map)):
     indices = [i for i, s in enumerate(sector_map) if s == sector]
     sector_sum = float(sum(weights[i] for i in indices))
-    print(f"  Sector {sector}: {sector_sum:.3f} (cap 0.50)")
+print(f"  Sector {sector}: {sector_sum:.3f} (cap 0.75)")
 ```
 
 You should see all four `True` / within-cap outputs.

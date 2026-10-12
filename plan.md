@@ -59,6 +59,8 @@ Completed in the current working tree:
 - Local quality verification now passes at 196 tests, 92.55% combined
   coverage, 94.50% package coverage, package/branch coverage thresholds, Ruff,
   Mypy, wheel installation, and CLI smoke test.
+- The current CI-equivalent Python 3.13 run passes 189 tests with 92.56%
+  total coverage, 94.51% package coverage, and the critical branch checks.
 - Astro type-checks and builds 18 routes. A live preview audit verified the
   homepage and documentation navigation, then caught and fixed the GitHub
   Pages base-path separator bug.
@@ -82,6 +84,9 @@ Completed in the current working tree:
   execute in the test suite, and the process-pool
   worker is exposed as the documented `reproduce_once` function rather than
   a semi-private underscored helper.
+- Package metadata, citation metadata, README installation instructions, and
+  the changelog identify the locally verified breaking release as `2.0.0`; an
+  annotated local `v2.0.0` tag points at this snapshot.
 
 Still required before declaring the plan complete:
 
@@ -92,6 +97,12 @@ Still required before declaring the plan complete:
   the documented rollback path. The repository is now versioned as `2.0.0`
   and has a release-ready changelog/checklist; publication has not been
   requested or performed.
+
+Hosted-state evidence: the latest visible remote CI runs were for the older
+`origin/master` commit `689624b`; those runs failed in the pre-v2 backtest
+implementation on Python 3.12/3.13, while the Pages run for that same commit
+succeeded. The current verified commits and local `v2.0.0` tag have not been
+pushed, so no hosted result is attributed to them.
 
 ## 2. Original issue inventory
 

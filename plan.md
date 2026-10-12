@@ -28,6 +28,37 @@ Deliver a breaking v2 release that is:
 - Site remains static and GitHub Pages-hosted.
 - The implementation must not be considered complete until local and CI checks pass from a clean environment.
 
+### Execution status — 2026-10-12
+
+Completed in the current working tree:
+
+- Reproducible Python 3.12–3.14 environment, pinned development tooling,
+  CI matrix, and build smoke test.
+- `Vector` and `Matrix` validated read-only value objects with explicit
+  `.copy()` and `.validate()` methods; no semi-private array helper API.
+- Configuration, input, price, matrix, alpha, constraint, and numerical
+  validation with typed domain errors.
+- ABC-based polymorphic risk, constraint, and optimizer contracts with
+  structured diagnostics and SLSQP failure reporting.
+- Stable linear solves, corrected sector/leverage constraints, holdings-based
+  marked-to-market backtests, and expanded CLI/domain tests.
+- Optional dependency groups for plotting, Hugging Face ingestion, and
+  benchmarks; core package installation no longer pulls them in.
+- Accessible site interaction updates, a restrained blue visual system,
+  truthful homepage claims, and a dependency-free site invariant check.
+
+Still required before declaring the plan complete:
+
+- Raise branch-aware package coverage to the stated thresholds, especially
+  legacy numerical branches, backtest failure policies, and CLI commands.
+- Add independent numerical reference, property-based, failure-injection,
+  documentation-example, and clean-wheel installation tests.
+- Verify documentation links/examples and build the Jekyll site in CI.
+- Run a rendered browser audit at 320px, 768px, and 1440px, including
+  contrast, reduced motion, focus, overflow, and console-error checks.
+- Complete release/migration/changelog/rollback documentation and a clean
+  machine reproduction before release.
+
 ## 2. Current issue inventory
 
 ### Environment and release process

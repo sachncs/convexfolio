@@ -36,6 +36,7 @@ jobs:
           python scripts/check_coverage.py coverage.json
           python scripts/check_site.py
           python scripts/check_docs.py
+          python scripts/check_doc_examples.py
 
       - name: Install Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0

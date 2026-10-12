@@ -46,7 +46,7 @@ from convexfolio.data import (
 from convexfolio.utils import Logger, Report, Reproduce
 
 
-def _convexfolio_version() -> str:
+def convexfolio_version() -> str:
     """Return the installed ``convexfolio`` package version.
 
     Returns:
@@ -108,7 +108,7 @@ def parser() -> argparse.ArgumentParser:
     argument_parser.add_argument(
         "--version",
         action="version",
-        version=f"convexfolio {_convexfolio_version()}",
+        version=f"convexfolio {convexfolio_version()}",
     )
     argument_parser.add_argument(
         "--config",

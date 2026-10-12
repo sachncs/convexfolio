@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import csv
 import math
+import time
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from pathlib import Path
@@ -244,6 +245,8 @@ class HFDatasetSource(DataSource):
         streaming: bool = True,
         symbols: Iterable[str] | None = None,
         max_rows: int | None = None,
+        retries: int = 2,
+        retry_delay_seconds: float = 1.0,
     ) -> None:
         """Store the Hub parameters; iteration happens in :meth:`__iter__`.
 
@@ -265,6 +268,12 @@ class HFDatasetSource(DataSource):
         self.streaming = streaming
         self.symbols = frozenset(symbols) if symbols is not None else None
         self.max_rows = max_rows
+        if retries < 0:
+            raise ValueError("retries must be non-negative")
+        if not math.isfinite(retry_delay_seconds) or retry_delay_seconds < 0.0:
+            raise ValueError("retry_delay_seconds must be finite and non-negative")
+        self.retries = retries
+        self.retry_delay_seconds = retry_delay_seconds
 
     def __iter__(self) -> Iterator[dict[str, Any]]:
         """Yield raw row dicts, honouring the symbol whitelist and cap.
@@ -280,12 +289,24 @@ class HFDatasetSource(DataSource):
                 "install with `pip install 'convexfolio[hf-data]'`"
             ) from exc
 
-        dataset = load_dataset(
-            self.repo_id,
-            self.subset,
-            split=self.split,
-            streaming=self.streaming,
-        )
+        dataset = None
+        for attempt in range(self.retries + 1):
+            try:
+                dataset = load_dataset(
+                    self.repo_id,
+                    self.subset,
+                    split=self.split,
+                    streaming=self.streaming,
+                )
+                break
+            except (ConnectionError, TimeoutError, OSError) as exc:
+                if attempt >= self.retries:
+                    raise RuntimeError(
+                        f"Hugging Face dataset failed after {attempt + 1} attempts"
+                    ) from exc
+                time.sleep(self.retry_delay_seconds)
+        if dataset is None:
+            raise RuntimeError("Hugging Face dataset did not produce a source")
         count = 0
         for raw in dataset:
             symbol_value = str(raw.get("symbol", "")).strip()

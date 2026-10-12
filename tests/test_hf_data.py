@@ -14,6 +14,8 @@ class in the ETL pipeline:
 from __future__ import annotations
 
 import json
+import sys
+import types
 from pathlib import Path
 
 import numpy as np
@@ -279,3 +281,24 @@ def test_hf_dataset_source_construction_does_not_import_datasets() -> None:
     assert source.repo_id
     assert source.symbols == frozenset({"AAPL"})
     assert source.max_rows == 10
+
+
+def test_hf_dataset_source_retries_transient_failures(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Transient Hub failures are retried before rows are yielded."""
+    attempts = 0
+
+    def load_dataset(*args, **kwargs):
+        nonlocal attempts
+        attempts += 1
+        if attempts < 3:
+            raise ConnectionError("temporary outage")
+        return [{"symbol": "AAPL", "value": 1}]
+
+    monkeypatch.setitem(
+        sys.modules, "datasets", types.SimpleNamespace(load_dataset=load_dataset)
+    )
+    source = HFDatasetSource(retries=2, retry_delay_seconds=0.0)
+    assert list(source) == [{"symbol": "AAPL", "value": 1}]
+    assert attempts == 3

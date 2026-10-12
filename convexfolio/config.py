@@ -22,7 +22,14 @@ from pathlib import Path
 import numpy as np
 import yaml
 
+from convexfolio.errors import ValidationError
 from convexfolio.types import FloatArray
+from convexfolio.validation import (
+    _copy_square_matrix,
+    _copy_vector,
+    _validate_matching_dimensions,
+    _validate_positive_vector,
+)
 
 
 @dataclass(frozen=True)
@@ -68,6 +75,21 @@ class PortfolioInputs:
     expected_payoff: FloatArray
     cost_vector: FloatArray
     precision_matrix: FloatArray
+
+    def __post_init__(self) -> None:
+        """Copy and validate all portfolio arrays at construction time."""
+        expected_payoff = _copy_vector(self.expected_payoff, "expected_payoff")
+        cost_vector = _copy_vector(self.cost_vector, "cost_vector")
+        precision_matrix = _copy_square_matrix(
+            self.precision_matrix, "precision_matrix"
+        )
+        _validate_positive_vector(cost_vector, "cost_vector")
+        _validate_matching_dimensions(
+            expected_payoff, cost_vector, precision_matrix
+        )
+        object.__setattr__(self, "expected_payoff", expected_payoff)
+        object.__setattr__(self, "cost_vector", cost_vector)
+        object.__setattr__(self, "precision_matrix", precision_matrix)
 
     @property
     def n_instruments(self) -> int:
@@ -247,6 +269,8 @@ class Validate:
             ValueError: If ``config.optimization.alpha`` falls outside
                 ``(0, 0.5)``.
         """
+        if not np.isfinite(config.optimization.alpha):
+            raise ValidationError("alpha must be finite")
         if not (0.0 < config.optimization.alpha < 0.5):
-            raise ValueError("alpha must satisfy 0 < alpha < 0.5")
+            raise ValidationError("alpha must satisfy 0 < alpha < 0.5")
         self.config = config

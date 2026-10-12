@@ -72,6 +72,12 @@ from convexfolio.config import (
     Validate,
 )
 from convexfolio.data import LoadCSV, Summary, SyntheticPortfolio
+from convexfolio.errors import (
+    ConvexfolioError,
+    InfeasibleProblemError,
+    SolverFailureError,
+    ValidationError,
+)
 from convexfolio.hf_data import (
     DATASET_REPO_ID,
     DATASET_SPLIT,
@@ -125,6 +131,7 @@ __all__ = [
     "CFVaR3Numerical",
     "CFVaR3Objective",
     "CFVaR3rd",
+    "ConvexfolioError",
     "CSVFileSource",
     "Compute",
     "Cross",
@@ -149,6 +156,7 @@ __all__ = [
     "Logger",
     "Loss",
     "Minimize",
+    "InfeasibleProblemError",
     "OptimalEpsilon",
     "Optimization",
     "OptionsRow",
@@ -162,9 +170,11 @@ __all__ = [
     "Reproduce",
     "Runtime",
     "Score",
+    "SolverFailureError",
     "SummariseResults",
     "Summary",
     "SyntheticPortfolio",
     "Validate",
+    "ValidationError",
     "Variance",
 ]

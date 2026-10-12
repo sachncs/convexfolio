@@ -21,7 +21,9 @@ from functools import partial
 
 import numpy as np
 
+from convexfolio.errors import ValidationError
 from convexfolio.types import FloatArray
+from convexfolio.validation import _copy_vector
 
 SLSQPLambda = Callable[[np.ndarray], float]
 SLSQPConstraint = dict[str, str | SLSQPLambda]
@@ -58,7 +60,10 @@ def budget_residual(cost_vector: FloatArray, x: np.ndarray) -> float:
         The signed residual; positive means over-budget, negative means
         under-budget.
     """
-    return float(np.dot(x, cost_vector) - 1.0)
+    weights = np.asarray(x, dtype=float)
+    if weights.ndim != 1 or weights.shape != cost_vector.shape:
+        raise ValidationError("weights and cost_vector must have matching shapes")
+    return float(np.dot(weights, cost_vector) - 1.0)
 
 
 def budget(cost_vector: FloatArray) -> SLSQPConstraint:
@@ -70,7 +75,10 @@ def budget(cost_vector: FloatArray) -> SLSQPConstraint:
     Returns:
         A SciPy SLSQP constraint dict enforcing the budget.
     """
-    bound_fun: SLSQPLambda = partial(budget_residual, cost_vector)
+    validated_costs = _copy_vector(cost_vector, "cost_vector")
+    if np.any(validated_costs <= 0.0):
+        raise ValidationError("cost_vector must contain only positive values")
+    bound_fun: SLSQPLambda = partial(budget_residual, validated_costs)
     return {"type": "eq", "fun": bound_fun}
 
 
@@ -85,6 +93,10 @@ def bounds(min: float, max: float, n: int) -> Sequence[tuple[float, float]]:
     Returns:
         A list of ``(min, max)`` tuples, length ``n``.
     """
+    if n < 0:
+        raise ValidationError("n must be non-negative")
+    if np.isnan(min) or np.isnan(max) or min > max:
+        raise ValidationError("bounds must not contain NaN and min must not exceed max")
     return [(float(min), float(max))] * int(n)
 
 
@@ -100,7 +112,10 @@ def inequality_residual(coefficients: FloatArray, limit: float, x: np.ndarray) -
         Slack to the constraint; positive means feasible, negative
         means violated.
     """
-    return float(limit - float(np.dot(x, coefficients)))
+    weights = np.asarray(x, dtype=float)
+    if weights.ndim != 1 or weights.shape != coefficients.shape:
+        raise ValidationError("weights and coefficients must have matching shapes")
+    return float(limit - float(np.dot(weights, coefficients)))
 
 
 def inequality(coefficients: FloatArray, limit: float) -> SLSQPConstraint:
@@ -113,7 +128,12 @@ def inequality(coefficients: FloatArray, limit: float) -> SLSQPConstraint:
     Returns:
         A SciPy SLSQP constraint dict.
     """
-    ineq_fun: SLSQPLambda = partial(inequality_residual, coefficients, limit)
+    validated_coefficients = _copy_vector(coefficients, "coefficients")
+    if not np.isfinite(limit):
+        raise ValidationError("constraint limit must be finite")
+    ineq_fun: SLSQPLambda = partial(
+        inequality_residual, validated_coefficients, float(limit)
+    )
     return {"type": "ineq", "fun": ineq_fun}
 
 
@@ -160,6 +180,8 @@ def long_only_inequalities(n: int) -> ConstraintSpec:
     Returns:
         Tuple of ``n`` inequality constraints.
     """
+    if n < 0:
+        raise ValidationError("n must be non-negative")
     eyes = [np.eye(n, dtype=float)[i] for i in range(n)]
     return tuple(inequality(-eye, 0.0) for eye in eyes)
 
@@ -177,6 +199,10 @@ def position_limits_inequalities(n: int, max_abs_weight: float) -> ConstraintSpe
     Returns:
         Tuple of ``2n`` inequality constraints.
     """
+    if n < 0:
+        raise ValidationError("n must be non-negative")
+    if not np.isfinite(max_abs_weight) or max_abs_weight < 0.0:
+        raise ValidationError("max_abs_weight must be finite and non-negative")
     eyes = [np.eye(n, dtype=float)[i] for i in range(n)]
     out: list[SLSQPConstraint] = []
     for eye in eyes:
@@ -202,10 +228,12 @@ def sector_caps_inequalities(
         Tuple of inequality constraints, one per unique sector.
     """
     out: list[SLSQPConstraint] = []
-    n_sectors = len(sector_map)
+    if not np.isfinite(max_per_sector):
+        raise ValidationError("max_per_sector must be finite")
+    instrument_count = len(sector_map)
     unique_sectors = sorted(set(sector_map))
     for sector in unique_sectors:
-        a = np.zeros(n_sectors, dtype=float)
+        a = np.zeros(instrument_count, dtype=float)
         for i, s in enumerate(sector_map):
             if s == sector:
                 a[i] = 1.0
@@ -228,5 +256,15 @@ def leverage_cap_inequality(n: int, max_leverage: float) -> SLSQPConstraint:
     Returns:
         A single SLSQP inequality constraint.
     """
-    a = np.ones(n, dtype=float)
-    return inequality(a, max_leverage)
+    if n < 0:
+        raise ValidationError("n must be non-negative")
+    if not np.isfinite(max_leverage) or max_leverage < 0.0:
+        raise ValidationError("max_leverage must be finite and non-negative")
+
+    def absolute_leverage_residual(x: np.ndarray) -> float:
+        weights = np.asarray(x, dtype=float)
+        if weights.ndim != 1 or weights.shape != (n,):
+            raise ValidationError("weights must match the requested instrument count")
+        return float(max_leverage - np.sum(np.abs(weights)))
+
+    return {"type": "ineq", "fun": absolute_leverage_residual}

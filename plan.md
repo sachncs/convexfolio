@@ -26,6 +26,8 @@ Deliver a breaking v2 release that is:
 - v2 may break the v1 API, but migration guidance is required.
 - Support Python `>=3.12,<3.15`; Python 3.14 compatibility was verified locally before adding it to CI.
 - Site remains static and GitHub Pages-hosted.
+- Astro is the only documentation/site source of truth. No Jekyll files,
+  generated documentation copies, or parallel page systems may remain.
 - The implementation must not be considered complete until local and CI checks pass from a clean environment.
 
 ### Execution status — 2026-10-12
@@ -46,14 +48,21 @@ Completed in the current working tree:
   benchmarks; core package installation no longer pulls them in.
 - Accessible site interaction updates, a restrained blue visual system,
   truthful homepage claims, and a dependency-free site invariant check.
+- Jekyll has been removed. Astro now owns the homepage, documentation shell,
+  Markdown content collection, static build, and GitHub Pages artifact.
+- Documentation tone was revised toward direct technical language: claims are
+  scoped, limitations are visible, and the homepage leads with inspectability
+  rather than marketing language.
+- Report output has a `2.0` schema version and the process-parallel report path
+  is covered by tests.
 
 Still required before declaring the plan complete:
 
-- Raise branch-aware package coverage to the stated thresholds, especially
-  legacy numerical branches, backtest failure policies, and CLI commands.
-- Add independent numerical reference, property-based, failure-injection,
-  documentation-example, and clean-wheel installation tests.
-- Verify documentation links/examples and build the Jekyll site in CI.
+- Add independent numerical reference, failure-injection, documentation-example,
+  and clean-wheel installation tests where coverage gaps remain.
+- Verify every public interface, including the data-source and backtest-engine
+  contracts, with contract tests.
+- Verify documentation links/examples and build the Astro site in CI.
 - Run a rendered browser audit at 320px, 768px, and 1440px, including
   contrast, reduced motion, focus, overflow, and console-error checks.
 - Complete release/migration/changelog/rollback documentation and a clean
@@ -63,7 +72,8 @@ Still required before declaring the plan complete:
 
 ### Environment and release process
 
-- Local environment cannot currently run the project test suite because pytest, SciPy, PyYAML, Matplotlib, Ruff, Mypy, `datasets`, and `build` are missing.
+- The repository previously had no reproducible local development environment
+  or documented quality baseline.
 - `pyproject.toml` advertises Python `>=3.12`, while CI tests only 3.12 and 3.13.
 - Production dependencies include development/benchmark packages.
 - Release workflow builds and publishes without running the full quality gate first.
@@ -134,20 +144,21 @@ Still required before declaring the plan complete:
 
 ### Documentation and website
 
-- Architecture documentation explicitly conflicts with the requested OOP/polymorphic design.
+- Documentation previously conflicted with the requested OOP/polymorphic design.
 - Documentation describes only three CLI commands while the implementation exposes more.
 - Claims about exactness, determinism, and production readiness are insufficiently qualified.
 - Examples are not automatically executed against the current API.
 - Homepage is visually over-decorated and marketing-heavy for a research library.
 - Palette has excessive mint/teal/glow usage and weak hierarchy.
-- Mobile and desktop navigation are duplicated.
+- Mobile and desktop navigation were duplicated in the previous Jekyll shell.
 - Focus-visible styling is not explicit.
 - Mobile menu lacks complete focus management and Escape handling.
 - Tabs lack complete ARIA relationships and keyboard semantics.
 - Copy feedback lacks an accessible live region and meaningful failure state.
 - Animated counters expose `0` before hydration.
 - Typewriter behavior uses randomness despite determinism messaging.
-- No automated contrast, overflow, link, accessibility, or responsive checks exist.
+- Automated source/link checks now exist; rendered contrast, overflow, and
+  responsive checks remain release gates.
 
 ## 3. Target architecture
 

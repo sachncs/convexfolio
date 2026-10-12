@@ -1,9 +1,3 @@
----
-layout: page
-title: "License"
-permalink: /LICENSE/
----
-
 # License
 
 Convexfolio is released under the **MIT License**.

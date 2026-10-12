@@ -2,10 +2,10 @@
   <h1 align="center">Convexfolio</h1>
   <p align="center">A Python package that figures out how to spread your money across options to minimise risk.</p>
   <p align="center">
-    <a href="#installation"><img src="https://img.shields.io/badge/python-3.12%20%7C%203.13-blue" alt="Python"></a>
+    <a href="#installation"><img src="https://img.shields.io/badge/python-3.12%20%7C%203.13%20%7C%203.14-blue" alt="Python"></a>
     <a href="LICENSE.md"><img src="https://img.shields.io/badge/license-MIT-green" alt="License"></a>
     <a href="https://github.com/sachncs/convexfolio/releases/latest"><img src="https://img.shields.io/github/v/release/sachncs/convexfolio" alt="Latest release"></a>
-    <a href="https://github.com/sachncs/convexfolio/actions"><img src="https://img.shields.io/github/actions/workflow/status/sachncs/convexfolio/ci.yml?branch=main" alt="CI"></a>
+    <a href="https://github.com/sachncs/convexfolio/actions"><img src="https://img.shields.io/github/actions/workflow/status/sachncs/convexfolio/ci.yml?branch=master" alt="CI"></a>
     <a href="https://github.com/sachncs/convexfolio/stargazers"><img src="https://img.shields.io/github/stars/sachncs/convexfolio" alt="Stars"></a>
   </p>
 </p>
@@ -82,7 +82,7 @@ If you don't know what Python is or whether you have it:
 1. Open a terminal (on macOS: `Cmd + Space`, type "Terminal"; on
    Windows: open "PowerShell"; on Linux: open your usual terminal).
 2. Type `python3 --version` and press Enter.
-3. If you see a version number starting with `3.12` or `3.13`, you're
+3. If you see a version number starting with `3.12`, `3.13`, or `3.14`, you're
    set.
 4. If you see "command not found" or an older version, follow the
    [official Python installer guide](https://realpython.com/installing-python/).

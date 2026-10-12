@@ -55,6 +55,12 @@ Completed in the current working tree:
   rather than marketing language.
 - Report output has a `2.0` schema version and the process-parallel report path
   is covered by tests.
+- Local quality verification now passes at 182 tests, 92.14% combined coverage,
+  package/branch coverage thresholds, Ruff, Mypy, wheel installation, and CLI
+  smoke test.
+- Astro type-checks and builds 18 routes. A live preview audit verified the
+  homepage and documentation navigation, then caught and fixed the GitHub
+  Pages base-path separator bug.
 
 Still required before declaring the plan complete:
 

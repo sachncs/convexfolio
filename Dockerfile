@@ -10,7 +10,7 @@ RUN groupadd --system convexfolio \
 
 WORKDIR /app
 
-COPY pyproject.toml README.md LICENSE ./
+COPY pyproject.toml README.md LICENSE.md ./
 COPY convexfolio ./convexfolio
 
 RUN pip install --no-cache-dir .

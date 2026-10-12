@@ -33,6 +33,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
 
+      - name: Build and smoke-test image
+        run: |
+          docker build --tag convexfolio:smoke .
+          docker run --rm convexfolio:smoke --command print-report > /tmp/docker-report.json
+          test -s /tmp/docker-report.json
+
       - name: Build and push
         uses: docker/build-push-action@v7
         with:

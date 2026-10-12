@@ -7,7 +7,7 @@ name = "convexfolio"
 version = "1.0.0"
 description = "Convexfolio — option portfolio optimizer (paper-faithful baseline + extensible package API). Not investment advice."
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.15"
 license = "MIT"
 authors = [
   {name = "Sachin <sachncs@gmail.com>"}
@@ -51,7 +51,9 @@ Changelog = "https://github.com/sachncs/convexfolio/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = [
+  "build==1.5.0",
   "pytest==9.1.1",
+  "pytest-cov==6.3.0",
   "mypy==2.4.0",
   "ruff==0.16.5",
 ]

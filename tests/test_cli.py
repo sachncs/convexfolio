@@ -9,7 +9,9 @@ package must be installed (``pip install -e .``) for these to find
 from __future__ import annotations
 
 import json
+import os
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -22,9 +24,15 @@ def run_cli(*args: str) -> subprocess.CompletedProcess[str]:
     Returns:
         The completed process with stdout/stderr captured.
     """
+    environment = os.environ.copy()
+    executable_directory = str(Path(sys.executable).parent)
+    environment["PATH"] = os.pathsep.join(
+        [executable_directory, environment.get("PATH", "")]
+    )
     return subprocess.run(
         ["convexfolio", *args],
         capture_output=True,
+        env=environment,
         text=True,
         timeout=60,
     )

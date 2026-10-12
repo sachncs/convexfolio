@@ -24,7 +24,7 @@ Deliver a breaking v2 release that is:
 - No mutation of caller-owned arrays or configuration dictionaries.
 - No new dependency may be added without justification, license review, and CI coverage.
 - v2 may break the v1 API, but migration guidance is required.
-- Initially support Python `>=3.12,<3.14`; add Python 3.14 only after all dependencies pass compatibility testing.
+- Support Python `>=3.12,<3.15`; Python 3.14 compatibility was verified locally before adding it to CI.
 - Site remains static and GitHub Pages-hosted.
 - The implementation must not be considered complete until local and CI checks pass from a clean environment.
 

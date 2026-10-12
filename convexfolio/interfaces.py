@@ -37,10 +37,15 @@ class Constraint(ABC):
     def check(self, weights: np.ndarray, tolerance: float) -> ConstraintResult:
         """Evaluate feasibility using a caller-supplied tolerance."""
         residual = float(self.residual(weights))
+        feasible = (
+            abs(residual) <= tolerance
+            if self.kind == "equality"
+            else residual >= -tolerance
+        )
         return ConstraintResult(
             name=self.name,
             residual=residual,
-            feasible=residual >= -tolerance,
+            feasible=feasible,
             tolerance=tolerance,
         )
 

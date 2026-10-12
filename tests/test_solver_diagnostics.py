@@ -12,6 +12,7 @@ from convexfolio import (
     SlsqpOptimizer,
 )
 from convexfolio.errors import InfeasibleProblemError, SolverFailureError
+from convexfolio.optimization import check_constraints
 
 
 def inputs() -> PortfolioInputs:
@@ -58,4 +59,65 @@ def test_slsqp_rejects_too_small_iteration_budget() -> None:
         tolerances=problem.tolerances.__class__(max_iterations=1),
     )
     with pytest.raises(SolverFailureError):
+        SlsqpOptimizer().solve(problem, CFVaR2Risk(portfolio, 0.05))
+
+
+def test_slsqp_rejects_non_constraint_objects() -> None:
+    portfolio = inputs()
+    problem = OptimizationProblem(inputs=portfolio, constraints=(object(),))
+    with pytest.raises(TypeError, match="implement Constraint"):
+        SlsqpOptimizer().solve(problem, CFVaR2Risk(portfolio, 0.05))
+    with pytest.raises(TypeError, match="implement Constraint"):
+        check_constraints(problem, np.array([1.0, 1.0]))
+
+
+@pytest.mark.parametrize(
+    ("result_values", "message"),
+    [
+        (
+            {
+                "success": True,
+                "nit": 2,
+                "fun": np.inf,
+                "message": "bad",
+                "x": [1.0, 1.0],
+            },
+            "non-finite",
+        ),
+        (
+            {"success": True, "nit": 2, "fun": 1.0, "message": "bad", "x": [0.0, 0.0]},
+            "infeasible",
+        ),
+        (
+            {
+                "success": False,
+                "nit": 2,
+                "fun": 1.0,
+                "message": "failed",
+                "x": [1.0, 1.0],
+            },
+            "failed",
+        ),
+    ],
+)
+def test_slsqp_postsolve_failure_paths(
+    monkeypatch: pytest.MonkeyPatch, result_values: dict[str, object], message: str
+) -> None:
+    portfolio = inputs()
+    problem = OptimizationProblem(
+        inputs=portfolio,
+        constraints=(BudgetConstraint(portfolio.cost_vector),),
+    )
+
+    class FakeResult:
+        success = result_values["success"]
+        nit = result_values["nit"]
+        fun = result_values["fun"]
+        message = result_values["message"]
+        x = np.asarray(result_values["x"], dtype=float)
+
+    monkeypatch.setattr(
+        "convexfolio.optimization.minimize", lambda *args, **kwargs: FakeResult()
+    )
+    with pytest.raises(SolverFailureError, match=message):
         SlsqpOptimizer().solve(problem, CFVaR2Risk(portfolio, 0.05))

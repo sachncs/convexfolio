@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from convexfolio.config import Load, Validate
+from convexfolio.config import Experiment, Load, Validate
 
 
 def test_load_config_defaults() -> None:
@@ -151,3 +151,43 @@ def test_load_file_does_not_mutate_input_mapping(tmp_path: Path) -> None:
     assert config_file.read_text(encoding="utf-8") == (
         '{"runtime": {"output_dir": "reports"}}'
     )
+
+
+@pytest.mark.parametrize(
+    ("section", "value", "message"),
+    [
+        ("runtime", [], "runtime must be a mapping"),
+        ("optimization", [], "optimization must be a mapping"),
+        ("inputs", [], "inputs must be a mapping"),
+    ],
+)
+def test_load_config_rejects_non_mapping_sections(
+    tmp_path: Path, section: str, value: list[object], message: str
+) -> None:
+    config_file = tmp_path / f"bad_{section}.json"
+    config_file.write_text(json.dumps({section: value}), encoding="utf-8")
+    with pytest.raises(ValueError, match=message):
+        Load(str(config_file))()
+
+
+def test_load_config_rejects_unknown_optimization_and_input_keys(
+    tmp_path: Path,
+) -> None:
+    for name, payload, message in [
+        ("optimization", {"unexpected": 1}, "unknown optimization keys"),
+        ("inputs", {"unexpected": 1}, "unknown inputs keys"),
+    ]:
+        config_file = tmp_path / f"unknown_{name}.json"
+        config_file.write_text(json.dumps({name: payload}), encoding="utf-8")
+        with pytest.raises(ValueError, match=message):
+            Load(str(config_file))()
+
+
+def test_experiment_shortcuts_require_inputs() -> None:
+    experiment = Experiment()
+    with pytest.raises(ValueError, match="no portfolio inputs"):
+        _ = experiment.expected_payoff
+    with pytest.raises(ValueError, match="no portfolio inputs"):
+        _ = experiment.cost_vector
+    with pytest.raises(ValueError, match="no portfolio inputs"):
+        _ = experiment.precision_matrix

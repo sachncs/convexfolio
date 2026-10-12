@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from convexfolio.constraints import (
     bounds,
@@ -16,6 +17,7 @@ from convexfolio.constraints import (
     position_limits_inequalities,
     sector_caps_inequalities,
 )
+from convexfolio.errors import ValidationError
 from convexfolio.math import CFVaR3Numerical, CFVaR3Objective, Variance
 
 
@@ -183,6 +185,41 @@ def test_cfvar3_backward_compat_no_extras() -> None:
         objective_callable=objective,
     ).value
     assert np.isclose(float(weights @ cost_vector), 1.0, atol=1e-6)
+
+
+def test_constraint_builders_reject_invalid_inputs() -> None:
+    with pytest.raises(ValidationError, match="cost_vector"):
+        budget(np.array([]))
+    with pytest.raises(ValidationError, match="positive"):
+        budget(np.array([1.0, 0.0]))
+    with pytest.raises(ValidationError, match="bounds"):
+        bounds(2.0, 1.0, 1)
+    with pytest.raises(ValidationError, match="non-negative"):
+        bounds(0.0, 1.0, -1)
+    with pytest.raises(ValidationError, match="coefficients"):
+        inequality(np.array([]), 1.0)
+    with pytest.raises(ValidationError, match="finite"):
+        inequality(np.array([1.0]), np.inf)
+    with pytest.raises(ValidationError, match="non-negative"):
+        position_limits_inequalities(1, -0.1)
+    with pytest.raises(ValidationError, match="finite"):
+        sector_caps_inequalities([0], np.inf)
+    with pytest.raises(ValidationError, match="non-negative"):
+        leverage_cap_inequality(1, -1.0)
+
+
+def test_constraint_functions_reject_dimension_errors() -> None:
+    with pytest.raises(ValidationError, match="matching shapes"):
+        fun_of(budget(np.array([1.0, 1.0])))(np.array([1.0]))
+    with pytest.raises(ValidationError, match="matching shapes"):
+        fun_of(inequality(np.array([1.0, 0.0]), 1.0))(np.array([1.0]))
+    with pytest.raises(ValidationError, match="instrument count"):
+        fun_of(leverage_cap_inequality(2, 1.0))(np.array([1.0]))
+
+
+def test_fun_of_requires_callable() -> None:
+    with pytest.raises(TypeError, match="callable"):
+        fun_of({"type": "ineq", "fun": "not-a-function"})
 
 
 def test_variance_unchanged_by_constraints_module() -> None:

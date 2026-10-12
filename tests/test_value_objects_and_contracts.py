@@ -56,12 +56,49 @@ def test_positive_vector_validation_rejects_zero() -> None:
         Vector([0.0]).validate(positive=True)
 
 
+def test_matrix_validation_reports_each_failure_mode(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    with pytest.raises(ValidationError, match="must not be empty"):
+        Matrix(np.empty((0, 0)))
+    with pytest.raises(ValidationError, match="finite"):
+        Matrix([[np.nan]]).validate()
+    with pytest.raises(ValidationError, match="symmetric"):
+        Matrix([[1.0, 2.0], [0.0, 1.0]]).validate()
+    with pytest.raises(ValidationError, match="positive definite"):
+        Matrix([[1.0, 2.0], [2.0, 1.0]]).validate()
+
+    def fail_factorisation(values):
+        raise np.linalg.LinAlgError("synthetic factorisation failure")
+
+    monkeypatch.setattr(np.linalg, "eigvalsh", fail_factorisation)
+    with pytest.raises(ValidationError, match="factorised"):
+        Matrix([[1.0]]).validate()
+
+
 def test_constraint_models_expose_named_residuals() -> None:
     values = np.array([1.0, 1.0])
     assert BudgetConstraint(np.array([0.6, 0.4])).residual(values) == pytest.approx(0)
     assert LongOnlyConstraint().residual(values) == pytest.approx(1)
     assert PositionLimitConstraint(1.5).residual(values) == pytest.approx(0.5)
     assert LeverageConstraint(3.0).residual(values) == pytest.approx(1.0)
+
+
+def test_constraint_models_reject_invalid_shapes_and_limits() -> None:
+    with pytest.raises(ValidationError, match="finite"):
+        BudgetConstraint(np.array([np.nan]))
+    with pytest.raises(ValidationError, match="positive"):
+        BudgetConstraint(np.array([0.0]))
+    with pytest.raises(ValidationError, match="matching shapes"):
+        BudgetConstraint(np.array([1.0, 1.0])).residual(np.array([1.0]))
+    with pytest.raises(ValidationError, match="non-empty"):
+        LongOnlyConstraint().residual(np.array([]))
+    with pytest.raises(ValidationError, match="non-negative"):
+        PositionLimitConstraint(-1.0)
+    with pytest.raises(ValidationError, match="non-negative"):
+        LeverageConstraint(-1.0)
+    with pytest.raises(ValidationError, match="non-empty"):
+        PositionLimitConstraint(1.0).residual(np.array([]))
 
 
 def test_risk_contracts_evaluate_all_risk_measures() -> None:

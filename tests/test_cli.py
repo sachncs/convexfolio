@@ -18,7 +18,7 @@ from pathlib import Path
 
 import pytest
 
-from convexfolio.cli import backtest_command, ingest_command, plot_command
+from convexfolio.cli import backtest_command, ingest_command, main, plot_command
 from convexfolio.config import Experiment, Runtime
 
 
@@ -138,6 +138,58 @@ def test_cli_plot_weights_writes_artifact(tmp_path: Path) -> None:
     assert Path(outputs[0]).stat().st_size > 0
 
 
+def test_cli_plot_all_charts_writes_artifacts(tmp_path: Path) -> None:
+    """All supported chart branches produce non-empty artifacts."""
+    from convexfolio.data import LoadCSV
+
+    inputs = LoadCSV("tests/fixtures/sample_portfolio.csv")()
+    experiment = Experiment(
+        runtime=Runtime(output_directory=str(tmp_path)), inputs=inputs
+    )
+    outputs = plot_command(Namespace(chart="all"), experiment)
+    assert {Path(path).name for path in outputs} == {
+        "weights.png",
+        "frontier.png",
+        "cfvar_alpha.png",
+    }
+    assert all(Path(path).stat().st_size > 0 for path in outputs)
+
+
+def test_cli_main_dispatches_plot_command(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The installed-style main dispatcher reaches the plot adapter."""
+    config_path = tmp_path / "config.json"
+    config_path.write_text(
+        json.dumps(
+            {
+                "runtime": {"output_directory": str(tmp_path)},
+                "inputs": {
+                    "expected_payoff": [0.05, 0.1],
+                    "cost_vector": [0.6, 0.4],
+                    "precision_matrix": [[2.0, 0.1], [0.1, 1.5]],
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "convexfolio",
+            "--command",
+            "plot",
+            "--chart",
+            "weights",
+            "--config",
+            str(config_path),
+        ],
+    )
+    main()
+    assert (tmp_path / "weights.png").exists()
+
+
 def test_cli_backtest_command_requires_path() -> None:
     """Backtest reports a useful error when no price CSV is supplied."""
     with pytest.raises(SystemExit, match="--path is required"):
@@ -149,3 +201,31 @@ def test_cli_backtest_command_requires_path() -> None:
                 transaction_cost_bps=5.0,
             )
         )
+
+
+def test_cli_backtest_command_runs_with_price_csv(tmp_path: Path) -> None:
+    """The backtest adapter loads prices and emits a summary."""
+    price_path = tmp_path / "prices.csv"
+    price_path.write_text(
+        "timestamp,A,B\nt0,1.0,1.0\nt1,1.1,0.9\n", encoding="utf-8"
+    )
+    backtest_command(
+        Namespace(
+            path=str(price_path),
+            config=None,
+            rebalance_frequency=2,
+            transaction_cost_bps=0.0,
+        )
+    )
+
+
+def test_cli_main_dispatches_determinism_command(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The main dispatcher runs the deterministic report command."""
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["convexfolio", "--command", "validate-determinism", "--repetitions", "2"],
+    )
+    main()

@@ -42,7 +42,11 @@ jobs:
         run: mypy convexfolio
 
       - name: Pytest
-        run: PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -q tests/
+        run: |
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest -p pytest_cov.plugin \
+            --cov=convexfolio --cov-branch --cov-report=term-missing \
+            --cov-report=json:coverage.json --cov-fail-under=90 -q tests/
+          python scripts/check_coverage.py coverage.json
 
       - name: Benchmarks
         run: pytest --benchmark-only --benchmark-columns=mean benchmarks/

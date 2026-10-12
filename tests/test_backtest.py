@@ -16,6 +16,7 @@ from convexfolio.backtest import (
     PriceHistory,
     load_price_history_csv,
     run_backtest,
+    scale_inputs_for_prices,
 )
 from convexfolio.config import PortfolioInputs
 from convexfolio.constraints import long_only_inequalities
@@ -78,6 +79,15 @@ def test_load_price_history_csv_rejects_empty(tmp_dir: Path) -> None:
     csv_path.write_text("timestamp,A\n", encoding="utf-8")
     with pytest.raises(ValueError, match="no data rows"):
         load_price_history_csv(csv_path)
+
+
+def test_load_price_history_csv_skips_blank_rows(tmp_dir: Path) -> None:
+    csv_path = tmp_dir / "blank_rows.csv"
+    csv_path.write_text(
+        "timestamp,A\n\n t0,1.0\n\n t1,1.1\n", encoding="utf-8"
+    )
+    history = load_price_history_csv(csv_path)
+    assert history.n_timestamps == 2
 
 
 @pytest.mark.parametrize(
@@ -176,6 +186,14 @@ def test_run_backtest_rejects_zero_rebalance_frequency(history: PriceHistory) ->
         BacktestConfig(portfolio_inputs=inputs, rebalance_frequency=0)
 
 
+def test_run_backtest_rejects_mutated_invalid_frequency(history: PriceHistory) -> None:
+    inputs = SyntheticPortfolio(5, 8.0, 7)()
+    config = BacktestConfig(portfolio_inputs=inputs)
+    config.rebalance_frequency = 0
+    with pytest.raises(ValueError, match="rebalance_frequency"):
+        run_backtest(history, config)
+
+
 def test_backtest_config_rejects_invalid_cost_and_alpha() -> None:
     inputs = SyntheticPortfolio(3, 8.0, 7)()
     with pytest.raises(ValidationError, match="transaction_cost_bps"):
@@ -234,6 +252,35 @@ def test_price_history_rejects_mismatched_rows() -> None:
         )
 
 
+@pytest.mark.parametrize(
+    ("timestamps", "prices", "message"),
+    [
+        (np.array([]), np.empty((0, 1)), "non-empty"),
+        (np.array([["t0"]]), np.ones((1, 1)), "one-dimensional"),
+        (np.array(["t0"]), np.empty((1, 0)), "finite instrument"),
+        (np.array(["t0"]), np.array([[np.nan]]), "finite instrument"),
+    ],
+)
+def test_price_history_rejects_invalid_shapes_and_values(
+    timestamps: np.ndarray, prices: np.ndarray, message: str
+) -> None:
+    with pytest.raises(ValidationError, match=message):
+        PriceHistory(timestamps=timestamps, prices=prices)
+
+
+def test_load_price_history_csv_rejects_empty_header_and_header_names(
+    tmp_dir: Path,
+) -> None:
+    empty = tmp_dir / "no_header.csv"
+    empty.write_text("", encoding="utf-8")
+    with pytest.raises(ValueError, match="header row"):
+        load_price_history_csv(empty)
+    blank_header = tmp_dir / "blank_header.csv"
+    blank_header.write_text("timestamp,\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="non-empty"):
+        load_price_history_csv(blank_header)
+
+
 def test_tolerated_solver_failure_uses_budget_feasible_fallback(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -287,3 +334,29 @@ def test_tolerated_solver_failure_rejects_invalid_extra_constraint(
                 ),
             ),
         )
+
+
+def test_solver_failure_is_raised_when_fallback_is_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    inputs = SyntheticPortfolio(2, 8.0, 7)()
+    history = PriceHistory(
+        timestamps=np.array(["t0", "t1"]), prices=np.ones((2, 2))
+    )
+
+    def fail_solver(*args, **kwargs):
+        raise RuntimeError("synthetic solver failure")
+
+    monkeypatch.setattr("convexfolio.backtest.CFVaR3Numerical", fail_solver)
+    with pytest.raises(RuntimeError, match="rebalance at t=0 failed"):
+        run_backtest(history, BacktestConfig(portfolio_inputs=inputs))
+
+
+def test_scale_inputs_rejects_shape_finiteness_and_positivity_errors() -> None:
+    base = SyntheticPortfolio(2, 8.0, 7)()
+    with pytest.raises(ValidationError, match="dimensions"):
+        scale_inputs_for_prices(base, np.ones(1), np.ones(2))
+    with pytest.raises(ValidationError, match="finite"):
+        scale_inputs_for_prices(base, np.array([np.nan, 1.0]), np.ones(2))
+    with pytest.raises(ValidationError, match="positive"):
+        scale_inputs_for_prices(base, np.ones(2), np.array([0.0, 1.0]))

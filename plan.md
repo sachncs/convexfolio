@@ -194,7 +194,9 @@ validation boundaries, stable solves, solver diagnostics, constraint bugs,
 backtest accounting, public OOP contracts, semi-private array helpers, report
 schema versioning, documentation links, Jekyll removal, Astro migration,
 homepage tone/claims, Docker build context, release quality gates, Astro
-toolchain security, and immutable GitHub Action references.
+toolchain security, immutable GitHub Action references, matrix conditioning
+validation, Hugging Face transient retries, and optional plotting test
+isolation.
 
 Still open or requiring stronger evidence: broader documentation-example
 execution beyond the canonical examples and CI confirmation on the hosted

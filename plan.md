@@ -74,6 +74,10 @@ Completed in the current working tree:
 - Release CI now runs the Python/site quality gate; the container workflow
   builds and smoke-tests the CLI image; package metadata no longer claims
   Production/Stable.
+- Python 3.13 was reproduced locally with the documented development install:
+  181 tests passed, 3 optional plotting tests skipped, Ruff and Mypy passed.
+- All 35 fenced Python documentation blocks compile, and the canonical
+  getting-started example executes in the test suite.
 
 Still required before declaring the plan complete:
 

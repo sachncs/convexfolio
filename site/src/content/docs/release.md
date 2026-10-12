@@ -14,7 +14,7 @@ How a new version of Convexfolio gets published.
 
 A "release" is a named snapshot of the code. Once a release exists:
 
-- It has a version number (e.g., `0.2.1`).
+- It has a version number (e.g., `2.0.1`).
 - It's tagged in git so you can find it later.
 - It's described in `CHANGELOG.md` so people know what changed.
 
@@ -35,9 +35,9 @@ numbers. A version has three parts: `MAJOR.MINOR.PATCH`.
 
 | Bump | When | Example |
 |---|---|---|
-| **MAJOR** | Incompatible change — old code will break. | `0.2.1` → `1.0.0` |
-| **MINOR** | New feature, backwards-compatible. | `0.2.1` → `0.3.0` |
-| **PATCH** | Bug fix, backwards-compatible. | `0.2.1` → `0.2.2` |
+| **MAJOR** | Incompatible change — old code will break. | `1.0.0` → `2.0.0` |
+| **MINOR** | New feature, backwards-compatible. | `2.0.0` → `2.1.0` |
+| **PATCH** | Bug fix, backwards-compatible. | `2.0.0` → `2.0.1` |
 
 Examples:
 
@@ -57,15 +57,15 @@ A "tag" is a named pointer to a specific commit. Tags are how
 software marks releases in version control. ([Glossary: tag](/convexfolio/docs/glossary/))
 
 ```bash
-git tag v0.2.1                  # tag the current commit as v0.2.1
-git push origin v0.2.1          # push the tag to the remote
+git tag v2.0.0                  # tag the current commit as v2.0.0
+git push origin v2.0.0          # push the tag to the remote
 ```
 
 Once a tag exists, you can always check out that exact version of
 the code:
 
 ```bash
-git checkout v0.2.1
+git checkout v2.0.0
 ```
 
 ---
@@ -120,7 +120,7 @@ Edit `pyproject.toml`:
 
 ```toml
 [project]
-version = "0.2.2"            # or whatever the new version is
+version = "2.0.1"            # or whatever the new version is
 ```
 
 (If you're not sure what to bump, see [SemVer](#what-is-semver)
@@ -131,7 +131,7 @@ above.)
 Add a new section to `CHANGELOG.md`, just below `## [Unreleased]`:
 
 ```markdown
-## [0.2.2] - 2026-08-22
+## [2.0.1] - YYYY-MM-DD
 
 ### Added
 - Description of new feature.
@@ -146,7 +146,7 @@ Add a new section to `CHANGELOG.md`, just below `## [Unreleased]`:
 Then add the link at the bottom of the file:
 
 ```markdown
-[0.2.2]: https://github.com/sachncs/convexfolio/compare/v0.2.1...v0.2.2
+[2.0.1]: https://github.com/sachncs/convexfolio/compare/v2.0.0...v2.0.1
 ```
 
 ### 4. Run the quality checks
@@ -164,15 +164,15 @@ All four must succeed.
 
 ```bash
 git add pyproject.toml CHANGELOG.md
-git commit -m "chore: release v0.2.2"
-git tag v0.2.2
+git commit -m "chore: release v2.0.1"
+git tag v2.0.1
 ```
 
 ### 6. Push
 
 ```bash
 git push origin master
-git push origin v0.2.2
+git push origin v2.0.1
 ```
 
 ### 7. (Optional) Create a GitHub release
@@ -181,8 +181,8 @@ If you want a fancy release page on GitHub:
 
 1. Go to [github.com/sachncs/convexfolio/releases](https://github.com/sachncs/convexfolio/releases).
 2. Click "Draft a new release".
-3. Pick the tag you just pushed (`v0.2.2`).
-4. Title: `v0.2.2`.
+3. Pick the tag you just pushed (`v2.0.1`).
+4. Title: `v2.0.1`.
 5. Description: paste the changelog section.
 6. Attach the wheel and sdist from `dist/` (optional — most teams
    attach them, some don't).
@@ -197,12 +197,12 @@ For critical bug fixes:
 1. Branch from the release tag, not from `master`:
 
    ```bash
-   git checkout -b hotfix/v0.2.3 v0.2.2
+   git checkout -b hotfix/v2.0.2 v2.0.1
    ```
 
 2. Make the minimum change needed.
 
-3. Bump the PATCH version (`0.2.2` → `0.2.3`).
+3. Bump the PATCH version (`2.0.1` → `2.0.2`).
 
 4. Follow the regular release steps above.
 
@@ -210,7 +210,7 @@ For critical bug fixes:
 
    ```bash
    git checkout master
-   git merge hotfix/v0.2.3
+   git merge hotfix/v2.0.2
    git push origin master
    ```
 

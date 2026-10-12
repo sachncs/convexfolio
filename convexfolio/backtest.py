@@ -16,16 +16,17 @@ in this same module; the test suite covers both.
 from __future__ import annotations
 
 import csv
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
-from convexfolio import CFVaR3Numerical, CFVaR3Objective
 from convexfolio.config import PortfolioInputs
 from convexfolio.constraints import SLSQPLambda, fun_of, long_only_inequalities
 from convexfolio.errors import ValidationError
+from convexfolio.math import CFVaR3Numerical, CFVaR3Objective
 
 
 @dataclass(frozen=True)
@@ -184,6 +185,26 @@ class BacktestResult:
     turnover: np.ndarray
     cumulative_costs: np.ndarray
     summary: dict[str, Any]
+
+
+class BacktestEngine(ABC):
+    """Interface for a configured backtest execution engine."""
+
+    @abstractmethod
+    def run(self) -> BacktestResult:
+        """Run the engine and return a validated result."""
+
+
+class HistoricalBacktest(BacktestEngine):
+    """Concrete engine for a historical price series and configuration."""
+
+    def __init__(self, history: PriceHistory, config: BacktestConfig) -> None:
+        self.history = history
+        self.config = config
+
+    def run(self) -> BacktestResult:
+        """Run the configured historical backtest."""
+        return run_backtest(self.history, self.config)
 
 
 def run_backtest(history: PriceHistory, config: BacktestConfig) -> BacktestResult:

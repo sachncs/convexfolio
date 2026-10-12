@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Iterator, Mapping
 
 import numpy as np
 
@@ -22,6 +23,14 @@ class RiskMeasure(ABC):
     @abstractmethod
     def evaluate(self, weights: np.ndarray) -> RiskEvaluation:
         """Evaluate risk for one weight vector."""
+
+
+class DataSource(ABC):
+    """Interface for lazy tabular data sources."""
+
+    @abstractmethod
+    def iter_rows(self) -> Iterator[Mapping[str, object]]:
+        """Yield rows without forcing the source into memory."""
 
 
 class Constraint(ABC):
@@ -60,4 +69,4 @@ class Optimizer(ABC):
         """Solve a portfolio problem for the selected risk measure."""
 
 
-__all__ = ["Constraint", "Optimizer", "RiskMeasure"]
+__all__ = ["Constraint", "DataSource", "Optimizer", "RiskMeasure"]

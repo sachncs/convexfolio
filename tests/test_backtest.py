@@ -12,7 +12,9 @@ import pytest
 
 from convexfolio.backtest import (
     BacktestConfig,
+    BacktestEngine,
     BacktestResult,
+    HistoricalBacktest,
     PriceHistory,
     load_price_history_csv,
     run_backtest,
@@ -133,6 +135,14 @@ def test_run_backtest_basic_shape(history: PriceHistory) -> None:
     assert result.turnover.shape == (history.n_timestamps,)
     assert result.cumulative_costs.shape == (history.n_timestamps,)
     assert len(result.timestamps) == history.n_timestamps
+
+
+def test_historical_backtest_implements_engine_contract(history: PriceHistory) -> None:
+    """The concrete engine delegates through the public ABC contract."""
+    inputs = SyntheticPortfolio(5, 8.0, 7)()
+    engine = HistoricalBacktest(history, BacktestConfig(portfolio_inputs=inputs))
+    assert isinstance(engine, BacktestEngine)
+    assert isinstance(engine.run(), BacktestResult)
 
 
 def test_run_backtest_summary_keys(history: PriceHistory) -> None:

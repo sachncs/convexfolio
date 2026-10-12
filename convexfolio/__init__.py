@@ -64,6 +64,15 @@ The API is grouped by responsibility and exported via ``__all__``:
 """
 
 from convexfolio.arrays import Matrix, Vector
+from convexfolio.backtest import (
+    BacktestConfig,
+    BacktestEngine,
+    BacktestResult,
+    HistoricalBacktest,
+    PriceHistory,
+    load_price_history_csv,
+    run_backtest,
+)
 from convexfolio.config import (
     Experiment,
     Load,
@@ -109,6 +118,7 @@ from convexfolio.hf_data import (
     Parse,
     SummariseResults,
 )
+from convexfolio.interfaces import DataSource
 from convexfolio.math import (
     Bilinear,
     CFVaR2Closed,
@@ -140,6 +150,9 @@ from convexfolio.utils import Logger, Report, Reproduce
 
 __all__ = [
     "Bilinear",
+    "BacktestConfig",
+    "BacktestEngine",
+    "BacktestResult",
     "BudgetConstraint",
     "BucketWeightStat",
     "BuildPortfolioInputs",
@@ -159,12 +172,14 @@ __all__ = [
     "ConstraintResult",
     "Cumulant",
     "Curvature",
+    "DataSource",
     "DATASET_REPO_ID",
     "DATASET_SPLIT",
     "DATASET_SUBSET",
     "Expect",
     "Experiment",
     "Greeks",
+    "HistoricalBacktest",
     "HFDatasetSource",
     "HV_COLUMNS",
     "IV_BUCKETS",
@@ -188,6 +203,8 @@ __all__ = [
     "Parse",
     "PortfolioInputs",
     "PortfolioVariance",
+    "PriceHistory",
+    "load_price_history_csv",
     "PositionLimitConstraint",
     "Quadratic",
     "QualityScore",
@@ -195,6 +212,7 @@ __all__ = [
     "Report",
     "Reproduce",
     "RiskEvaluation",
+    "run_backtest",
     "Runtime",
     "Score",
     "SolverFailureError",

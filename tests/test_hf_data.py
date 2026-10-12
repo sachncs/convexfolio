@@ -112,6 +112,7 @@ def test_csv_file_source_yields_raw_dicts() -> None:
     rows = list(CSVFileSource(FIXTURE_PATH))
     assert len(rows) == 4
     assert {row["symbol"] for row in rows} == {"AAPL", "MSFT"}
+    assert len(list(CSVFileSource(FIXTURE_PATH).iter_rows())) == 4
 
 
 def test_csv_file_source_missing_file_raises() -> None:

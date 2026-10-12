@@ -38,6 +38,7 @@ from typing import Any, TypedDict
 import numpy as np
 
 from convexfolio.config import PortfolioInputs
+from convexfolio.interfaces import DataSource
 from convexfolio.math import Minimize, Variance
 from convexfolio.types import FloatArray
 
@@ -207,7 +208,7 @@ class Parse:
         )
 
 
-class HFDatasetSource:
+class HFDatasetSource(DataSource):
     """Yield raw row dicts from a HuggingFace dataset (Extract stage).
 
     Lazy: the :mod:`datasets` package is only imported on the first
@@ -295,8 +296,12 @@ class HFDatasetSource:
             if self.max_rows is not None and count >= self.max_rows:
                 return
 
+    def iter_rows(self) -> Iterator[dict[str, Any]]:
+        """Yield rows through the public :class:`DataSource` contract."""
+        return iter(self)
 
-class CSVFileSource:
+
+class CSVFileSource(DataSource):
     """Yield raw row dicts from a local CSV file (Extract stage).
 
     Args:
@@ -332,6 +337,10 @@ class CSVFileSource:
                 raise ValueError("CSV file has no header row")
             for raw in reader:
                 yield dict(raw)
+
+    def iter_rows(self) -> Iterator[dict[str, Any]]:
+        """Yield rows through the public :class:`DataSource` contract."""
+        return iter(self)
 
 
 class LoadOptionsIV:

@@ -69,6 +69,8 @@ Completed in the current working tree:
   the mobile pass found and fixed content overflow, and all three renders now
   have bounded layouts with responsive controls. The preview produced no
   page-level console errors.
+- Lighthouse accessibility is 100/100 on the local Astro preview, including a
+  passing WCAG color-contrast audit.
 - Release CI now runs the Python/site quality gate; the container workflow
   builds and smoke-tests the CLI image; package metadata no longer claims
   Production/Stable.
@@ -190,10 +192,9 @@ schema versioning, documentation links, Jekyll removal, Astro migration,
 homepage tone/claims, Docker build context, release quality gates, Astro
 toolchain security, and immutable GitHub Action references.
 
-Still open or requiring stronger evidence: full rendered responsive/accessibility
-audit, broader documentation-example execution beyond the canonical examples,
-and CI confirmation on the hosted runners. These remain explicit release gates
-below.
+Still open or requiring stronger evidence: broader documentation-example
+execution beyond the canonical examples and CI confirmation on the hosted
+runners. These remain explicit release gates below.
 
 ## 3. Target architecture
 

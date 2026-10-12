@@ -1180,6 +1180,7 @@ main.layout-page { background: var(--bg); min-height: 70vh; }
 .brand img { width: 30px; height: 30px; }
 .hero { padding: clamp(72px, 12vw, 144px) 0 110px; max-width: 900px; }
 .eyebrow { color: var(--brand-deep); font: 700 .76rem/1.2 'JetBrains Mono', monospace; letter-spacing: .12em; text-transform: uppercase; }
+.hero .eyebrow { color: #b7c7ff; }
 .hero h1 { max-width: 800px; margin: 20px 0; font-size: clamp(3rem, 8vw, 6.6rem); line-height: .98; letter-spacing: -.075em; }
 .lede { max-width: 680px; color: var(--text-2); font-size: clamp(1.12rem, 2vw, 1.35rem); }
 .mobile-copy { display: none; }
@@ -1193,7 +1194,7 @@ main.layout-page { background: var(--bg); min-height: 70vh; }
 .card-grid article { min-height: 220px; padding: 24px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-sm); }
 .card-grid h3 { margin: 34px 0 8px; font-size: 1.2rem; }
 .card-grid p, .notice { color: var(--text-2); }
-.number { color: var(--brand); font: 700 .8rem 'JetBrains Mono', monospace; }
+.number { color: var(--brand-deep); font: 700 .8rem 'JetBrains Mono', monospace; }
 .notice { display: flex; justify-content: space-between; gap: 20px; align-items: center; margin-bottom: 72px; padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--brand-soft); }
 .notice p { margin: 0; }
 .demo { width: min(var(--container-narrow), calc(100% - 2 * var(--gutter))); margin: 20px auto 72px; padding: 44px 0; border-top: 1px solid var(--line); }

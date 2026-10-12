@@ -36,7 +36,6 @@ from pathlib import Path
 from typing import Any, TypedDict
 
 import numpy as np
-from datasets import load_dataset
 
 from convexfolio.config import PortfolioInputs
 from convexfolio.math import Minimize, Variance
@@ -272,6 +271,14 @@ class HFDatasetSource:
         Yields:
             Raw row dicts as returned by the Hub.
         """
+        try:
+            from datasets import load_dataset
+        except ImportError as exc:
+            raise RuntimeError(
+                "Hugging Face ingestion requires the optional dependency; "
+                "install with `pip install 'convexfolio[hf-data]'`"
+            ) from exc
+
         dataset = load_dataset(
             self.repo_id,
             self.subset,

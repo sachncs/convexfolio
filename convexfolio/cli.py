@@ -27,11 +27,6 @@ from importlib.metadata import PackageNotFoundError
 from importlib.metadata import version as package_version
 from pathlib import Path
 
-import matplotlib
-
-matplotlib.use("Agg")
-
-import matplotlib.pyplot as plt
 import numpy as np
 import yaml
 
@@ -204,6 +199,17 @@ def plot_command(parsed_args: argparse.Namespace, experiment: Experiment) -> lis
     Returns:
         A list of output paths written, one entry per chart rendered.
     """
+    try:
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+    except ImportError as exc:
+        raise SystemExit(
+            "plot requires the optional plotting dependencies; "
+            "install with `pip install 'convexfolio[plot]'`"
+        ) from exc
+
     precision_matrix = experiment.precision_matrix
     cost_vector = experiment.cost_vector
     expected_payoff = experiment.expected_payoff

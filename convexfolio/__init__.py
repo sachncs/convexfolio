@@ -146,7 +146,7 @@ from convexfolio.math import (
 )
 from convexfolio.optimization import ClosedFormVarianceOptimizer, SlsqpOptimizer
 from convexfolio.risk import CFVaR2Risk, CFVaR3Risk, VarianceRisk
-from convexfolio.utils import Logger, Report, Reproduce
+from convexfolio.utils import Logger, Report, Reproduce, reproduce_once
 
 __all__ = [
     "Bilinear",
@@ -211,6 +211,7 @@ __all__ = [
     "Reconstruct",
     "Report",
     "Reproduce",
+    "reproduce_once",
     "RiskEvaluation",
     "run_backtest",
     "Runtime",

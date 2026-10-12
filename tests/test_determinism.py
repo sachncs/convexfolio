@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from convexfolio.config import Experiment, PortfolioInputs
-from convexfolio.utils import Report, Reproduce
+from convexfolio.utils import Report, Reproduce, reproduce_once
 
 
 def test_pipeline_is_deterministic_given_same_seed() -> None:
@@ -69,6 +69,12 @@ def test_reproduce_honours_user_inputs() -> None:
         precision_matrix,
     )
     assert result["uncertainty"]["status"] == "DETERMINED"
+
+
+def test_reproduce_once_is_public_process_pool_worker() -> None:
+    result = reproduce_once(Experiment())
+
+    assert set(result) == {"config", "inputs", "outputs", "uncertainty"}
 
 
 def test_cfvar3_differs_from_cfvar2_in_synthetic_path() -> None:

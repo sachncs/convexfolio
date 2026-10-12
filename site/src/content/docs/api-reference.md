@@ -106,7 +106,7 @@ config = Load("config.json")()      # or config.yaml, or Load(None)() for defaul
 |---|---|
 | `convexfolio.config` | `Experiment`, `Runtime`, `Optimization`, `PortfolioInputs`, `Load`, `Validate` |
 | `convexfolio.math` | `Variance`, `Minimize`, `CFVaR2Closed`, `CFVaR2nd`, `CFVaR3rd`, `CFVaR3Numerical`, `CFVaR3Objective`, `OptimalEpsilon`, `QualityScore`, plus section-2.4 primitives (`Compute`, `Linear`, `Curvature`, `Bilinear`, `Cross`, `Greeks`, `PortfolioVariance`, `Linearize`, `Reconstruct`, `Cumulant`) |
-| `convexfolio.utils` | `Logger`, `Reproduce`, `Report` |
+| `convexfolio.utils` | `Logger`, `reproduce_once`, `Reproduce`, `Report` |
 | `convexfolio.data` | `LoadCSV`, `SyntheticPortfolio`, `Summary` |
 | `convexfolio.constraints` | `budget`, `bounds`, `inequality`, `merge`, plus long-only / sector / leverage builders |
 | `convexfolio.backtest` | `PriceHistory`, `BacktestConfig`, `BacktestResult`, `load_price_history_csv`, `run_backtest`, `scale_inputs_for_prices`, `max_drawdown` |
@@ -451,6 +451,12 @@ variance at basis vectors and pairwise sums.
 ---
 
 ## Determinism & pipeline
+
+### `reproduce_once(config: Experiment) -> dict[str, object]`
+
+Runs one reproduction in a process-pool-safe, picklable callable. Use it
+when an application needs one structured pipeline result without the
+repetition and comparison performed by `Report`.
 
 ### `Report.from_reproduce(config: Experiment, repetitions: int = 2) -> Report`
 

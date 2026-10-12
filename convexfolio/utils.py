@@ -6,6 +6,7 @@ Holds the deterministic primitives shared by the pipeline:
 * :class:`Reproduce` — runs the end-to-end optimisation once on an
   :class:`~convexfolio.config.Experiment` and returns a structured
   result dict.
+* :func:`reproduce_once` — process-pool-safe single pipeline execution.
 * :class:`Report` — determinism result over repeated
   :class:`Reproduce` runs; the primary constructor is
   :meth:`Report.from_reproduce`.
@@ -32,7 +33,7 @@ from convexfolio.math import (
 )
 
 
-def _reproduce_once(config: Experiment) -> dict[str, object]:
+def reproduce_once(config: Experiment) -> dict[str, object]:
     """Run one reproduction in a process-pool-safe top-level function."""
     return Reproduce(config)()
 
@@ -373,7 +374,7 @@ class Report:
         if repetitions >= parallel_threshold:
             with ProcessPoolExecutor() as executor:
                 results = list(
-                    executor.map(_reproduce_once, [config] * repetitions)
+                    executor.map(reproduce_once, [config] * repetitions)
                 )
         else:
             results = [Reproduce(config)() for _ in range(repetitions)]

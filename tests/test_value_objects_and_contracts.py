@@ -80,6 +80,8 @@ def test_matrix_validation_rejects_ill_conditioned_values() -> None:
     """Numerical inputs with unstable solves fail at the value boundary."""
     with pytest.raises(ValidationError, match="ill-conditioned"):
         Matrix(np.diag([1.0, 1e-13])).validate()
+    with pytest.raises(ValidationError, match="greater than 1"):
+        Matrix(np.eye(2)).validate(max_condition_number=1.0)
 
 
 def test_constraint_models_expose_named_residuals() -> None:

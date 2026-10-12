@@ -428,7 +428,7 @@ class BuildPortfolioInputs:
             inverse-vol diagonal with the cross-product outer term.
             ``0.0`` → fully diagonal precision; ``1.0`` → full
             correlation. Default ``0.1`` matches the convention in
-            :func:`convexfolio.data.load_csv`.
+            :class:`convexfolio.data.LoadCSV`.
         realised_vol_window: ``"median"`` or ``"mean"`` of the row's
             ``hv_values``. Default ``"median"`` (robust to a single
             noisy window).
@@ -455,7 +455,7 @@ class BuildPortfolioInputs:
                 inverse-vol diagonal with the cross-product outer
                 term. ``0.0`` → fully diagonal precision; ``1.0`` →
                 full correlation. Default ``0.1`` matches
-                :func:`convexfolio.data.load_csv`'s convention.
+                :class:`convexfolio.data.LoadCSV`'s convention.
             realised_vol_window: ``"median"`` or ``"mean"`` of the
                 row's ``hv_values``. Default ``"median"`` (robust to
                 a single noisy window).

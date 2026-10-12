@@ -40,12 +40,14 @@ not a live-trading or investment-advice system. Convexfolio:
 
 - Is fully type-checked (mypy --strict).
 - Is fully lint-checked (ruff).
-- Has a deterministic test suite (pytest, 171 tests locally).
+- Has a deterministic test suite covering numerical, integration, CLI, and
+  documentation workflows.
 - Has a benchmark suite available through the `dev` extra.
 - Has a CI pipeline that runs on every push.
-- Uses frozen dataclasses for configuration (can't be silently
-  mutated).
-- Has reproducible execution (same seed = same output).
+- Uses frozen dataclasses and defensive array copies for configuration
+  boundaries.
+- Has reproducible execution for the documented deterministic paths; exact
+  floating-point identity across different platforms is not promised.
 
 The demo uses synthetic data and the numerical model still needs
 independent validation against your data and controls. To use

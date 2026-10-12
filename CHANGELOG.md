@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-10-12
+
+Breaking v2 release: validated value objects, explicit polymorphic contracts,
+failure-transparent numerical execution, holdings-based backtesting, and the
+Astro-only documentation site.
+
+### Added
+
+- Public `Vector.copy()` / `Vector.validate()` and
+  `Matrix.copy()` / `Matrix.validate()` value-object APIs.
+- Typed risk, optimizer, constraint, data-source, and backtest-engine
+  interfaces with contract tests.
+- Structured diagnostics, versioned report output, retryable data ingestion,
+  and explicit solver-failure policies.
+- Astro documentation and accessible responsive site checks.
+
+### Changed
+
+- Core installation excludes optional plotting, Hugging Face, and benchmark
+  dependencies.
+- Backtests use holdings-based mark-to-market accounting and documented
+  transaction costs.
+- The release is classified as Beta until hosted CI and deployment evidence
+  are complete.
+
+### Removed
+
+- Jekyll source files, generated documentation copies, and semi-private array
+  helper APIs.
+
 ## [Unreleased]
 
 ### Added
@@ -156,7 +186,8 @@ ergonomics, and operational polish.
 - CFVaR2 closed-form solver.
 - CFVaR3 numerical solver.
 
-[Unreleased]: https://github.com/sachncs/convexfolio/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/sachncs/convexfolio/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/sachncs/convexfolio/compare/v1.0.0...v2.0.0
 [0.3.0]: https://github.com/sachncs/convexfolio/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/sachncs/convexfolio/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/sachncs/convexfolio/compare/v0.0.1...v0.2.0

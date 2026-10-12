@@ -99,7 +99,7 @@ Pick whichever option fits your setup:
 ### Option 1 — Pre-built wheel from GitHub Releases (fastest)
 
 ```bash
-pip install https://github.com/sachncs/convexfolio/releases/download/v1.0.0/convexfolio-1.0.0-py3-none-any.whl
+pip install https://github.com/sachncs/convexfolio/releases/download/v2.0.0/convexfolio-2.0.0-py3-none-any.whl
 ```
 
 No `git clone`, no build step. Works as soon as a GitHub Release

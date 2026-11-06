@@ -53,7 +53,7 @@ dev = [
   "pytest-cov==6.3.0",
   "mypy==2.4.0",
   "ruff==0.16.5",
-  "pytest-benchmark==5.3.0",
+  "pytest-benchmark==5.3.1",
   "py-cpuinfo==9.0.0",
 ]
 plot = [

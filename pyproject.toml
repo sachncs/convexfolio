@@ -60,7 +60,7 @@ plot = [
   "matplotlib==3.11.2",
 ]
 hf-data = [
-  "datasets==5.1.0",
+  "datasets==5.2.0",
 ]
 
 [project.scripts]
